@@ -25,13 +25,13 @@ func InitDb() string {
 	}
 
 	if !loaded {
-		log.Println("⚠️  Warning: .env not found in any known path")
+		log.Fatal("Warning: .env not found in any known path")
 	}
 
 	dbHostdsn := os.Getenv("DSN")
 	if dbHostdsn == "" {
-		log.Fatal("❌ DSN not found in environment variables")
+		log.Fatal("DSN not found in environment variables")
 	}
-	fmt.Println("✅ DB Host:", dbHostdsn)
+	fmt.Println("DB Host:", dbHostdsn)
 	return dbHostdsn
 }
