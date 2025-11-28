@@ -17,7 +17,11 @@ func PriorRuns(cmds []string) {
 	defer db.Close()
 	for _, v := range cmds {
 		if v != "" {
-			db.Exec(v)
+			_, err := db.Exec(v)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
 		}
 	}
 }
