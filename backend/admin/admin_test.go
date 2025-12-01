@@ -631,15 +631,17 @@ func TestDisplaySubjectsByAdmin(t *testing.T) {
 			expectedCode: http.StatusUnauthorized,
 		},
 		{
-			name:    "Valid case with result",
-			reqbody: "1",
-
+			name:         "Valid case with result",
+			reqbody:      "12",
+			prior:        []string{"INSERT INTO subjectAllocation VALUES (12,5)", `INSERT INTO subjects VALUES (125,"anatomy",12,10)`},
+			cleanup:      []string{"DELETE FROM subjects WHERE subId=125", "DELETE FROM subjectAllocation WHERE std=12"},
 			expectedCode: http.StatusOK,
 		},
 		{
-			name:    "Valid case with no result",
-			reqbody: "3",
-
+			name:         "Valid case with no result",
+			reqbody:      "12",
+			prior:        []string{"INSERT INTO subjectAllocation VALUES (12,5)"},
+			cleanup:      []string{"DELETE FROM subjectAllocation WHERE std=12"},
 			expectedCode: http.StatusOK,
 		},
 		{
@@ -717,22 +719,22 @@ func TestAddMarksByAdmin(t *testing.T) {
 		{
 			name:         "Valid case",
 			reqbody:      `{"subId":141,"grNo":1221,"theoryMarks":80,"practicalMarks":15}`,
-			prior:        []string{`INSERT INTO students VALUES (1221,"password","student","selmon",3,"A")`, `INSERT INTO subjects VALUES (141,"HINDI",3,15)`},
-			cleanup:      []string{`DELETE FROM students WHERE grNo=1221`, `DELETE FROM subjects WHERE subId=141`},
+			prior:        []string{"INSERT INTO subjectAllocation VALUES (3,5)", `INSERT INTO students VALUES (1221,"password","student","selmon",3,"A")`, `INSERT INTO subjects VALUES (141,"HINDI",3,15)`},
+			cleanup:      []string{`DELETE FROM students WHERE grNo=1221`, `DELETE FROM subjects WHERE subId=141`, "DELETE FROM subjectAllocation WHERE std=3"},
 			expectedCode: http.StatusOK,
 		},
 		{
 			name:         "record already present",
 			reqbody:      `{"subId":141,"grNo":1221,"theoryMarks":80,"practicalMarks":15}`,
-			prior:        []string{`INSERT INTO students VALUES (1221,"password","student","selmon",3,"A")`, `INSERT INTO subjects VALUES (141,"HINDI",3,15)`, `INSERT INTO marks VALUES (1221,141,80,20,"AA")`},
+			prior:        []string{"INSERT INTO subjectAllocation VALUES (3,5)", `INSERT INTO students VALUES (1221,"password","student","selmon",3,"A")`, `INSERT INTO subjects VALUES (141,"HINDI",3,15)`, `INSERT INTO marks VALUES (1221,141,80,20,"AA")`},
 			expectedCode: http.StatusBadRequest,
-			cleanup:      []string{`DELETE FROM students WHERE grNo=1221`, `DELETE FROM subjects WHERE subId=141`},
+			cleanup:      []string{`DELETE FROM students WHERE grNo=1221`, `DELETE FROM subjects WHERE subId=141`, "DELETE FROM subjectAllocation WHERE std=3"},
 		},
 		{
 			name:         "standards donot match",
 			reqbody:      `{"subId":141,"grNo":1221,"theoryMarks":80,"practicalMarks":15}`,
-			prior:        []string{`INSERT INTO students VALUES (1221,"password","student","selmon",3,"A")`, `INSERT INTO subjects VALUES (141,"HINDI",7,15)`},
-			cleanup:      []string{`DELETE FROM students WHERE grNo=1221`, `DELETE FROM subjects WHERE subId=141`},
+			prior:        []string{"INSERT INTO subjectAllocation VALUES (7,5)", `INSERT INTO students VALUES (1221,"password","student","selmon",3,"A")`, `INSERT INTO subjects VALUES (141,"HINDI",7,15)`},
+			cleanup:      []string{`DELETE FROM students WHERE grNo=1221`, `DELETE FROM subjects WHERE subId=141`, "DELETE FROM subjectAllocation WHERE std=7"},
 			expectedCode: http.StatusBadRequest,
 		},
 	}
@@ -809,9 +811,10 @@ func TestEditMarksByAdmin(t *testing.T) {
 			expectedCode: http.StatusOK,
 		},
 		{
-			name:    "record not found to edit",
-			reqbody: `{"subId":9999,"grNo":1,"theoryMarks":80,"practicalMarks":15}`,
-
+			name:         "record not found to edit",
+			reqbody:      `{"subId":141,"grNo":1221,"theoryMarks":80,"practicalMarks":15}`,
+			prior:        []string{`INSERT INTO students VALUES (1221,"password","student","selmon",3,"A")`, `INSERT INTO subjects VALUES (141,"HINDI",3,15)`},
+			cleanup:      []string{`DELETE FROM students WHERE grNo=1221`, `DELETE FROM subjects WHERE subId=141`},
 			expectedCode: http.StatusBadRequest,
 		},
 	}
@@ -860,14 +863,14 @@ func TestTeacherPerformanceByAdmin(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 		{
-			name: "valid",
-
-			reqbody:      "T1",
+			name:         "valid",
+			prior:        []string{`INSERT INTO students VALUES (1221,"password","student","selmon",3,"A")`, `INSERT INTO subjects VALUES (141,"HINDI",3,15)`, `INSERT INTO marks VALUES (1221,141,80,20,"AA")`, `INSERT INTO teachers (tId,tPwd,userRole,tName,subId,stdAllocated,sectionAllocated) VALUES ("t1t1","password","teacher","Sona",141,3,"A")`},
+			cleanup:      []string{`DELETE FROM students WHERE grNo=1221`, `DELETE FROM subjects WHERE subId=141`, `DELETE FROM teachers WHERE tId="t1t1"`},
+			reqbody:      "t1t1",
 			expectedCode: http.StatusOK,
 		},
 		{
-			name: "teacher not found",
-
+			name:         "teacher not found",
 			reqbody:      "T254",
 			expectedCode: http.StatusBadRequest,
 		},
@@ -914,7 +917,9 @@ func TestStudentReportByAdmin(t *testing.T) {
 	testcases := []TestingStructure{
 		{
 			name:         "Valid",
-			reqbody:      `1`,
+			reqbody:      `1221`,
+			prior:        []string{`INSERT INTO students VALUES (1221,"password","student","selmon",3,"A")`, `INSERT INTO subjects VALUES (141,"HINDI",3,15)`, `INSERT INTO marks VALUES (1221,141,80,20,"AA")`},
+			cleanup:      []string{`DELETE FROM students WHERE grNo=1221`, `DELETE FROM subjects WHERE subId=141`},
 			expectedCode: http.StatusOK,
 		},
 		{
