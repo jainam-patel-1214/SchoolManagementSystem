@@ -8,6 +8,7 @@ import (
 )
 
 func PriorRuns(cmds []string) {
+	fmt.Println("Inside prior runs with", cmds)
 	dsn := database.InitDb()
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {

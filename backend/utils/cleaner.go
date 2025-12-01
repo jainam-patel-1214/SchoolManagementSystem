@@ -3,6 +3,7 @@ package utils
 import (
 	"database/sql"
 	"fmt"
+	"log"
 
 	"example.com/main/database"
 )
@@ -17,7 +18,10 @@ func Cleaner(cmds []string) {
 	defer db.Close()
 	for _, v := range cmds {
 		if v != "" {
-			db.Exec(v)
+			_, err := db.Exec(v)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 	}
 }

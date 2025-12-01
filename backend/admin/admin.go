@@ -256,9 +256,7 @@ func AcceptPendingReq(ctx *gin.Context) {
 							ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject donot exist you want to assign"})
 							return
 						}
-						return
 					} else if body.SubId == 0 {
-
 					} else {
 						ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject id"})
 					}
@@ -294,7 +292,6 @@ func AcceptPendingReq(ctx *gin.Context) {
 				return
 			}
 		}
-
 		switch body.UserRole {
 		case "student":
 			if body.Std == 0 || body.Section == "" || body.UserId == 0 || body.UserId == "" || body.UserName == "" || body.UserPwd == "" {
@@ -314,7 +311,7 @@ func AcceptPendingReq(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, gin.H{"output": "student created"})
 			return
 		case "teacher":
-			if body.UserId == 0 || body.UserName == "" || body.UserPwd == "" {
+			if body.UserId == "" || body.UserName == "" || body.UserPwd == "" {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": "fill userid/std/section accurately"})
 				return
 			}
@@ -331,7 +328,7 @@ func AcceptPendingReq(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, gin.H{"output": "teacher created"})
 			return
 		case "admin":
-			if body.UserId == 0 || body.UserName == "" || body.UserPwd == "" {
+			if body.UserId == "" || body.UserName == "" || body.UserPwd == "" {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": "fill userid/name/pwd accurately"})
 				return
 			}

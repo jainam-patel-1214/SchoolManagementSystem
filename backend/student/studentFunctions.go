@@ -63,25 +63,6 @@ func DisplayStudents(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
 		return
 	} else {
-		// if err := ctx.ShouldBindJSON(&constraints); err != nil {
-
-		// }
-		// errBool := false
-		// if err != nil {
-		// 	errBool = true
-		// }
-		// if err != nil {
-		// 	errBool = true
-		// }
-		// if err != nil {
-		// 	errBool = true
-		// }
-
-		// if errBool {
-		// 	ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid params sent"})
-		// 	return
-		// }
-		// var err error
 		var constraints DisplayConditions
 		fmt.Println(constraints, "constraintssss1")
 		if ctx.Query("viewBySection") == "null" {

@@ -168,14 +168,29 @@ func ListStudents(ctx *gin.Context) {
 		defer db.Close()
 
 		searchParam, err := strconv.Atoi(ctx.Query("studId"))
-		if err != nil || searchParam <= 0 {
+		if err != nil || searchParam == 0 {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "id not found"})
+			return
+		}
+		if searchParam > 99999999 || searchParam < 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
 			return
 		}
 		temp := fmt.Sprintf("%v", searchParam)
 		tc, err := db.Begin()
 		if err != nil {
 			log.Fatal(err)
+			return
+		}
+		var amount int
+		err = db.QueryRow("SELECT COUNT(grNo) FROM students WHERE grNo = ?", searchParam).Scan(&amount)
+		if err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if amount <= 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "no student found"})
 			return
 		}
 		var student struct {
@@ -628,7 +643,7 @@ func CreateSub(ctx *gin.Context) {
 			return
 		}
 		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("first set limit of subjects allocated in standard %d", subInfo.LevelStd)})
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("first set limit of subjects allocated in standard %d", subInfo.LevelStd)})
 			return
 		}
 		var count int
@@ -737,19 +752,21 @@ func EditSub(ctx *gin.Context) {
 		if editBody.LevelStd != 0 && editBody.LevelStd != defaultData.LevelStd && editBody.LevelStd <= 12 && editBody.LevelStd > 0 {
 			conditions = append(conditions, ("levelStd = " + strconv.Itoa(editBody.LevelStd)))
 		}
-		if editBody.Credits != defaultData.Credits {
+		if editBody.Credits != defaultData.Credits && (defaultData.Credits != 0 && editBody.Credits != 0) {
 			conditions = append(conditions, ("credits = " + strconv.Itoa(editBody.Credits)))
 		}
+		fmt.Println(editBody.Credits, "------", defaultData.Credits)
 		for i, v := range conditions {
 			dbstr += v
 			if i != len(conditions)-1 {
 				dbstr += ","
 			}
 		}
-		dbstr += ("WHERE subId = " + strconv.Itoa(editBody.SubId))
+		dbstr += (" WHERE subId = " + strconv.Itoa(editBody.SubId))
 
 		if len(conditions) > 0 {
 			_, err = db.Exec(dbstr)
+			fmt.Println("dbtrs", dbstr)
 			if err != nil {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error while updating db"})
 				return
