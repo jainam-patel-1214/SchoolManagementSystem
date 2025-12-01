@@ -76,7 +76,7 @@ func CreatePendingReq(ctx *gin.Context) {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error creating id"})
 				return
 			} else {
-				ctx.JSON(http.StatusOK, gin.H{"output": fmt.Sprintf("your_id = %d and pwd = %s", id, PendingDb.Pwd)})
+				ctx.JSON(http.StatusOK, gin.H{"uid": id, "upwd": PendingDb.Pwd})
 				return
 			}
 		case "teacher":
@@ -86,7 +86,7 @@ func CreatePendingReq(ctx *gin.Context) {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error creating id"})
 				return
 			} else {
-				ctx.JSON(http.StatusOK, gin.H{"output": fmt.Sprintf("your_id = %s and pwd = %s", id, PendingDb.Pwd)})
+				ctx.JSON(http.StatusOK, gin.H{"uid": id, "upwd": PendingDb.Pwd})
 				return
 			}
 		case "admin":
@@ -97,7 +97,7 @@ func CreatePendingReq(ctx *gin.Context) {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error creating id"})
 				return
 			} else {
-				ctx.JSON(http.StatusOK, gin.H{"output": fmt.Sprintf("your_id = %s and pwd = %s for login", id, PendingDb.Pwd)})
+				ctx.JSON(http.StatusOK, gin.H{"uid": id, "upwd": PendingDb.Pwd})
 				return
 			}
 		default:

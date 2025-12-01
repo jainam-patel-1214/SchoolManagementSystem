@@ -508,7 +508,7 @@ func EnterMarks(ctx *gin.Context) {
 			return
 		}
 		if amount > 0 {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "record already present please try updating it"})
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "record already present please try updating it"})
 			return
 		}
 		var stdSt int
@@ -613,7 +613,7 @@ func EditMarks(ctx *gin.Context) {
 			return
 		}
 		if amount <= 0 {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "record not present please try inserting it first"})
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "record not present please try inserting it first"})
 			return
 		}
 		var defaultData marks
@@ -709,7 +709,7 @@ func AddReviews(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	if amt == 1 {
+	if amt >= 1 {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "you can only enter comment once"})
 		return
 	}

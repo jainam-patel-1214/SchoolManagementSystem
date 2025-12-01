@@ -2,7 +2,10 @@ package admin_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -21,9 +24,87 @@ type TestingStructure struct {
 	expectedCode int
 }
 
+type UserData struct {
+	UID  string `json:"uid"`
+	UPwd string `json:"upwd"`
+}
+
+type LoginResponse struct {
+	Token string `json:"output"`
+	UName string `json:"username"`
+	Urole string `json:"role"`
+}
+
+var CurrentData struct {
+	UserId string
+	Token  string
+}
+
+func AdminGenerator() {
+
+	data := map[string]string{
+		"yourName": "John Doe",
+		"password": "password",
+		"roleReq":  "admin",
+		"secretK":  "$2a$15$NXTb8AxndfnaA82JWAxr2.apFmJkU.S1ROK10HmFBf69KxSCtW7S",
+	}
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		fmt.Println("Error marshaling JSON:", err)
+		return
+	}
+	resp, err := http.Post("http://localhost:8090/register", "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		fmt.Println("Error making POST request:", err)
+		return
+	}
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading response body:", err)
+		return
+	}
+	var result UserData
+
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		log.Fatalf("Error unmarshaling JSON: %v", err)
+	}
+	CurrentData.UserId = result.UID
+	logindata := map[string]any{
+		"userId":   result.UID,
+		"password": result.UPwd,
+	}
+	jsonData, err = json.Marshal(logindata)
+	if err != nil {
+		fmt.Println("Error marshaling JSON:", err)
+		return
+	}
+	resp, err = http.Post("http://localhost:8090/login", "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		fmt.Println("Error making POST request:", err)
+		return
+	}
+	defer resp.Body.Close()
+	body, err = io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading response body:", err)
+		return
+	}
+	var LoginOp LoginResponse
+	err = json.Unmarshal(body, &LoginOp)
+	if err != nil {
+		log.Fatalf("Error unmarshaling JSON: %v", err)
+	}
+	CurrentData.Token = LoginOp.Token
+}
+func AdminDeleter() {
+	utils.Cleaner([]string{`DELETE FROM admins where admin_id="` + CurrentData.UserId + `"`})
+}
+
 func tokenSetter(tokentype string) string {
 	if tokentype == "valid" {
-		return `token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVaWQiOiJBMSIsIlJvbGUiOiJhZG1pbiIsImV4cCI6MTc2NDYwODIxMywiaWF0IjoxNzY0NTIxODEzfQ.nyflBG3YRoZyU0deQAOxo4BvxCcboDADfynFV6jSmPw"`
+		return `token="` + CurrentData.Token + `"`
 	} else {
 		return `token="eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp.eyJVaWQiOiJBMiJhZG1pbiIsImV4cCI6MTc2NDMzMjUyMSwiaWF0IjoxNzY0MjQ2MTIxfQ.uws7721EbSn41HbLOF1dduPNssuHSLt0VF"`
 	}
@@ -94,7 +175,7 @@ func TestAddStudentsByAdmin(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 	}
-
+	AdminGenerator()
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -125,6 +206,7 @@ func TestAddStudentsByAdmin(t *testing.T) {
 			}
 		})
 	}
+	AdminDeleter()
 }
 
 func TestEditStudentsByAdmin(t *testing.T) {
@@ -189,6 +271,7 @@ func TestEditStudentsByAdmin(t *testing.T) {
 			expectedCode: http.StatusOK,
 		},
 	}
+	AdminGenerator()
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -219,6 +302,7 @@ func TestEditStudentsByAdmin(t *testing.T) {
 			}
 		})
 	}
+	AdminDeleter()
 }
 
 func TestAddSubjectByAdmin(t *testing.T) {
@@ -262,7 +346,7 @@ func TestAddSubjectByAdmin(t *testing.T) {
 			expectedCode: http.StatusOK,
 		},
 	}
-
+	AdminGenerator()
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -297,6 +381,7 @@ func TestAddSubjectByAdmin(t *testing.T) {
 			}
 		})
 	}
+	AdminDeleter()
 }
 
 func TestEditSubjectsByAdmin(t *testing.T) {
@@ -345,6 +430,7 @@ func TestEditSubjectsByAdmin(t *testing.T) {
 			expectedCode: http.StatusOK,
 		},
 	}
+	AdminGenerator()
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -376,6 +462,7 @@ func TestEditSubjectsByAdmin(t *testing.T) {
 			}
 		})
 	}
+	AdminDeleter()
 }
 
 func TestAddTeacherByAdmin(t *testing.T) {
@@ -468,6 +555,7 @@ func TestAddTeacherByAdmin(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 	}
+	AdminGenerator()
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -501,6 +589,7 @@ func TestAddTeacherByAdmin(t *testing.T) {
 			}
 		})
 	}
+	AdminDeleter()
 }
 
 func TestEditTeacherByAdmin(t *testing.T) {
@@ -582,6 +671,7 @@ func TestEditTeacherByAdmin(t *testing.T) {
 			expectedCode: http.StatusOK,
 		},
 	}
+	AdminGenerator()
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -614,6 +704,7 @@ func TestEditTeacherByAdmin(t *testing.T) {
 			}
 		})
 	}
+	AdminDeleter()
 }
 
 func TestDisplaySubjectsByAdmin(t *testing.T) {
@@ -651,6 +742,7 @@ func TestDisplaySubjectsByAdmin(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 	}
+	AdminGenerator()
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -682,6 +774,7 @@ func TestDisplaySubjectsByAdmin(t *testing.T) {
 			}
 		})
 	}
+	AdminDeleter()
 }
 
 func TestAddMarksByAdmin(t *testing.T) {
@@ -738,7 +831,7 @@ func TestAddMarksByAdmin(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 	}
-
+	AdminGenerator()
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -769,6 +862,7 @@ func TestAddMarksByAdmin(t *testing.T) {
 			}
 		})
 	}
+	AdminDeleter()
 }
 
 func TestEditMarksByAdmin(t *testing.T) {
@@ -818,6 +912,7 @@ func TestEditMarksByAdmin(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 	}
+	AdminGenerator()
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -850,6 +945,7 @@ func TestEditMarksByAdmin(t *testing.T) {
 			}
 		})
 	}
+	AdminDeleter()
 }
 
 func TestTeacherPerformanceByAdmin(t *testing.T) {
@@ -880,6 +976,7 @@ func TestTeacherPerformanceByAdmin(t *testing.T) {
 			expectedCode: http.StatusUnauthorized,
 		},
 	}
+	AdminGenerator()
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -910,6 +1007,7 @@ func TestTeacherPerformanceByAdmin(t *testing.T) {
 			}
 		})
 	}
+	AdminDeleter()
 }
 
 func TestStudentReportByAdmin(t *testing.T) {
@@ -946,7 +1044,7 @@ func TestStudentReportByAdmin(t *testing.T) {
 			expectedCode: http.StatusUnauthorized,
 		},
 	}
-
+	AdminGenerator()
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -977,6 +1075,7 @@ func TestStudentReportByAdmin(t *testing.T) {
 			}
 		})
 	}
+	AdminDeleter()
 }
 
 func TestDeleteTeacherByAdmin(t *testing.T) {
@@ -1006,7 +1105,7 @@ func TestDeleteTeacherByAdmin(t *testing.T) {
 			expectedCode: http.StatusOK,
 		},
 	}
-
+	AdminGenerator()
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -1037,6 +1136,7 @@ func TestDeleteTeacherByAdmin(t *testing.T) {
 			}
 		})
 	}
+	AdminDeleter()
 }
 
 func TestDeleteStudentByAdmin(t *testing.T) {
@@ -1066,7 +1166,7 @@ func TestDeleteStudentByAdmin(t *testing.T) {
 			expectedCode: http.StatusOK,
 		},
 	}
-
+	AdminGenerator()
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -1097,6 +1197,7 @@ func TestDeleteStudentByAdmin(t *testing.T) {
 			}
 		})
 	}
+	AdminDeleter()
 }
 
 func TestDeleteSubjectByAdmin(t *testing.T) {
@@ -1127,7 +1228,7 @@ func TestDeleteSubjectByAdmin(t *testing.T) {
 			expectedCode: http.StatusOK,
 		},
 	}
-
+	AdminGenerator()
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -1158,6 +1259,7 @@ func TestDeleteSubjectByAdmin(t *testing.T) {
 			}
 		})
 	}
+	AdminDeleter()
 }
 
 func TestSetSubLimitByAdmin(t *testing.T) {
@@ -1187,7 +1289,7 @@ func TestSetSubLimitByAdmin(t *testing.T) {
 			expectedCode: http.StatusOK,
 		},
 	}
-
+	AdminGenerator()
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -1218,6 +1320,7 @@ func TestSetSubLimitByAdmin(t *testing.T) {
 			}
 		})
 	}
+	AdminDeleter()
 }
 
 func TestPendingRequestByAdmin(t *testing.T) {
@@ -1232,6 +1335,7 @@ func TestPendingRequestByAdmin(t *testing.T) {
 			expectedCode: http.StatusOK,
 		},
 	}
+	AdminGenerator()
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -1365,7 +1469,7 @@ func TestAcceptPendingRequestByAdmin(t *testing.T) {
 			expectedCode: http.StatusOK,
 		},
 	}
-
+	AdminGenerator()
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -1397,6 +1501,7 @@ func TestAcceptPendingRequestByAdmin(t *testing.T) {
 			}
 		})
 	}
+	AdminDeleter()
 }
 
 func TestRejectPendingRequestByAdmin(t *testing.T) {
@@ -1421,6 +1526,7 @@ func TestRejectPendingRequestByAdmin(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 	}
+	AdminGenerator()
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -1451,6 +1557,7 @@ func TestRejectPendingRequestByAdmin(t *testing.T) {
 			}
 		})
 	}
+	AdminDeleter()
 }
 
 func TestRegister(t *testing.T) {
@@ -1508,6 +1615,7 @@ func TestRegister(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 	}
+	AdminGenerator()
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -1538,4 +1646,5 @@ func TestRegister(t *testing.T) {
 			}
 		})
 	}
+	AdminDeleter()
 }
