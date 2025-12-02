@@ -43,7 +43,8 @@ var CurrentData struct {
 }
 
 func StudentGenerator() {
-
+	router := routes.InitializeRouter()
+	log.Printf("%v", "within generator function")
 	data := map[string]string{
 		"yourName": "John Doe",
 		"password": "password",
@@ -55,13 +56,18 @@ func StudentGenerator() {
 		fmt.Println("Error marshaling JSON:", err)
 		return
 	}
-	resp, err := http.Post("http://localhost:8090/register", "application/json", bytes.NewBuffer(jsonData))
+	w := httptest.NewRecorder()
+	v := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(w)
+
+	req, err := http.NewRequest(http.MethodPost, "/register", bytes.NewBuffer(jsonData))
 	if err != nil {
-		fmt.Println("Error making POST request:", err)
-		return
+		log.Fatalf("failed to create request: %v", err)
 	}
-	defer resp.Body.Close()
-	body, err := io.ReadAll(resp.Body)
+	ctx.Request = req
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
+	body, err := io.ReadAll(w.Body)
 	if err != nil {
 		fmt.Println("Error reading response body:", err)
 		return
@@ -82,13 +88,14 @@ func StudentGenerator() {
 		fmt.Println("Error marshaling JSON:", err)
 		return
 	}
-	resp, err = http.Post("http://localhost:8090/login", "application/json", bytes.NewBuffer(jsonData))
+	req, err = http.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(jsonData))
 	if err != nil {
-		fmt.Println("Error making POST request:", err)
-		return
+		log.Fatalf("failed to create request: %v", err)
 	}
-	defer resp.Body.Close()
-	body, err = io.ReadAll(resp.Body)
+	ctx.Request = req
+	req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(v, req)
+	body, err = io.ReadAll(v.Body)
 	if err != nil {
 		fmt.Println("Error reading response body:", err)
 		return
@@ -183,10 +190,10 @@ func TestDisplayStudents(t *testing.T) {
 			}
 
 			ctx.Request = req
+			fmt.Println("setter else -----------", tokenSetter("valid"))
 			if tc.name == "authorization fail" {
 				tc.token = tokenSetter("invalid")
 			} else {
-				fmt.Println("setter else -----------", tokenSetter("valid"))
 				tc.token = tokenSetter("valid")
 			}
 			req.Header.Set("Content-Type", "application/json")
@@ -196,6 +203,7 @@ func TestDisplayStudents(t *testing.T) {
 				t.Errorf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
 			}
 			t.Logf("%s - testname, Response = %s", tc.name, w.Body.String())
+			log.Printf("%v", w.Body)
 			if len(tc.cleanup) > 0 {
 				utils.Cleaner(tc.cleanup)
 			}
@@ -262,6 +270,7 @@ func TestDisplaySubject(t *testing.T) {
 				t.Errorf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
 			}
 			t.Logf("%s - testname, Response = %s", tc.name, w.Body.String())
+			log.Printf("%v", w.Body)
 			if len(tc.cleanup) > 0 {
 				utils.Cleaner(tc.cleanup)
 			}
