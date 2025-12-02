@@ -108,6 +108,7 @@ func StudentGenerator() {
 	CurrentData.Token = LoginOp.Token
 }
 func StudentDeleter() {
+	utils.Cleaner([]string{`DELETE FROM activeSessions where sessiontoken="` + CurrentData.Token + `"`})
 	utils.Cleaner([]string{`DELETE FROM students where grNo=` + strconv.Itoa(CurrentData.UserId)})
 }
 
@@ -244,7 +245,7 @@ func TestDisplaySubject(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 	}
-
+	StudentGenerator()
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -276,4 +277,5 @@ func TestDisplaySubject(t *testing.T) {
 			}
 		})
 	}
+	StudentDeleter()
 }

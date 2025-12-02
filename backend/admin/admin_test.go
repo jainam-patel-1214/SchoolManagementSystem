@@ -105,6 +105,7 @@ func AdminGenerator() {
 	CurrentData.Token = LoginOp.Token
 }
 func AdminDeleter() {
+	utils.Cleaner([]string{`DELETE FROM activeSessions where sessiontoken="` + CurrentData.Token + `"`})
 	utils.Cleaner([]string{`DELETE FROM admins where admin_id="` + CurrentData.UserId + `"`})
 }
 

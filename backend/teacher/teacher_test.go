@@ -64,12 +64,6 @@ func TeacherGenerator() {
 	ctx.Request = req
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(w, req)
-	// resp, err := http.Post("http://localhost:8090/register", "application/json", bytes.NewBuffer(jsonData))
-	// if err != nil {
-	// 	fmt.Println("Error making POST request:", err)
-	// 	return
-	// }
-	// defer resp.Body.Close()
 	body, err := io.ReadAll(w.Body)
 	if err != nil {
 		fmt.Println("Error reading response body:", err)
@@ -111,6 +105,7 @@ func TeacherGenerator() {
 	CurrentData.Token = LoginOp.Token
 }
 func TeacherDeleter() {
+	utils.Cleaner([]string{`DELETE FROM activeSessions where sessiontoken="` + CurrentData.Token + `"`})
 	utils.Cleaner([]string{`DELETE FROM teachers where tId="` + CurrentData.UserId + `"`})
 }
 
