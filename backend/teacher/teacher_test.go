@@ -899,67 +899,75 @@ func TestDeleteSubjectByTeacher(t *testing.T) {
 	TeacherDeleter()
 }
 
-// func TestAddReviewByTeacher(t *testing.T) {
+func TestAddReviewByTeacher(t *testing.T) {
+	TeacherGenerator()
+	testcases := []TestingStructure{
+		{
+			name:         "student invalid grno",
+			reqbody:      `{"grNo":1399999999,"comment":"sincere"}`,
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name:         "valid but student not found",
+			reqbody:      `{"grNo":190,"comment":"sincere"}`,
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name:         "authorization fail",
+			reqbody:      `{"grNo":13,"comment":"sincere"}`,
+			expectedCode: http.StatusUnauthorized,
+		},
+		{
+			name:         "Valid case",
+			reqbody:      `{"grNo":1221,"comment":"sincere"}`,
+			prior:        []string{`INSERT INTO students VALUES (1221, "Asdf123@", "student", "raju", 8, "B")`},
+			cleanup:      []string{"DELETE FROM students WHERE grNo=1221", "DELETE FROM reviews WHERE grNo=1221"},
+			expectedCode: http.StatusOK,
+		},
+		{
+			name:         "Valid case but review already present",
+			reqbody:      `{"grNo":1221,"comment":"sincere"}`,
+			prior:        []string{`INSERT INTO students VALUES (1221, "Asdf123@", "student", "raju", 8, "B")`, `INSERT INTO reviews VALUES ("` + CurrentData.UserId + `", 1221, "bad boy")`},
+			cleanup:      []string{"DELETE FROM students WHERE grNo=1221", "DELETE FROM reviews WHERE grNo=1221"},
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name:    "too long comment",
+			reqbody: `{"grNo":1212,"comment":"sinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresisinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresincerenceresinceresinceresinceresincere"}`,
 
-// 	testcases := []TestingStructure{
-// 		{
-// 			name:         "student invalid grno",
-// 			reqbody:      `{"grNo":1399999999,"comment":"sincere"}`,
-// 			expectedCode: http.StatusBadRequest,
-// 		},
-// 		{
-// 			name:         "valid but student not found",
-// 			reqbody:      `{"grNo":190,"comment":"sincere"}`,
-// 			expectedCode: http.StatusBadRequest,
-// 		},
-// 		{
-// 			name:         "authorization fail",
-// 			reqbody:      `{"grNo":13,"comment":"sincere"}`,
-// 			expectedCode: http.StatusUnauthorized,
-// 		},
-// 		{
-// 			name:         "Valid case",
-// 			reqbody:      `{"grNo":1221,"comment":"sincere"}`,
-// 			prior:        []string{`INSERT INTO students VALUES (1221, "Asdf123@", "student", "raju", 8, "B")`},
-// 			cleanup:      []string{"DELETE FROM students WHERE grNo=1221","DELETE FROM reviews WHERE grNo=1221"},
-// 			expectedCode: http.StatusOK,
-// 		},
-// 		{
-// 			name:         "Valid case but review already present",
-// 			reqbody:      `{"grNo":1221,"comment":"sincere"}`,
-// 			prior:        []string{`INSERT INTO students VALUES (1221, "Asdf123@", "student", "raju", 8, "B")`},
-// 			cleanup:      []string{"DELETE FROM students WHERE grNo=1221","DELETE FROM reviews WHERE grNo=1221"},
-// 			expectedCode: http.StatusInternalServerError,
-// 		},
-// 		{
-// 			name:         "too long comment",
-// 			reqbody:      `{"grNo":1212,"comment":"sinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresisinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresinceresincerenceresinceresinceresinceresincere"}`,
+			expectedCode: http.StatusBadRequest,
+		},
+	}
 
-// 			expectedCode: http.StatusBadRequest,
-// 		},
-// 		{
-// 			name:         "tid not set",
-// 			reqbody:      `{"grNo":1212,"comment":"sincere"}`,
+	router := routes.InitializeRouter()
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			if len(tc.prior) > 0 {
+				utils.Cleaner(tc.prior)
+			}
+			w := httptest.NewRecorder()
+			ctx, _ := gin.CreateTestContext(w)
+			req, err := http.NewRequest(http.MethodPost, "/teacher/addReview", bytes.NewBufferString(tc.reqbody))
+			if err != nil {
+				t.Fatalf("failed to create request: %v", err)
+			}
+			req.Header.Set("Content-Type", "application/json")
+			ctx.Request = req
+			if tc.name == "authorization fail" {
+				tc.token = tokenSetter("invalid")
+			} else {
+				tc.token = tokenSetter("valid")
+			}
+			req.Header.Set("Cookie", tc.token)
+			router.ServeHTTP(w, req)
 
-// 			expectedCode: http.StatusInternalServerError,
-// 		},
-// 	}
-
-// 	for _, tc := range testcases {
-// 		t.Run(tc.name, func(t *testing.T) {
-// 			w := httptest.NewRecorder()
-// 			ctx, _ := gin.CreateTestContext(w)
-// 			req, err := http.NewRequest(http.MethodPost, "/teacher/addReview", bytes.NewBufferString(tc.reqbody))
-// 			if err != nil {
-// 				t.Fatalf("failed to create request: %v", err)
-// 			}
-// 			req.Header.Set("Content-Type", "application/json")
-// 			ctx.Request = req
-
-// 			if w.Code != tc.expectedCode {
-// 				t.Errorf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
-// 			}
-// 			t.Logf("%s - testname, Response = %s", tc.name, w.Body.String())
-// 		})
-// 	}
-// }
+			if w.Code != tc.expectedCode {
+				t.Errorf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
+			}
+			t.Logf("%s - testname, Response = %s", tc.name, w.Body.String())
+			if len(tc.cleanup) > 0 {
+				utils.Cleaner(tc.cleanup)
+			}
+		})
+	}
+}
