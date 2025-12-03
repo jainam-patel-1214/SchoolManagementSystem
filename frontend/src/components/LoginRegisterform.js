@@ -6,6 +6,7 @@ import styled from "styled-components";
 import { SignInBtn } from "../styled-components/LoginSigninButton";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
+import { ErrorToast, SuccessToast } from "../utils/Toaster";
 const SelectInRegister = styled.select`
   border: 1px solid #b9b9b9;
   padding: 5px;
@@ -43,7 +44,6 @@ export const LoginRegisterForm = () => {
         if (state === "name") {
             setname(e.target.value);
         }
-        // console.log(userId,pwd);
     };
 
     const handleSignUp = async(e) => {
@@ -65,30 +65,10 @@ export const LoginRegisterForm = () => {
                 { headers: { "Content-Type": "application/json" } }
             )
             .then((res) => {
-                toast.success(res.data.output + ". Wait till any admin accepts it.", {
-                    position: "top-right",
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "light",
-                });
-                // console.log("res", );
+                SuccessToast(res.data.output + ". Wait till any admin accepts it.",toast)
             })
             .catch((err) => {
-                toast.error(err.response.data.error, {
-                    position: "top-right",
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "light",
-                })
-                // console.log("errrrr", err.response.data.error);
+                ErrorToast(err.response.data.error||err,toast)
             });
         } catch (error) {
             console.log(error);
@@ -115,17 +95,7 @@ export const LoginRegisterForm = () => {
                 { headers: { "Content-Type": "application/json" } }
             )
             .then((res) => {
-                console.log("res", res.data.output, res.data.username, res.data.role);
-                toast.success('Login Successful!', {
-                    position: "top-right",
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "light",
-                });
+                SuccessToast('Login Successful!',toast)
                 const now = new Date();
                 let timenow = now.getTime();
                 timenow += 86340000;
@@ -145,19 +115,7 @@ export const LoginRegisterForm = () => {
                 }
             })
             .catch((err) => {
-                // console.log(err);
-                // showToast(err.response.data.error,false)
-                toast.error(err.response.data.error || err, {
-                    position: "top-right",
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "light",
-                })
-                // console.log("errrrr", err.response.data.error);
+                ErrorToast(err.response.data.error||err,toast)
             });
         } catch (error) {
             console.log(error);
