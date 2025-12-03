@@ -3,48 +3,31 @@ import { Label, LabelValue, PerformanceWindow, StudentHomeSection, StudentInfo, 
 import { ToastContainer, toast } from "react-toastify"
 import { ProfileComponent, ProfileTabs, TableHeader } from "../../styled-components/TableComponents"
 import { SearchOutputSection } from "../studentComponents/SchoolRes"
+import { ErrorToast } from "../../utils/Toaster"
+import { FetchApi } from "../../utils/FetchApi"
 export const TeacherHome = (props) => {
     const [displayData, setDisplayData] = useState({})
     const [displayReport, setDisplayReport] = useState({})
 
     useEffect(() => {
-        const fetchReport = async () => {
-            try {
-                const resp = await fetch(`http://localhost:8090/${props.roleOfPerson}/displayPerformance`, {
-                    method: 'GET',
-                    credentials: 'include',
-                });
-                const res = await resp.json();
-                console.log("performance", res.output);
-                setDisplayReport(res.output);
-            } catch (err) {
-                console.log(err);
-                toast.error(err.error || "Something went wrong", {
-                })
-            }
-        };
-        const fetchData = async () => {
-            try {
-                const resp = await fetch(`http://localhost:8090/${props.roleOfPerson}/data`, {
-                    method: 'GET',
-                    credentials: 'include',
-                });
-                const res = await resp.json();
-                console.log("data", res.output);
-                setDisplayData(res.output);
-            } catch (err) {
-                console.log(err);
-                toast.error(err.error || "Something went wrong", {
+    const baseApi = `http://localhost:8090/${props.roleOfPerson}`
 
-                })
-            }
-        };
-        fetchData()
-        fetchReport()
-    }, []);
-    // useEffect(() => {
+    const load = async () => {
+        try {
+            const [dataRes, reportRes] = await Promise.all([
+                FetchApi(`${baseApi}/data`, 'GET', {}),
+                FetchApi(`${baseApi}/displayPerformance`, 'GET', {})
+            ])
+            setDisplayData(dataRes.output)
+            setDisplayReport(reportRes.output)
+        } catch (err) {
+            ErrorToast(err.error, toast)
+        }
+    }
 
-    // }, [])
+    load()
+}, [])
+
 
     return (
         <div>

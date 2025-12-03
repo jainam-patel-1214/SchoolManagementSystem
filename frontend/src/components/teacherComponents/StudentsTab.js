@@ -12,6 +12,8 @@ import { TableHeader } from "../../styled-components/TableComponents"
 import { GradeCalculator } from "../../utils/gradeCalculator"
 import { FaFileDownload } from "react-icons/fa"
 import { jsPDF } from "jspdf";
+import { FetchApi } from "../../utils/FetchApi"
+import { ErrorToast, Toaster } from "../../utils/Toaster"
 
 
 export const TeacherInputTabContainer = styled.div`
@@ -101,7 +103,7 @@ const fetchData = async (e, grNo, setter, setDisplayData, apiUrl, methodtype, da
     if (dataObj?.studPwd !== undefined && dataObj?.studPwd !== null && (dataObj?.studPwd.toString().length !== 8)) flagarr[1] = true
     if ((grNo < 0 || grNo > 99999999) && grNo !== undefined && grNo !== null) flagarr[0] = true
     if ((dataObj?.std < 1 || dataObj?.std > 12) && dataObj?.std !== undefined && dataObj?.std !== null) flagarr[2] = true
-    if (!(regex.test(dataObj?.studName)) && dataObj?.studName !== undefined && dataObj?.studName !== null && dataObj?.studName != "") flagarr[3] = true
+    if (!(regex.test(dataObj?.studName)) && dataObj?.studName !== undefined && dataObj?.studName !== null && dataObj?.studName !== "") flagarr[3] = true
     if (!(regex.test(dataObj?.section)) && dataObj?.section !== undefined && dataObj?.section !== null) flagarr[4] = true
     let errstr = ""
     let anyErr = false
@@ -121,16 +123,12 @@ const fetchData = async (e, grNo, setter, setDisplayData, apiUrl, methodtype, da
         errorComp.current.style.display = "none"
     }
     try {
-        let resp;
+        let res;
         if (methodtype === "GET") {
-            resp = await fetch(apiUrl + "?" + new URLSearchParams({ "studId": grNo }), {
-                method: 'GET',
-                credentials: 'include',
-            });
+            res = await FetchApi(apiUrl+"?"+new URLSearchParams({ "studId": grNo }),methodtype,{})
         } else {
             let bodyObj = {}
             for (const [key, value] of Object.entries(dataObj)) {
-                console.log(key, value);
                 if (value !== null && value !== undefined) {
                     bodyObj[key] = value
                 }
@@ -139,101 +137,34 @@ const fetchData = async (e, grNo, setter, setDisplayData, apiUrl, methodtype, da
                 case "addStud":
                     bodyObj['grNo'] = grNo
                     bodyObj['userRole'] = "student"
-                    resp = await fetch((apiUrl), {
-                        method: methodtype,
-                        credentials: 'include',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(bodyObj),
-                    });
+                    res = await FetchApi(apiUrl,methodtype,bodyObj)
                     break;
                 case "editStud":
                     bodyObj['grNo'] = grNo
-                    resp = await fetch((apiUrl), {
-                        method: methodtype,
-                        credentials: 'include',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(bodyObj),
-                    });
+                    res = await FetchApi(apiUrl,methodtype,bodyObj)
                     break;
                 case "delStud":
-                    console.log(apiUrl, methodtype, { "grNo": grNo });
-                    resp = await fetch((apiUrl), {
-                        method: methodtype,
-                        credentials: 'include',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ "grNo": grNo })
-                    })
+                    res = await FetchApi(apiUrl,methodtype,{ "grNo": grNo })
                     break;
                 default:
                     break;
             }
         }
-        const res = await resp.json();
-        console.log(typeof (res.output));
-
+        Toaster(res,toast)
         if (res.output) {
             setDisplayData(res.output)
-            if (methodtype === "PUT") {
-                successToast("updated data successfully")
-            }
-            if (methodtype === "DELETE") {
-                successToast("deleted student successfully")
-            }
-            if (methodtype === "POST") {
-                successToast("created student successfully")
-            }
-            if (methodtype === "GET") {
-                successToast("fetched data successfully")
-            }
-            return
-        }
-        if (res.error) {
-            errorToast(res.error)
             return
         }
     } catch (err) {
-        // console.log(err.error);
-        errorToast(err.error)
+        ErrorToast(err.error,toast)
     } finally {
         cleanup.forEach(e => e(null))
         e.target.reset();
     }
 };
 
-const successToast = (str) => {
-    toast.success(str || "fetch successful", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-    });
-}
-const errorToast = (str) => {
-    toast.error(str || "Something went wrong", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-    });
-}
-
 export const StudentTab = (props) => {
     const errorComp = useRef(null)
-    const buttonComp = useRef(null)
     const performanceComponent = useRef(null)
     const [grNo, setGrNo] = useState(null)
     const [displayData, setDisplayData] = useState(null)
@@ -267,7 +198,7 @@ export const StudentTab = (props) => {
                             </InputContainer>
                         </TeacherInputTabContainer>
                         <ButtonContainer>
-                            <StyledButton ref={buttonComp} type="submit">Submit</StyledButton>
+                            <StyledButton  type="submit">Submit</StyledButton>
                         </ButtonContainer>
                         <ErrorSpan id="minmaxerror" ref={errorComp}></ErrorSpan>
                     </SearchForm>
@@ -368,7 +299,7 @@ export const StudentTab = (props) => {
 
 export const StudentEditTab = (props) => {
     const errorComp = useRef(null)
-    const buttonComp = useRef(null)
+    
     const [grNo, setGrNo] = useState(null)
     const [std, setStd] = useState(null)
     const [section, setSection] = useState(null)
@@ -447,7 +378,7 @@ export const StudentEditTab = (props) => {
                         </TeacherInputTabContainer>
                         <ErrorSpan id="minmaxerror" ref={errorComp}></ErrorSpan>
                         <ButtonContainer>
-                            <StyledButton ref={buttonComp} type="submit">Submit</StyledButton>
+                            <StyledButton  type="submit">Submit</StyledButton>
                         </ButtonContainer>
                     </SearchForm>
                 </SearchParamSection>
@@ -461,7 +392,7 @@ export const StudentEditTab = (props) => {
 
 export const StudentDelTab = (props) => {
     const errorComp = useRef(null)
-    const buttonComp = useRef(null)
+    
     const [grNo, setGrNo] = useState(null)
     const [displayData, setDisplayData] = useState(null)
     const changeHandler = (e) => {
@@ -486,7 +417,7 @@ export const StudentDelTab = (props) => {
                         </TeacherInputTabContainer>
                         <ErrorSpan id="minmaxerror" ref={errorComp}></ErrorSpan>
                         <ButtonContainer>
-                            <StyledButton ref={buttonComp} type="submit">Submit</StyledButton>
+                            <StyledButton  type="submit">Submit</StyledButton>
                         </ButtonContainer>
                     </SearchForm>
                 </SearchParamSection>
@@ -500,7 +431,7 @@ export const StudentDelTab = (props) => {
 
 export const StudentAddTab = (props) => {
     const errorComp = useRef(null)
-    const buttonComp = useRef(null)
+    
     const [grNo, setGrNo] = useState(null)
     const [std, setStd] = useState(null)
     const [section, setSection] = useState(null)
@@ -579,7 +510,7 @@ export const StudentAddTab = (props) => {
                         </TeacherInputTabContainer>
                         <ErrorSpan id="minmaxerror" ref={errorComp}></ErrorSpan>
                         <ButtonContainer>
-                            <StyledButton ref={buttonComp} type="submit">Submit</StyledButton>
+                            <StyledButton  type="submit">Submit</StyledButton>
                         </ButtonContainer>
                     </SearchForm>
                 </SearchParamSection>

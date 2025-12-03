@@ -7,6 +7,8 @@ import { ButtonContainer, InputContainer } from "./StudentsTab"
 import { FaCircleUser, FaOrcid } from "react-icons/fa6"
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../styled-components/InputComp"
 import { PiExamFill, PiExamLight } from "react-icons/pi"
+import { ErrorToast, Toaster } from "../../utils/Toaster"
+import { FetchApi } from "../../utils/FetchApi"
 
 export const TeacherInputTabContainer = styled.div`
     display: flex;
@@ -44,112 +46,44 @@ const fetchData = async (e, grNo, setter, setDisplayData, apiUrl, methodtype, da
         errorComp.current.style.display = "none"
     }
     try {
-        let resp;
-        if (methodtype === "GET") {
-            resp = await fetch(apiUrl + "?" + new URLSearchParams({ "studId": grNo }), {
-                method: 'GET',
-                credentials: 'include',
-            });
-        } else {
-            let bodyObj = {}
-            for (const [key, value] of Object.entries(dataObj)) {
-                console.log(key, value);
-                if (value !== null && value !== undefined) {
-                    bodyObj[key] = value
-                }
-            }
-            switch (todo) {
-                case "addMark":
-                    bodyObj['grNo'] = grNo
-                    console.log(bodyObj);
-                    resp = await fetch((apiUrl), {
-                        method: methodtype,
-                        credentials: 'include',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(bodyObj),
-                    });
-                    break;
-                case "editMark":
-                    bodyObj['grNo'] = grNo
-                    console.log(bodyObj, "issue su che");
+        let res;
 
-                    resp = await fetch((apiUrl), {
-                        method: methodtype,
-                        credentials: 'include',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(bodyObj),
-                    });
-                    break;
-                default:
-                    break;
+        let bodyObj = {}
+        for (const [key, value] of Object.entries(dataObj)) {
+            console.log(key, value);
+            if (value !== null && value !== undefined) {
+                bodyObj[key] = value
             }
         }
-        const res = await resp.json();
-        console.log(typeof (res.output));
+        switch (todo) {
+            case "addMark":
+                bodyObj['grNo'] = grNo
+                res = await FetchApi(apiUrl, methodtype, bodyObj)
+                break;
+            case "editMark":
+                bodyObj['grNo'] = grNo
+                res = await FetchApi(apiUrl, methodtype, bodyObj)
+                break;
+            default:
+                break;
+        }
 
+        Toaster(res,toast)
         if (res.output) {
             setDisplayData(res.output)
-            if (methodtype === "PUT") {
-                successToast("updated data successfully")
-            }
-            if (methodtype === "DELETE") {
-                successToast("deleted student successfully")
-            }
-            if (methodtype === "POST") {
-                successToast("created student successfully")
-            }
-            if (methodtype === "GET") {
-                successToast("fetched data successfully")
-            }
-            // setter(null)
-            return
-        }
-        if (res.error) {
-            errorToast(res.error)
-            // setter(null)
             return
         }
     } catch (err) {
-        // console.log(err.error);
-        errorToast(err.error)
+        ErrorToast(err.error,toast)
     } finally {
         cleanup.forEach(e => { e(null) })
         e.target.reset();
     }
 };
 
-const successToast = (str) => {
-    toast.success(str || "fetch successful", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-    });
-}
-const errorToast = (str) => {
-    toast.error(str || "Something went wrong", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-    });
-}
-
 export const MarkEditTab = (props) => {
     const errorComp = useRef(null)
-    const buttonComp = useRef(null)
+
     const [grNo, setGrNo] = useState(null)
     const [subid, setsubid] = useState(null)
     const [theory, setTheory] = useState(null)
@@ -215,7 +149,7 @@ export const MarkEditTab = (props) => {
                         </TeacherInputTabContainer>
                         <ErrorSpan id="minmaxerror" ref={errorComp}></ErrorSpan>
                         <ButtonContainer>
-                            <StyledButton ref={buttonComp} type="submit">Submit</StyledButton>
+                            <StyledButton type="submit">Submit</StyledButton>
                         </ButtonContainer>
                     </SearchForm>
                 </SearchParamSection>
@@ -229,7 +163,7 @@ export const MarkEditTab = (props) => {
 
 export const MarkAddTab = (props) => {
     const errorComp = useRef(null)
-    const buttonComp = useRef(null)
+
     const [grNo, setGrNo] = useState(null)
     const [subid, setsubid] = useState(null)
     const [theory, setTheory] = useState(null)
@@ -295,14 +229,14 @@ export const MarkAddTab = (props) => {
 
                         <ErrorSpan id="minmaxerror" ref={errorComp}></ErrorSpan>
                         <ButtonContainer>
-                            <StyledButton ref={buttonComp} type="submit">Submit</StyledButton>
+                            <StyledButton type="submit">Submit</StyledButton>
                         </ButtonContainer>
                     </SearchForm>
                 </SearchParamSection>
             </SearchBoxSection>
-                {displayData!==undefined&&displayData!==null?<SearchOutputSection>
-                    {typeof (displayData) === "string" ? <div style={{ padding: "10px" }}>{displayData}</div> : <></>}
-                </SearchOutputSection>:<></>}
+            {displayData !== undefined && displayData !== null ? <SearchOutputSection>
+                {typeof (displayData) === "string" ? <div style={{ padding: "10px" }}>{displayData}</div> : <></>}
+            </SearchOutputSection> : <></>}
         </div>
     )
 }

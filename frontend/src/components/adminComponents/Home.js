@@ -5,6 +5,8 @@ import { ToastContainer, toast } from "react-toastify"
 import { ErrorSpan, SearchForm } from "../studentComponents/SchoolRes"
 import { StyledNavbar } from "../../styled-components/styledNav"
 import imgpfp from '../../assets/pfp.webp'
+import { ErrorToast, SuccessToast, Toaster } from "../../utils/Toaster"
+import { FetchApi } from "../../utils/FetchApi"
 
 export const AdminHome = (props) => {
     const [displayData, setDisplayData] = useState({})
@@ -12,18 +14,10 @@ export const AdminHome = (props) => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const resp = await fetch(`http://localhost:8090/${props.roleOfPerson}/data`, {
-                    method: 'GET',
-                    credentials: 'include',
-                });
-                const res = await resp.json();
-                console.log("data", res.output);
+                const res = await FetchApi(`http://localhost:8090/${props.roleOfPerson}/data`,'GET',{})
                 setDisplayData(res.output);
             } catch (err) {
-                console.log(err);
-                toast.error(err.error || "Something went wrong", {
-
-                })
+                ErrorToast(err,toast)
             }
         };
         fetchData()
@@ -35,23 +29,23 @@ export const AdminHome = (props) => {
                 < ToastContainer />
                 <StudentInfo style={{ width: "100%" }}>
                     <div style={{ display: "flex", justifyContent: "center", flexDirection: "column", padding: "1rem" }}>
-                        <h3 style={{ marginBottom: "1rem"}}><strong>User Profile:</strong></h3>
+                        <h3 style={{ marginBottom: "1rem" }}><strong>User Profile:</strong></h3>
                         <StyledNavbar variant="inbody">
                             <div>
-                            <img src={imgpfp} alt="pfp" style={{height:"100px",width:"100px",objectFit:"contain"}}></img>
-                            <LabelValue>
-                                <Value style={{ margin: "1rem auto"}}><strong>{displayData.Name}</strong></Value>
-                            </LabelValue>
+                                <img src={imgpfp} alt="pfp" style={{ height: "100px", width: "100px", objectFit: "contain" }}></img>
+                                <LabelValue>
+                                    <Value style={{ margin: "1rem auto" }}><strong>{displayData.Name}</strong></Value>
+                                </LabelValue>
                             </div>
                             <div>
-                            <LabelValue>
-                                <Label><strong>Id:</strong></Label>
-                                <Value>{displayData.Id}</Value>
-                            </LabelValue>
-                            <LabelValue>
-                                <Label><strong>Password:</strong></Label>
-                                <Value>{displayData.Password}</Value>
-                            </LabelValue>
+                                <LabelValue>
+                                    <Label><strong>Id:</strong></Label>
+                                    <Value>{displayData.Id}</Value>
+                                </LabelValue>
+                                <LabelValue>
+                                    <Label><strong>Password:</strong></Label>
+                                    <Value>{displayData.Password}</Value>
+                                </LabelValue>
                             </div>
                         </StyledNavbar>
                     </div>
@@ -164,30 +158,7 @@ export const AdminPendingReqTab = (props) => {
     const [isStudent, setstud] = useState(false)
     const [isTeacher, setteach] = useState(false)
     const [displayData, setDisplayData] = useState([])
-    const successToast = (str) => {
-        toast.success(str || "fetch successful", {
-            position: "top-right",
-            autoClose: 2000,
-            hideProgressBar: false,
-            closeOnClick: false,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-        });
-    }
-    const errorToast = (str) => {
-        toast.error(str || "Something went wrong", {
-            position: "top-right",
-            autoClose: 2000,
-            hideProgressBar: false,
-            closeOnClick: false,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-        });
-    }
+
     const stateChange = (e, type) => {
         e.preventDefault()
         switch (type) {
@@ -240,29 +211,15 @@ export const AdminPendingReqTab = (props) => {
         const role = e.target.getAttribute("userRole");
         const pId = Number(e.target.getAttribute("pend"));
         try {
-            const temp = { "pendingId": pId, "uName": name, "uPwd": pwd, "uRole": role}
-            console.log(temp);
-            await fetch(`http://localhost:8090/${props.roleOfPerson}/rejectRequest`, {
-                method: "DELETE",
-                credentials: "include",
-                body: JSON.stringify(temp)
-            }).then(async (res) => {
-                const result = await res.json()
-                if (result.output) {
-                    successToast(result.output)
-                    emptystates()
-                    fetchPendingApps()
-                }
-                if (result.error) {
-                    errorToast(result.error);
-                }
-            }).catch(e => {
-                console.log(e.error);
-                errorToast(e.error);
-            })
+            const temp = { "pendingId": pId, "uName": name, "uPwd": pwd, "uRole": role }
+            const res = await FetchApi(`http://localhost:8090/${props.roleOfPerson}/rejectRequest`, 'DELETE', temp)
+            Toaster(res, toast)
+            if (res.output) {
+                emptystates()
+                fetchPendingApps()
+            }
         } catch (error) {
-            console.log(error);
-            errorToast(error.error);
+            ErrorToast(error,toast);
         }
     }
     const handleHide = () => {
@@ -270,110 +227,44 @@ export const AdminPendingReqTab = (props) => {
         detailsComp.current.style.display = "none"
         document.querySelector("body").style.overflow = "auto"
         emptystates()
-        // setName(null); setPwd(null); setRole(null); setId(null); setSubid(null); setStd(null); setSection(null); setstud(false); setteach(false);
     }
 
     const handleSubmitForm = async (e) => {
         e.preventDefault()
-
+        let temp;
         if (isStudent) {
-            try {
-                const temp = { "pendingId": pendId, "uName": name, "uPwd": pwd, "uRole": role, "Uid": id, "std": std, "section": section }
-                console.log(temp);
-                await fetch(`http://localhost:8090/${props.roleOfPerson}/acceptRequest`, {
-                    method: "POST",
-                    credentials: "include",
-                    body: JSON.stringify(temp)
-                }).then(async (res) => {
-                    const result = await res.json()
-                    if (result.output) {
-                        successToast(result.output)
-                    }
-                    if (result.error) {
-                        errorToast(result.error);
-                    }
-                }).catch(e => {
-                    console.log(e.error);
-                    errorToast(e.error);
-                })
-            } catch (error) {
-                console.log(error);
-                errorToast(error.error);
-            }
+            temp = { "pendingId": pendId, "uName": name, "uPwd": pwd, "uRole": role, "Uid": id, "std": std, "section": section }
         } else if (isTeacher) {
-            try {
-                const temp = { "pendingId": pendId, "uName": name, "uPwd": pwd, "uRole": role, "Uid": id, "std": std, "section": section, "subId": subid }
-                console.log(temp);
-
-                await fetch(`http://localhost:8090/${props.roleOfPerson}/acceptRequest`, {
-                    method: "POST",
-                    credentials: "include",
-                    body: JSON.stringify(temp)
-                }).then(async (res) => {
-                    const result = await res.json()
-                    if (result.output) {
-                        successToast(result.output)
-                    }
-                    if (result.error) {
-                        errorToast(result.error);
-                    }
-                }).catch(e => {
-                    console.log(e.error);
-                    errorToast(e.error);
-                })
-            } catch (error) {
-                console.log(error.error);
-                errorToast(error.error);
-            }
+            temp = { "pendingId": pendId, "uName": name, "uPwd": pwd, "uRole": role, "Uid": id, "std": std, "section": section, "subId": subid }
         } else if (!isStudent && !isTeacher) {
-            try {
-                const temp = { "pendingId": pendId, "uName": name, "uPwd": pwd, "uRole": role, "Uid": id }
-                console.log(temp);
-
-                await fetch(`http://localhost:8090/${props.roleOfPerson}/acceptRequest`, {
-                    method: "POST",
-                    credentials: "include",
-                    body: JSON.stringify(temp)
-                }).then(async (res) => {
-                    const result = await res.json()
-                    if (result.output) {
-                        successToast(result.output)
-                    }
-                    if (result.error) {
-                        errorToast(result.error);
-                    }
-                }).catch(e => {
-                    console.log(e.error);
-                })
-            } catch (error) {
-                console.log(error);
-                errorToast(error.error);
-            }
+            temp = { "pendingId": pendId, "uName": name, "uPwd": pwd, "uRole": role, "Uid": id }
         }
-        handleHide()
-        emptystates()
-        fetchPendingApps()
-        e.target.reset()
+        try {
+            console.log(temp);
+            const res = await FetchApi(`http://localhost:8090/${props.roleOfPerson}/acceptRequest`, 'POST', temp)
+            Toaster(res, toast)
+        } catch (error) {
+            ErrorToast(error.error, toast);
+        }finally{
+            handleHide()
+            emptystates()
+            fetchPendingApps()
+            e.target.reset()
+        }
     }
     const emptystates = () => {
         setName(null); setPwd(null); setRole(null); setId(null); setSubid(null); setStd(null); setSection(null); setstud(false); setteach(false); setPendid(null)
     }
     const fetchPendingApps = async () => {
         try {
-            const output = await fetch(`http://localhost:8090/${props.roleOfPerson}/pendingRequest`, {
-                method: "GET",
-                credentials: "include"
-            })
-            const res = await output.json()
-
+            const res = await FetchApi(`http://localhost:8090/${props.roleOfPerson}/pendingRequest`,'GET',{})
             if (typeof (res.output) === "string") {
-                successToast("no pending applications present")
+                SuccessToast("no pending applications present",toast)
             } else {
                 setDisplayData(res.output)
             }
         } catch (err) {
-            console.log(err);
-            errorToast(err)
+            ErrorToast(err,toast)
         }
     }
     useEffect(() => {

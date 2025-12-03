@@ -7,13 +7,13 @@ import { TeacherInputTabContainer } from "./TeachersTab"
 import { RiBookShelfLine } from "react-icons/ri"
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../styled-components/InputComp"
 import { GiBookPile } from "react-icons/gi";
+import { ErrorToast, Toaster } from "../../utils/Toaster"
+import { FetchApi } from "../../utils/FetchApi"
 
 export const SubjectLImit = (props) => {
     const errorComp = useRef(null)
-    const buttonComp = useRef(null)
     const [grade, setGrade] = useState(null)
     const [limit, setLimit] = useState(null)
-    const [displayData, setDisplayData] = useState()
 
     const setSubLim = async (e) => {
         e.preventDefault()
@@ -31,26 +31,10 @@ export const SubjectLImit = (props) => {
         }
         try {
             const temp = { "std": grade, "limit": limit }
-            console.log(temp);
-            await fetch(`http://localhost:8090/${props.roleOfPerson}/setSubLimit`, {
-                method: "POST",
-                credentials: "include",
-                body: JSON.stringify(temp)
-            }).then(async (res) => {
-                const result = await res.json()
-                if (result.output) {
-                    successToast(result.output)
-                }
-                if (result.error) {
-                    errorToast(result.error);
-                }
-            }).catch(e => {
-                console.log(e.error);
-                errorToast(e.error);
-            })
+            const res = await FetchApi(`http://localhost:8090/${props.roleOfPerson}/setSubLimit`, 'POST', temp)
+            Toaster(res,toast)
         } catch (error) {
-            console.log(error);
-            errorToast(error.error);
+            ErrorToast(error.error,toast)
         } finally {
             emptystates()
             e.target.reset()
@@ -73,36 +57,12 @@ export const SubjectLImit = (props) => {
         setGrade(null)
         setLimit(null)
     }
-    const successToast = (str) => {
-        toast.success(str || "fetch successful", {
-            position: "top-right",
-            autoClose: 2000,
-            hideProgressBar: false,
-            closeOnClick: false,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-        });
-    }
-    const errorToast = (str) => {
-        toast.error(str || "Something went wrong", {
-            position: "top-right",
-            autoClose: 2000,
-            hideProgressBar: false,
-            closeOnClick: false,
-            pauseOnHover: true,
-            draggable: true,
-            progress: undefined,
-            theme: "light",
-        });
-    }
     return (
         <div>
             <SearchBoxSection>
                 < ToastContainer />
                 <SearchParamSection>
-                    <SearchForm action="" onSubmit={(e) => { setSubLim(e) }}>
+                    <SearchForm onSubmit={(e) => { setSubLim(e) }}>
                         <TeacherInputTabContainer>
                             <InputContainer style={{ width: "50%" }}>
                                 <RiBookShelfLine style={{ fontSize: "xx-large" }} />
@@ -121,14 +81,11 @@ export const SubjectLImit = (props) => {
                         </TeacherInputTabContainer>
                         <ErrorSpan id="minmaxerror" ref={errorComp}></ErrorSpan>
                         <ButtonContainer>
-                            <StyledButton ref={buttonComp} type="submit">Submit</StyledButton>
+                            <StyledButton type="submit">Submit</StyledButton>
                         </ButtonContainer>
                     </SearchForm>
                 </SearchParamSection>
             </SearchBoxSection>
-            {displayData !== undefined && displayData !== null ? <SearchOutputSection>
-                {typeof (displayData) === "string" ? <span style={{ background: "#fa6c61", padding: "5px" }}>{displayData}</span> : <></>}
-            </SearchOutputSection> : <></>}
         </div>
     )
 }

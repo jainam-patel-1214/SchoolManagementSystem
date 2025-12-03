@@ -3,12 +3,14 @@ import styled from "styled-components"
 import { useState, useRef } from "react"
 import { StyledButton } from "../../styled-components/styledButton"
 import { SubInfo, TableEntry } from "./Home"
-import { ButtonContainer, InputContainer, StudentResultContainer, TeacherInputTabContainer } from "../teacherComponents/StudentsTab"
+import { ButtonContainer, InputContainer, TeacherInputTabContainer } from "../teacherComponents/StudentsTab"
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../styled-components/InputComp"
 import { TiSortAlphabetically } from "react-icons/ti"
 import { RiBookShelfLine } from "react-icons/ri"
 import { PiLineSegmentsBold } from "react-icons/pi"
 import { TableHeader } from "../../styled-components/TableComponents"
+import { FetchApi } from "../../utils/FetchApi"
+import { ErrorToast, Toaster } from "../../utils/Toaster"
 
 export const SearchBoxSection = styled.div`
     display: flex;
@@ -65,7 +67,7 @@ export const ErrorSpan = styled.div`
 
 export const SchoolResult = (props) => {
     const errorComp = useRef(null)
-    const buttonComp = useRef(null)
+    
     const [section, setSection] = useState(null)
     const [grade, setGrade] = useState(null)
     const [minMark, setMinMark] = useState(null)
@@ -130,50 +132,17 @@ export const SchoolResult = (props) => {
                     queryParams[elem] = params[elem]
                 }
             }
-            const resp = await fetch(apiUrl+"?"+new URLSearchParams(queryParams), {
-                method: 'GET',
-                credentials: 'include',
-            });
-            const res = await resp.json();
+            
+            const res = await FetchApi(apiUrl+"?"+new URLSearchParams(queryParams),"GET",{})
+            Toaster(res,toast)
             if (res.output) {
-                toast.success(res.output || "data fetched", {
-                    position: "top-right",
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "light",
-                })
                 setDisplayData(res.output);
             } else{
-                toast.success(res.error || "data fetched", {
-                    position: "top-right",
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "light",
-                })
                 setDisplayData(res.error);
             }
         } catch (err) {
             console.log(err);
-            // toast.error(err.error || "Something went wrong", {
-            // })
-            toast.error(err.error || "Something went wrong", {
-                position: "top-right",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-            });
+            ErrorToast(err.error,toast)
         } finally {
             cleanup()
             console.log(e);
@@ -230,7 +199,7 @@ export const SchoolResult = (props) => {
                         </TeacherInputTabContainer>
                         <ErrorSpan id="minmaxerror" ref={errorComp}></ErrorSpan>
                         <ButtonContainer>
-                            <StyledButton ref={buttonComp} type="submit">Submit</StyledButton>
+                            <StyledButton  type="submit">Submit</StyledButton>
                         </ButtonContainer>
                     </SearchForm>
                 </div>

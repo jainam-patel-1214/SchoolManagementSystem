@@ -12,6 +12,8 @@ import { FaAddressCard, FaKey } from "react-icons/fa6"
 import { RiBookShelfLine, RiContactsBook2Fill } from "react-icons/ri"
 import { MdWindow } from "react-icons/md"
 import { TableHeader } from "../../styled-components/TableComponents"
+import { ErrorToast, Toaster } from "../../utils/Toaster"
+import { FetchApi } from "../../utils/FetchApi"
 
 export const TeacherInputTabContainer = styled.div`
     display: flex;
@@ -49,12 +51,9 @@ const fetchData = async (e, tid, setTid, setDisplayData, apiUrl, methodtype, dat
         errorComp.current.style.display = "none"
     }
     try {
-        let resp;
+        let res;
         if (methodtype === "GET") {
-            resp = await fetch(apiUrl, {
-                method: 'GET',
-                credentials: 'include',
-            });
+            res = await FetchApi(apiUrl,methodtype,{})
         } else {
             let bodyObj = {}
             for (const [key, value] of Object.entries(dataObj)) {
@@ -65,110 +64,41 @@ const fetchData = async (e, tid, setTid, setDisplayData, apiUrl, methodtype, dat
             }
             switch (todo) {
                 case "addTeach":
-                    // bodyObj = {}
                     bodyObj["teacherId"] = tid
                     bodyObj["role"] = "teacher"
-                    resp = await fetch((apiUrl), {
-                        method: methodtype,
-                        credentials: 'include',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(bodyObj),
-                    });
+                    res = await FetchApi(apiUrl,methodtype,bodyObj)
                     break;
                 case "editTeach":
-                    // bodyObj = {}
-                    // for (const [key, value] of Object.entries(dataObj)) {
-                    //     console.log(key, value);
-                    //     if (value !== null && value !== undefined) {
-                    //         bodyObj[key] = value
-                    //     }
-                    // }
                     bodyObj["teacherId"] = tid
-                    resp = await fetch((apiUrl), {
-                        method: methodtype,
-                        credentials: 'include',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(bodyObj),
-                    });
+                    res = await FetchApi(apiUrl,methodtype,bodyObj)
                     break;
                 case "delTeach":
-                    resp = await fetch((apiUrl), {
-                        method: methodtype,
-                        credentials: 'include',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ "teacherId": tid })
-                    })
+                    res = await FetchApi(apiUrl,methodtype,{ "teacherId": tid })
                     break;
                 default:
                     break;
             }
         }
-        const res = await resp.json();
-        console.log(res);
-
+        
+        Toaster(res,toast)
         if (res.output) {
             setDisplayData(res.output)
-            if (methodtype === "PUT") {
-                successToast("updated data successfully")
-            }
-            if (methodtype === "DELETE") {
-                successToast("deleted teacher successfully")
-            }
-            if (methodtype === "POST") {
-                successToast("created teacher successfully")
-            }
-            if (methodtype === "GET") {
-                successToast("fetched data successfully")
-            }
             return
         }
         if (res.error) {
-            errorToast(res.error)
+            ErrorToast(res.error,toast)
             return
         }
     } catch (err) {
-        // console.log(err.error);
-        errorToast(err.error)
+        ErrorToast(err.error,toast)
     } finally {
         cleanup.forEach(e => e(null))
         e.target.reset();
     }
 };
 
-const successToast = (str) => {
-    toast.success(str || "fetch successful", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-    });
-}
-const errorToast = (str) => {
-    toast.error(str || "Something went wrong", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-    });
-}
-
 export const TeacherPerformance = (props) => {
     const errorComp = useRef(null)
-    const buttonComp = useRef(null)
     const [tid, setTid] = useState(null)
     const [displayData, setDisplayData] = useState(null)
     const changeHandler = (e) => {
@@ -192,7 +122,7 @@ export const TeacherPerformance = (props) => {
                         </TeacherInputTabContainer>
                         <ErrorSpan id="minmaxerror" ref={errorComp}></ErrorSpan>
                         <ButtonContainer>
-                            <StyledButton ref={buttonComp} type="submit">Submit</StyledButton>
+                            <StyledButton  type="submit">Submit</StyledButton>
                         </ButtonContainer>
                     </SearchForm>
                 </SearchParamSection>
@@ -240,7 +170,7 @@ export const TeacherPerformance = (props) => {
 
 export const TeacherEditTab = (props) => {
     const errorComp = useRef(null)
-    const buttonComp = useRef(null)
+    
     const [tId, setTid] = useState(null)
     const [password, setPassword] = useState(null)
     const [subId, setsubId] = useState(null)
@@ -332,7 +262,7 @@ export const TeacherEditTab = (props) => {
                         </TeacherInputTabContainer>
                         <ErrorSpan id="minmaxerror" ref={errorComp}></ErrorSpan>
                         <ButtonContainer>
-                            <StyledButton ref={buttonComp} type="submit">Submit</StyledButton>
+                            <StyledButton  type="submit">Submit</StyledButton>
                         </ButtonContainer>
                     </SearchForm>
                 </SearchParamSection>
@@ -346,7 +276,7 @@ export const TeacherEditTab = (props) => {
 
 export const TeacherDelTab = (props) => {
     const errorComp = useRef(null)
-    const buttonComp = useRef(null)
+    
     const [tId, setTid] = useState(null)
     const [displayData, setDisplayData] = useState(null)
     const changeHandler = (e) => {
@@ -370,7 +300,7 @@ export const TeacherDelTab = (props) => {
                         </TeacherInputTabContainer>
                         <ErrorSpan id="minmaxerror" ref={errorComp}></ErrorSpan>
                         <ButtonContainer>
-                            <StyledButton ref={buttonComp} type="submit">Submit</StyledButton>
+                            <StyledButton  type="submit">Submit</StyledButton>
                         </ButtonContainer>
                     </SearchForm>
                 </SearchParamSection>
@@ -386,7 +316,7 @@ export const TeacherDelTab = (props) => {
 
 export const TeacherAddTab = (props) => {
     const errorComp = useRef(null)
-    const buttonComp = useRef(null)
+    
     const [tId, setTid] = useState(null)
     const [password, setPassword] = useState(null)
     const [subId, setsubId] = useState(null)
@@ -478,7 +408,7 @@ export const TeacherAddTab = (props) => {
                         </TeacherInputTabContainer>
                         <ErrorSpan id="minmaxerror" ref={errorComp}></ErrorSpan>
                         <ButtonContainer>
-                            <StyledButton ref={buttonComp} type="submit">Submit</StyledButton>
+                            <StyledButton  type="submit">Submit</StyledButton>
                         </ButtonContainer>
                     </SearchForm>
                 </SearchParamSection>

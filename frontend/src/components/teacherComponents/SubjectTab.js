@@ -1,6 +1,6 @@
 import styled from "styled-components"
 import { ErrorSpan, SearchBoxSection, SearchForm, SearchOutputSection, SearchParamSection } from "../studentComponents/SchoolRes"
-import { toast, ToastContainer } from "react-toastify"
+import {  toast, ToastContainer } from "react-toastify"
 import { StyledButton } from "../../styled-components/styledButton"
 import { SubInfo, TableEntry } from "../studentComponents/Home"
 import { useRef, useState } from "react"
@@ -11,6 +11,8 @@ import { LuBookA } from "react-icons/lu";
 import { IoIosRibbon } from "react-icons/io";
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../styled-components/InputComp"
 import { TableHeader } from "../../styled-components/TableComponents"
+import { FetchApi } from "../../utils/FetchApi"
+import { ErrorToast, Toaster } from "../../utils/Toaster"
 
 export const TeacherInputTabContainer = styled.div`
     display: flex;
@@ -45,12 +47,9 @@ const fetchData = async (e, grade, setGrade, setDisplayData, apiUrl, methodtype,
         errorComp.current.style.display = "none"
     }
     try {
-        let resp;
+        let res;
         if (methodtype === "GET") {
-            resp = await fetch(apiUrl + "?" + new URLSearchParams({ "std": grade }), {
-                method: 'GET',
-                credentials: 'include',
-            });
+            res = await FetchApi(apiUrl+"?"+new URLSearchParams({ "std": grade }),methodtype,{})
         } else {
             let bodyObj = {}
             for (const [key, value] of Object.entries(dataObj)) {
@@ -61,105 +60,36 @@ const fetchData = async (e, grade, setGrade, setDisplayData, apiUrl, methodtype,
             }
             switch (todo) {
                 case "addSub":
-                    resp = await fetch((apiUrl), {
-                        method: methodtype,
-                        credentials: 'include',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(bodyObj),
-                    });
+                    res = await FetchApi(apiUrl,methodtype,bodyObj)
                     break;
                 case "editSub":
-                    for (const [key, value] of Object.entries(dataObj)) {
-                        console.log(key, value);
-                        if (value !== null && value !== undefined) {
-                            bodyObj[key] = value
-                        }
-                    }
-                    resp = await fetch((apiUrl), {
-                        method: methodtype,
-                        credentials: 'include',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(bodyObj),
-                    });
+                    res = await FetchApi(apiUrl,methodtype,bodyObj)
                     break;
                 case "delSub":
-                    resp = await fetch((apiUrl), {
-                        method: methodtype,
-                        credentials: 'include',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ "subId": grade })
-                    })
+                    res = await FetchApi(apiUrl,methodtype,{ "subId": dataObj.subId })
                     break;
                 default:
                     break;
             }
         }
-        const res = await resp.json();
-        console.log(res);
-
+        Toaster(res,toast)
         if (res.output) {
             setDisplayData(res.output)
-            if (methodtype === "PUT") {
-                successToast("updated data successfully")
-            }
-            if (methodtype === "DELETE") {
-                successToast("deleted subject successfully")
-            }
-            if (methodtype === "POST") {
-                successToast("created subject successfully")
-            }
-            if (methodtype === "GET") {
-                successToast("fetched data successfully")
-            }
-            return
-        }
-        if (res.error) {
-            errorToast(res.error)
             return
         }
     } catch (err) {
-        // console.log(err.error);
-        errorToast(err.error)
+        ErrorToast(err.error,toast)
     } finally {
         cleanup.forEach(e => e(null))
         e.target.reset();
     }
 };
 
-const successToast = (str) => {
-    toast.success(str || "fetch successful", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-    });
-}
-const errorToast = (str) => {
-    toast.error(str || "Something went wrong", {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-    });
-}
+
 
 export const SubTab = (props) => {
     const errorComp = useRef(null)
-    const buttonComp = useRef(null)
+    
     const [grade, setGrade] = useState(null)
     const [displayData, setDisplayData] = useState(null)
     const changeHandler = (e) => {
@@ -194,7 +124,7 @@ export const SubTab = (props) => {
                             </InputContainer>
                         </TeacherInputTabContainer>
                         <ButtonContainer>
-                            <StyledButton ref={buttonComp} type="submit">Submit</StyledButton>
+                            <StyledButton  type="submit">Submit</StyledButton>
                         </ButtonContainer>
                         <ErrorSpan id="minmaxerror" ref={errorComp}></ErrorSpan>
                     </SearchForm>
@@ -234,7 +164,7 @@ export const SubTab = (props) => {
 
 export const SubEditTab = (props) => {
     const errorComp = useRef(null)
-    const buttonComp = useRef(null)
+    
     const [grade, setGrade] = useState(null)
     const [credits, setCredits] = useState(null)
     const [subId, setsubId] = useState(null)
@@ -300,7 +230,7 @@ export const SubEditTab = (props) => {
                         </TeacherInputTabContainer>
                         <ErrorSpan id="minmaxerror" ref={errorComp}></ErrorSpan>
                         <ButtonContainer>
-                            <StyledButton ref={buttonComp} type="submit">Submit</StyledButton>
+                            <StyledButton  type="submit">Submit</StyledButton>
                         </ButtonContainer>
                     </SearchForm>
                 </SearchParamSection>
@@ -314,7 +244,7 @@ export const SubEditTab = (props) => {
 
 export const SubDelTab = (props) => {
     const errorComp = useRef(null)
-    const buttonComp = useRef(null)
+    
     const [subid, setSubId] = useState(null)
     const [displayData, setDisplayData] = useState(null)
     const changeHandler = (e) => {
@@ -326,7 +256,7 @@ export const SubDelTab = (props) => {
             <SearchBoxSection>
                 < ToastContainer />
                 <SearchParamSection>
-                    <SearchForm onSubmit={(e) => { fetchData(e, subid, setSubId, setDisplayData, `http://localhost:8090/${props.roleOfPerson}/delSubject`, "DELETE", {}, "delSub", errorComp, [setSubId]) }}>
+                    <SearchForm onSubmit={(e) => { fetchData(e, undefined, setSubId, setDisplayData, `http://localhost:8090/${props.roleOfPerson}/delSubject`, "DELETE", {"subId":subid}, "delSub", errorComp, [setSubId]) }}>
                         <TeacherInputTabContainer>
                             <InputContainer>
                                 <FaOrcid style={{ fontSize: "xx-large" }} />
@@ -338,7 +268,7 @@ export const SubDelTab = (props) => {
                         </TeacherInputTabContainer>
                         <ErrorSpan id="minmaxerror" ref={errorComp}></ErrorSpan>
                             <ButtonContainer>
-                                <StyledButton ref={buttonComp} type="submit">Submit</StyledButton>
+                                <StyledButton  type="submit">Submit</StyledButton>
                             </ButtonContainer>
                     </SearchForm>
                 </SearchParamSection>
@@ -354,7 +284,7 @@ export const SubDelTab = (props) => {
 
 export const SubAddTab = (props) => {
     const errorComp = useRef(null)
-    const buttonComp = useRef(null)
+    
     const [grade, setGrade] = useState(null)
     const [credits, setCredits] = useState(null)
     const [subId, setsubId] = useState(null)
@@ -421,7 +351,7 @@ export const SubAddTab = (props) => {
                         </TeacherInputTabContainer>
                         <ErrorSpan id="minmaxerror" ref={errorComp}></ErrorSpan>
                         <ButtonContainer>
-                            <StyledButton ref={buttonComp} type="submit">Submit</StyledButton>
+                            <StyledButton  type="submit">Submit</StyledButton>
                         </ButtonContainer>
                     </SearchForm>
                 </SearchParamSection>

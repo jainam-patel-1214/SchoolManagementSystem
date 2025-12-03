@@ -6,12 +6,13 @@ import { InputContainer, TeacherInputTabContainer } from "./StudentsTab"
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../styled-components/InputComp"
 import { MdRateReview } from "react-icons/md"
 import { FaCircleUser } from "react-icons/fa6"
+import { FetchApi } from "../../utils/FetchApi"
+import { ErrorToast, Toaster } from "../../utils/Toaster"
 
 export const ReviewTab = (props) => {
     const errorComp = useRef(null)
-    const buttonComp = useRef(null)
+    
     const [grNO, setGrNo] = useState(0)
-    // const [rerender, setrerender] = useState(0)
     const [comment, setComment] = useState(null)
 
     const changeHandler = (e, type) => {
@@ -48,51 +49,10 @@ export const ReviewTab = (props) => {
         }
         try {
             const apiUrl = `http://localhost:8090/${props.roleOfPerson}/addReview`;
-
-            const resp = await fetch(apiUrl, {
-                method: 'POST',
-                credentials: 'include',
-                body: JSON.stringify({ "grNo": grNO, "comment": comment })
-            });
-            const res = await resp.json();
-            if (res.output) {
-                toast.success(res.output || "Your review added successfully", {
-                    position: "top-right",
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "light",
-                });
-                return
-            }
-            if (res.error) {
-                toast.error(res.error || "Something went wrong", {
-                    position: "top-right",
-                    autoClose: 2000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "light",
-                });
-                return
-            }
+            const res = await FetchApi(apiUrl,"POST",{ "grNo": grNO, "comment": comment })
+            Toaster(res,toast)
         } catch (err) {
-            console.log(err.error);
-            toast.error(err.error || "Something went wrong", {
-                position: "top-right",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-            });
+            ErrorToast(err.error,toast)
         } finally {
             setComment(null)
             setGrNo(null)
@@ -123,7 +83,7 @@ export const ReviewTab = (props) => {
                     </TeacherInputTabContainer>
                     <ErrorSpan id="minmaxerror" ref={errorComp}></ErrorSpan>
                     <buttonComp>
-                        <StyledButton ref={buttonComp} >Submit</StyledButton>
+                        <StyledButton>Submit</StyledButton>
                     </buttonComp>
                 </SearchForm>
             </SearchParamSection>

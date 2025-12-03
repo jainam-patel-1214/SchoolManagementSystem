@@ -9,11 +9,12 @@ import { GradeCalculator } from "../../utils/gradeCalculator";
 import { FaFileDownload } from "react-icons/fa";
 import { DownloadBtn } from "../../styled-components/styledButton";
 import { SearchOutputSection } from "./SchoolRes";
+import { FetchApi } from "../../utils/FetchApi";
+import { ErrorToast } from "../../utils/Toaster";
 
 export const StudentHomeSection = styled.div`
     display: flex;
     flex-direction: row;
-    /* width: 100%; */
     justify-content: space-evenly;
     padding: 1rem;
 `
@@ -68,62 +69,36 @@ export const StudentHomePage = () => {
     const [uName, setuName] = useState('')
     const performanceComponent = useRef(null)
     const [totalMsg, setTotalMsg] = useState("");
-    useEffect(() => {
-        let sum = 0
-        displayReport?.MarkInfo?.forEach(e => {
-            console.log(Number(e.practicalMM) + Number(e.theoryMM));
-            sum += Number(e.practicalMM) + Number(e.theoryMM)
-        })
-        const res = GradeCalculator((sum * 100) / (100 * displayReport?.MarkInfo?.length))
-        setTotalMsg(res)
-    }, [displayReport])
-
 
     useEffect(() => {
         const name = getCookie("username")
         setuName(name)
-    }, [])
-
-
-    useEffect(() => {
+        const baseUrl = "http://localhost:8090/student"
         const fetchReport = async () => {
             try {
-                const resp = await fetch('http://localhost:8090/student/report', {
-                    method: 'GET',
-                    credentials: 'include',
-                });
-                const res = await resp.json();
-                console.log(res.output);
-                setDisplayReport(res.output);
-            } catch (err) {
-                console.log(err);
-                toast.error(err.error || "Something went wrong", {
+                const name = getCookie("username")
+                console.log(name);
+                
+                setuName(name)
+                const [report, data] = await Promise.all([
+                    FetchApi(`${baseUrl}/report`, "GET", {}),
+                    FetchApi(`${baseUrl}/data`, "GET", {})
+                ]);
+                setDisplayReport(report.output)
+                setDisplayData(data.output)
+                let sum = 0
+                report.output?.MarkInfo?.forEach(e => {
+                    sum += Number(e.practicalMM) + Number(e.theoryMM)
                 })
+                const res = GradeCalculator((sum * 100) / (100 * displayReport?.MarkInfo?.length))
+                setTotalMsg(res)
+            } catch (err) {
+                console.log({ here : "catch"})
+                ErrorToast(err.error, toast)
             }
         };
         fetchReport()
     }, []);
-
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const resp = await fetch('http://localhost:8090/student/data', {
-                    method: 'GET',
-                    credentials: 'include',
-                });
-                const res = await resp.json();
-                console.log(res.output);
-                setDisplayData(res.output);
-            } catch (err) {
-                console.log(err);
-                toast.error(err.error || "Something went wrong", {
-
-                })
-            }
-        };
-        fetchData()
-    }, [])
 
     return (
         <div>
@@ -169,62 +144,62 @@ export const StudentHomePage = () => {
                 </SubInfo> : <>No Subject Info Found</>}
             </StudentHomeSection>
             {displayReport !== undefined && displayReport !== null ? <SearchOutputSection>
-            <PerformanceWindow ref={performanceComponent}>
-                <h2>Your Report Card</h2>
-                <div style={{ border: "1px solid black", width: "100%" }}>
-                    <div style={{ border: "1px solid black", margin: "10px", padding: "1rem", display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
-                        <h3>Faculty reviews</h3>
-                        {displayReport.CommentInfo?.length > 0 ? <>
-                            <CommentsContainer>
-                                {displayReport.CommentInfo?.map((element, index) => {
-                                    return (
-                                        <div key={index} style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", margin: "3px 0" }}>
-                                            <CommentTeacher>
-                                                <h2>{element.tName}</h2>
-                                                <p>ID:{element.tId}</p>
-                                            </CommentTeacher>
-                                            <CommentContent>
-                                                <FaRegCommentDots />
-                                                <p>Review:&nbsp;{element.comment}</p>
-                                            </CommentContent>
-                                        </div>
-                                    )
-                                })}
-                            </CommentsContainer>
-                        </> : <>No review made by any teacher</>}
-                    </div>
-                    <StudentResultContainer>
-                        <h3 style={{ textAlign: "center" }}>Academic Performance</h3>
-                        {displayReport.MarkInfo?.length > 0 ? <>
-                            <SubInfo style={{ width: "100%" }}>
-                                <thead>
-                                    <tr>
-                                        <TableHeader>Subject Id</TableHeader>
-                                        <TableHeader>Subject Name</TableHeader>
-                                        <TableHeader>Practical Marks</TableHeader>
-                                        <TableHeader>Theory Marks</TableHeader>
-                                        <TableHeader>Grade</TableHeader>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {displayReport.MarkInfo?.map((element, index) => {
+                <PerformanceWindow ref={performanceComponent}>
+                    <h2>Your Report Card</h2>
+                    <div style={{ border: "1px solid black", width: "100%" }}>
+                        <div style={{ border: "1px solid black", margin: "10px", padding: "1rem", display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
+                            <h3>Faculty reviews</h3>
+                            {displayReport.CommentInfo?.length > 0 ? <>
+                                <CommentsContainer>
+                                    {displayReport.CommentInfo?.map((element, index) => {
                                         return (
-                                            <tr key={index}>
-                                                <TableEntry>{element.subId}</TableEntry>
-                                                <TableEntry>{element.subjectName}</TableEntry>
-                                                <TableEntry>{element.practicalMM}</TableEntry>
-                                                <TableEntry>{element.theoryMM}</TableEntry>
-                                                <TableEntry>{element.grade}</TableEntry>
-                                            </tr>
+                                            <div key={index} style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", margin: "3px 0" }}>
+                                                <CommentTeacher>
+                                                    <h2>{element.tName}</h2>
+                                                    <p>ID:{element.tId}</p>
+                                                </CommentTeacher>
+                                                <CommentContent>
+                                                    <FaRegCommentDots />
+                                                    <p>Review:&nbsp;{element.comment}</p>
+                                                </CommentContent>
+                                            </div>
                                         )
                                     })}
-                                </tbody>
-                            </SubInfo>
-                        </> : <>No entry of marks scroed in exam by any teacher</>}
-                    </StudentResultContainer>
-                </div>
-            </PerformanceWindow>
-            </SearchOutputSection>:<></>}
+                                </CommentsContainer>
+                            </> : <>No review made by any teacher</>}
+                        </div>
+                        <StudentResultContainer>
+                            <h3 style={{ textAlign: "center" }}>Academic Performance</h3>
+                            {displayReport.MarkInfo?.length > 0 ? <>
+                                <SubInfo style={{ width: "100%" }}>
+                                    <thead>
+                                        <tr>
+                                            <TableHeader>Subject Id</TableHeader>
+                                            <TableHeader>Subject Name</TableHeader>
+                                            <TableHeader>Practical Marks</TableHeader>
+                                            <TableHeader>Theory Marks</TableHeader>
+                                            <TableHeader>Grade</TableHeader>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {displayReport.MarkInfo?.map((element, index) => {
+                                            return (
+                                                <tr key={index}>
+                                                    <TableEntry>{element.subId}</TableEntry>
+                                                    <TableEntry>{element.subjectName}</TableEntry>
+                                                    <TableEntry>{element.practicalMM}</TableEntry>
+                                                    <TableEntry>{element.theoryMM}</TableEntry>
+                                                    <TableEntry>{element.grade}</TableEntry>
+                                                </tr>
+                                            )
+                                        })}
+                                    </tbody>
+                                </SubInfo>
+                            </> : <>No entry of marks scroed in exam by any teacher</>}
+                        </StudentResultContainer>
+                    </div>
+                </PerformanceWindow>
+            </SearchOutputSection> : <></>}
             <div style={{ border: "1px solid #a9a9a9ff", display: "flex", flexDirection: "row", justifyContent: "space-between", margin: "1rem auto", alignItems: "center", width: "97%" }}>
                 <p style={{ textAlign: "left", marginLeft: "3px" }}><strong><i>Result:&nbsp;</i></strong>{totalMsg}</p>
                 <DownloadBtn onClick={(e) => { DownloadHandler(e, uName, performanceComponent.current.innerHTML) }}><FaFileDownload /> &nbsp;Download</DownloadBtn>
