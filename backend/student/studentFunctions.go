@@ -146,8 +146,7 @@ func DisplayStudents(ctx *gin.Context) {
 		}
 		fmt.Println(dbstr)
 
-		// db, err := sql.Open("mysql", dsn)
-		db, err := sql.Open("mysql", "root:admin123@tcp(127.0.0.1:3306)/test?multiStatements=true")
+		db, err := sql.Open("mysql", dsn)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Cannot open DB: %v", err)})
 			return
