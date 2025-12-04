@@ -13,6 +13,8 @@ import { FloatingInput, FloatingLabel, InputWrapper } from "../../styled-compone
 import { TableHeader } from "../../styled-components/TableComponents"
 import { FetchApi } from "../../utils/FetchApi"
 import { ErrorToast, Toaster } from "../../utils/Toaster"
+import { GradeValidation, GrNoOrSubIdValidation } from "../../utils/Validations"
+import { NullStateObjGenerator, ObjValueChangeHandler } from "../../utils/StateSetter"
 
 export const TeacherInputTabContainer = styled.div`
     display: flex;
@@ -27,8 +29,8 @@ const fetchData = async (e, grade, setGrade, setDisplayData, apiUrl, methodtype,
     e.preventDefault()
     const errarr = ["invalid sub id", "invalid grade. Allowed range is 1 - 12"]
     let flagarr = [false, false]
-    if ((grade < 1 || grade > 12) && grade !== null && grade !== undefined) flagarr[1] = true
-    if ((dataObj.subId < 0 || dataObj.subId > 99999999) && dataObj.subId !== undefined && dataObj.subId !== null) flagarr[0] = true
+    if (!GradeValidation(grade)) flagarr[1] = true
+    if (!GrNoOrSubIdValidation(dataObj.subId)) flagarr[0] = true
     let errstr = ""
     let anyErr = false
     flagarr.forEach((v, i) => {
@@ -72,13 +74,17 @@ const fetchData = async (e, grade, setGrade, setDisplayData, apiUrl, methodtype,
                     break;
             }
         }
+        console.log("1");
+        
         Toaster(res,toast)
+        console.log("2");
+        
         if (res.output) {
             setDisplayData(res.output)
             return
         }
     } catch (err) {
-        ErrorToast(err.error,toast)
+        ErrorToast(err,toast)
     } finally {
         cleanup.forEach(e => e(null))
         e.target.reset();
@@ -164,12 +170,13 @@ export const SubTab = (props) => {
 
 export const SubEditTab = (props) => {
     const errorComp = useRef(null)
-    
+    const [data,setData] = useState(NullStateObjGenerator(["subid","subname","subcredit","substd"]))
     const [grade, setGrade] = useState(null)
     const [credits, setCredits] = useState(null)
     const [subId, setsubId] = useState(null)
     const [name, setName] = useState(null)
     const [displayData, setDisplayData] = useState(null)
+    
     const changeHandler = (e, type) => {
         switch (type) {
             case "subid":
@@ -199,7 +206,7 @@ export const SubEditTab = (props) => {
                             <InputContainer>
                                 <FaOrcid style={{ fontSize: "xx-large" }} />
                                 <InputWrapper>
-                                    <FloatingInput type="number" name="subid" value={subId || ''} required placeholder=" " maxLength={8} onChange={(e) => { changeHandler(e, "subid") }} />
+                                    <FloatingInput type="number" name="subid" value={data.subid || ''} required placeholder=" " maxLength={8} onChange={(e) => { ObjValueChangeHandler(e,setData) }} />
                                     <FloatingLabel>Provide subject's SubId to be updated:</FloatingLabel>
                                 </InputWrapper>
                             </InputContainer>
@@ -209,21 +216,21 @@ export const SubEditTab = (props) => {
                             <InputContainer style={{width:"35%"}}>
                                 <LuBookA style={{ fontSize: "xx-large" }} />
                                 <InputWrapper>
-                                    <FloatingInput type="text" name="subname" value={name || ''} placeholder=" " maxLength={55} onChange={(e) => { changeHandler(e, "name") }} />
+                                    <FloatingInput type="text" name="subname" value={data.subname || ''} placeholder=" " maxLength={55} onChange={(e) => { ObjValueChangeHandler(e,setData) }} />
                                     <FloatingLabel>Provide new name:</FloatingLabel>
                                 </InputWrapper>
                             </InputContainer>
                             <InputContainer style={{width:"35%"}}>
                                 <IoIosRibbon style={{ fontSize: "xx-large" }} />
                                 <InputWrapper>
-                                    <FloatingInput type="number" name="credit" value={credits || ''} placeholder=" " onChange={(e) => { changeHandler(e, "credits") }} />
+                                    <FloatingInput type="number" name="subcredit" value={data.subcredit || ''} placeholder=" " onChange={(e) => { ObjValueChangeHandler(e,setData) }} />
                                     <FloatingLabel>Provide new credits:</FloatingLabel>
                                 </InputWrapper>
                             </InputContainer>
                             <InputContainer style={{width:"35%"}}>
                                 <RiBookShelfLine style={{ fontSize: "xx-large" }} />
                                 <InputWrapper>
-                                    <FloatingInput type="number" name="std" value={grade || ''} placeholder=" " onChange={(e) => { changeHandler(e, "std") }} />
+                                    <FloatingInput type="number" name="substd" value={data.substd || ''} placeholder=" " onChange={(e) => { ObjValueChangeHandler(e,setData) }} />
                                     <FloatingLabel>Provide new standard:</FloatingLabel>
                                 </InputWrapper>
                             </InputContainer>

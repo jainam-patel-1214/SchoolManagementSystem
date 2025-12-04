@@ -34,7 +34,7 @@ export const SubjectLImit = (props) => {
             const res = await FetchApi(`http://localhost:8090/${props.roleOfPerson}/setSubLimit`, 'POST', temp)
             Toaster(res,toast)
         } catch (error) {
-            ErrorToast(error.error,toast)
+            ErrorToast(error,toast)
         } finally {
             emptystates()
             e.target.reset()

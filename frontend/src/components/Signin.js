@@ -10,7 +10,10 @@ export const SignIn = () => {
     const navigate = useNavigate()
     useEffect(() => {
         const x = getCookie("role")
-        SuccessToast(`You would be soon redirected to ${x}'s home page`,toast)
+        if (x!==undefined && x!== null&&x!=="") {
+            SuccessToast(`You would be soon redirected to ${x}'s home page`,toast)
+        }
+        
         if (x === "student") {
             setTimeout(() => {
                 navigate("/app/student")

@@ -1,3 +1,5 @@
+import { toast } from "react-toastify";
+
 export const FetchApi = async (url, methodtype, bodyObj) => {
     const fetchParams = {
         method: methodtype,
@@ -10,10 +12,12 @@ export const FetchApi = async (url, methodtype, bodyObj) => {
     }
     const resp = await fetch(url, fetchParams);
     const data = await resp.json();
-    console.log(data);
+    // console.log(data);
 
     if (!resp.ok) {
-        throw data.error;
+        // console.log(new Error(data.error));
+        
+        throw data.error
     }
 
     return data;

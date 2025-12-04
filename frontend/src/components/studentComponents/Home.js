@@ -94,7 +94,7 @@ export const StudentHomePage = () => {
                 setTotalMsg(res)
             } catch (err) {
                 console.log({ here : "catch"})
-                ErrorToast(err.error, toast)
+                ErrorToast(err, toast)
             }
         };
         fetchReport()

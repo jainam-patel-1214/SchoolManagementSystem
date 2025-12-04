@@ -14,6 +14,7 @@ import { MdWindow } from "react-icons/md"
 import { TableHeader } from "../../styled-components/TableComponents"
 import { ErrorToast, Toaster } from "../../utils/Toaster"
 import { FetchApi } from "../../utils/FetchApi"
+import { GradeValidation, GrNoOrSubIdValidation, PasswordValidation, StringValidator } from "../../utils/Validations"
 
 export const TeacherInputTabContainer = styled.div`
     display: flex;
@@ -28,11 +29,11 @@ const fetchData = async (e, tid, setTid, setDisplayData, apiUrl, methodtype, dat
     const errarr = ["invalid teacher id", "password must be 8 digits", "name shall only have alphabets", "invalid subject id", "invalid grade. Allowed range is 1 - 12", "invalid section"]
     let flagarr = [false, false, false, false, false]
     if ((tid?.length < 1 || tid?.length > 8) && tid !== null && tid !== undefined) flagarr[0] = true
-    if ((dataObj.subId < 0 || dataObj.subId > 99999999) && dataObj.subId !== undefined && dataObj.subId !== null) flagarr[3] = true
-    if ((dataObj.tPwd?.length !== 8) && dataObj.tPwd !== undefined && dataObj.tPwd !== null) flagarr[1] = true
-    if (!(regex.test(dataObj.tName)) && dataObj.tName !== undefined && dataObj.tName !== null) flagarr[2] = true
-    if ((dataObj.stdAllocated < 1 || dataObj.stdAllocated > 12) && dataObj.stdAllocated !== undefined && dataObj.stdAllocated !== null) flagarr[4] = true
-    if (!(regex.test(dataObj.sectionAllocated)) && dataObj.sectionAllocated !== undefined && dataObj.sectionAllocated !== null) flagarr[5] = true
+    if (!(GrNoOrSubIdValidation(dataObj?.subId))) flagarr[3] = true
+    if (!PasswordValidation(dataObj?.tPwd)) flagarr[1] = true
+    if (!StringValidator(dataObj?.tName)) flagarr[2] = true
+    if (!GradeValidation(dataObj?.stdAllocated)) flagarr[4] = true
+    if (!StringValidator(dataObj?.sectionAllocated)) flagarr[5] = true
     let errstr = ""
     let anyErr = false
     flagarr.forEach((v, i) => {
@@ -85,12 +86,8 @@ const fetchData = async (e, tid, setTid, setDisplayData, apiUrl, methodtype, dat
             setDisplayData(res.output)
             return
         }
-        if (res.error) {
-            ErrorToast(res.error,toast)
-            return
-        }
     } catch (err) {
-        ErrorToast(err.error,toast)
+        ErrorToast(err,toast)
     } finally {
         cleanup.forEach(e => e(null))
         e.target.reset();

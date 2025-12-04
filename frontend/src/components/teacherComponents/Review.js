@@ -8,6 +8,7 @@ import { MdRateReview } from "react-icons/md"
 import { FaCircleUser } from "react-icons/fa6"
 import { FetchApi } from "../../utils/FetchApi"
 import { ErrorToast, Toaster } from "../../utils/Toaster"
+import { GrNoOrSubIdValidation } from "../../utils/Validations"
 
 export const ReviewTab = (props) => {
     const errorComp = useRef(null)
@@ -32,7 +33,7 @@ export const ReviewTab = (props) => {
         let flagarr = [false, false]
         let errarr = ["Please provide a comment to add, ", "Invalid GrNO, "]
         if (comment.length <= 0) flagarr[0] = true
-        if (grNO <= 0 || grNO > 99999999) flagarr[1] = true
+        if (!GrNoOrSubIdValidation(grNO)) flagarr[1] = true
         let errstr = ""
         flagarr.forEach((v, i) => {
             if (v === true) {
@@ -52,7 +53,7 @@ export const ReviewTab = (props) => {
             const res = await FetchApi(apiUrl,"POST",{ "grNo": grNO, "comment": comment })
             Toaster(res,toast)
         } catch (err) {
-            ErrorToast(err.error,toast)
+            ErrorToast(err,toast)
         } finally {
             setComment(null)
             setGrNo(null)

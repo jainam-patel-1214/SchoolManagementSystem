@@ -11,6 +11,7 @@ import { PiLineSegmentsBold } from "react-icons/pi"
 import { TableHeader } from "../../styled-components/TableComponents"
 import { FetchApi } from "../../utils/FetchApi"
 import { ErrorToast, Toaster } from "../../utils/Toaster"
+import { GradeValidation, MarkValidation, StringValidator } from "../../utils/Validations"
 
 export const SearchBoxSection = styled.div`
     display: flex;
@@ -99,11 +100,11 @@ export const SchoolResult = (props) => {
         const err = ['Max mark not allowed more than 100 or less than 0\n', 'Min mark not allowed less than 0 or greater than 100 \n', 'Grade/Std not allowed shall be between 1 and 12 inclusive \n', 'Min mark shall be less than max mark \n', 'Invalid section']
         let arr = [false, false, false, false, false]
 
-        if (maxMark != null && (maxMark > 100 || maxMark < 0)) arr[0] = true
-        if (minMark != null && (minMark < 0 || minMark > 100)) arr[1] = true
-        if (grade != null && (grade < 1 || grade > 12)) arr[2] = true
+        if ( !MarkValidation(maxMark)) arr[0] = true
+        if (!MarkValidation(minMark)) arr[1] = true
+        if (!GradeValidation(grade)) arr[2] = true
         if (minMark != null && maxMark != null && maxMark <= minMark) arr[3] = true
-        if (!(regex.test(section)) && section !== undefined && section !== null && section != '') arr[4] = true
+        if (!StringValidator(section)) arr[4] = true
 
         let ErrStr = ""
         let errExist = false
@@ -142,7 +143,7 @@ export const SchoolResult = (props) => {
             }
         } catch (err) {
             console.log(err);
-            ErrorToast(err.error,toast)
+            ErrorToast(err,toast)
         } finally {
             cleanup()
             console.log(e);

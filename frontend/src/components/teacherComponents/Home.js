@@ -21,7 +21,7 @@ export const TeacherHome = (props) => {
             setDisplayData(dataRes.output)
             setDisplayReport(reportRes.output)
         } catch (err) {
-            ErrorToast(err.error, toast)
+            ErrorToast(err, toast)
         }
     }
 

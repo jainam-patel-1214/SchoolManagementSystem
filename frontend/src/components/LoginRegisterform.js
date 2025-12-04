@@ -7,6 +7,8 @@ import { SignInBtn } from "../styled-components/LoginSigninButton";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { ErrorToast, SuccessToast } from "../utils/Toaster";
+import { CookieSetter } from "../utils/setCookie";
+import { NullStateObjGenerator, ObjValueChangeHandler, ResetState } from "../utils/StateSetter";
 const SelectInRegister = styled.select`
   border: 1px solid #b9b9b9;
   padding: 5px;
@@ -14,11 +16,8 @@ const SelectInRegister = styled.select`
 
 export const LoginRegisterForm = () => {
     const navigate = useNavigate()
-    const [userId, setUserID] = useState("");
     const [validInp, setValidInp] = useState(false)
-    const [pwd, setPwd] = useState("");
-    const [name, setname] = useState("");
-    const [role, setRole] = useState("");
+    const [loginRegisterData, setLoginRegisterData] = useState(NullStateObjGenerator(["userId","password","userName","userRole"]))
     const [showLogin, setShowLogin] = useState(true);
     const [showRegister, setShowRegister] = useState(false);
 
@@ -30,102 +29,77 @@ export const LoginRegisterForm = () => {
         setShowLogin(true);
         setShowRegister(false);
     };
-    const valueChangeHandler = (e, state) => {
-        e.preventDefault();
-        if (state === "pwd") {
-            setPwd(e.target.value);
-        }
-        if (state === "id") {
-            setUserID(e.target.value);
-        }
-        if (state === "role") {
-            setRole(e.target.value);
-        }
-        if (state === "name") {
-            setname(e.target.value);
-        }
-    };
+    
 
-    const handleSignUp = async(e) => {
+    const handleSignUp = async (e) => {
         e.preventDefault();
-        console.log(name, pwd, role);
-        if (role === "") {
+        if (loginRegisterData?.userRole === "") {
             alert("pick a role for yourself to register with");
             return;
         }
-        if (name === "" || pwd === "") {
+        if (loginRegisterData?.userName === "" || loginRegisterData?.password === "") {
             alert("enter userid and password properly");
             return;
         }
         try {
             await axios
-            .post(
-                "http://localhost:8090/register",
-                { yourName: name, password: pwd, roleReq: role },
-                { headers: { "Content-Type": "application/json" } }
-            )
-            .then((res) => {
-                SuccessToast(res.data.output + ". Wait till any admin accepts it.",toast)
-            })
-            .catch((err) => {
-                ErrorToast(err.response.data.error||err,toast)
-            });
+                .post(
+                    "http://localhost:8090/register",
+                    { yourName: loginRegisterData?.userName, password: loginRegisterData?.password, roleReq: loginRegisterData?.userRole },
+                    { headers: { "Content-Type": "application/json" } }
+                )
+                .then((res) => {
+                    SuccessToast(res.data.output + ". Wait till any admin accepts it.", toast)
+                })
+                .catch((err) => {
+                    ErrorToast(err.response.data.error || err, toast)
+                });
         } catch (error) {
             console.log(error);
-        }finally{
-            setPwd("")
-            setRole("")
-            setname("")
+        } finally {
+            ResetState(loginRegisterData,setLoginRegisterData)
             e.target.reset()
-            setValidInp(false)}
+            setValidInp(false)
+        }
     };
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        console.log(userId, pwd);
-        if (userId === "" || pwd === "") {
+        if (loginRegisterData.userId === "" || loginRegisterData.password === "") {
             alert("enter userid and password properly");
             return;
         }
         try {
             await axios
-            .post(
-                "http://localhost:8090/login",
-                { userId: userId, password: pwd },
-                { headers: { "Content-Type": "application/json" } }
-            )
-            .then((res) => {
-                SuccessToast('Login Successful!',toast)
-                const now = new Date();
-                let timenow = now.getTime();
-                timenow += 86340000;
-                now.setTime(timenow);
-                document.cookie = "userid=" + userId + "; expires=" + now.toUTCString()
-                document.cookie = "username=" + res.data.username + "; expires=" + now.toUTCString();
-                document.cookie = "token=" + res.data.output + "; expires=" + now.toUTCString();
-                document.cookie = "role=" + res.data.role + "; expires=" + now.toUTCString()
-                if (res.data.role === "student") {
-                    navigate("/app/student")
-                }
-                if (res.data.role === "teacher") {
-                    navigate("/app/teacher")
-                }
-                if (res.data.role === "admin") {
-                    navigate("/app/admin")
-                }
-            })
-            .catch((err) => {
-                ErrorToast(err.response.data.error||err,toast)
-            });
+                .post(
+                    "http://localhost:8090/login",
+                    { userId: loginRegisterData.userId, password: loginRegisterData.password },
+                    { headers: { "Content-Type": "application/json" } }
+                )
+                .then((res) => {
+                    SuccessToast('Login Successful!', toast)
+                    CookieSetter(loginRegisterData.userId, res.data.username, res.data.output, res.data.role)
+                    if (res.data.role === "student") {
+                        navigate("/app/student")
+                    }
+                    if (res.data.role === "teacher") {
+                        navigate("/app/teacher")
+                    }
+                    if (res.data.role === "admin") {
+                        navigate("/app/admin")
+                    }
+                })
+                .catch((err) => {
+                    ErrorToast(err.response.data.error || err, toast)
+                });
         } catch (error) {
             console.log(error);
-        }finally{
+        } finally {
             e.target.reset()
-            setPwd("");
-            setUserID("");
+            ResetState(loginRegisterData,setLoginRegisterData)
             setValidInp(false)
         }
-        
+
     };
 
     useEffect(() => {
@@ -142,16 +116,16 @@ export const LoginRegisterForm = () => {
         }
     }, [validInp])
     useEffect(() => {
-        if ((showLogin && userId.length > 0 && userId.length <= 8 && pwd.length === 8) || (showRegister && name.length >= 2 && pwd.length === 8 && role != "")) {
+        if ((showLogin && loginRegisterData.userId?.length > 0 && loginRegisterData?.userId?.length <= 8 && loginRegisterData?.password?.length === 8) || (showRegister && loginRegisterData?.userName?.length >= 2 && loginRegisterData?.password?.length === 8 && loginRegisterData?.userRole?.toString() !== "")) {
             setValidInp(true)
         } else setValidInp(false)
-    }, [name, userId, pwd, role])
+    }, [loginRegisterData])
 
 
     return (
         <div id="signInForm">
             <ToastContainer />
-            {showLogin ? 
+            {showLogin ?
                 <Fragment>
                     <form id="loginform" onSubmit={handleLogin}>
                         <h2>Welcome to Scholar</h2>
@@ -164,7 +138,7 @@ export const LoginRegisterForm = () => {
                             id="userid"
                             placeholder="user id here"
                             onChange={(e) => {
-                                valueChangeHandler(e, "id");
+                                ObjValueChangeHandler(e,setLoginRegisterData)
                             }}
                         />
                         <label htmlFor="password">
@@ -176,7 +150,7 @@ export const LoginRegisterForm = () => {
                             name="password"
                             placeholder="password here"
                             onChange={(e) => {
-                                valueChangeHandler(e, "pwd");
+                                ObjValueChangeHandler(e,setLoginRegisterData)
                             }}
                         />
                         <SignInBtn className="applyNoAfter" type="submit">Login</SignInBtn>
@@ -184,7 +158,7 @@ export const LoginRegisterForm = () => {
                     <p>Or sign up using</p>
                     <h3 onClick={registerChangeHandler}>Sign Up</h3>
                 </Fragment>
-             : 
+                :
                 <></>
             }
             {showRegister ? (
@@ -200,7 +174,7 @@ export const LoginRegisterForm = () => {
                             id="userid"
                             placeholder="provide your name"
                             onChange={(e) => {
-                                valueChangeHandler(e, "name");
+                                ObjValueChangeHandler(e,setLoginRegisterData)
                             }}
                         />
                         <label htmlFor="password">
@@ -212,13 +186,14 @@ export const LoginRegisterForm = () => {
                             name="password"
                             placeholder="provide a password"
                             onChange={(e) => {
-                                valueChangeHandler(e, "pwd");
+                                ObjValueChangeHandler(e,setLoginRegisterData)
                             }}
                         />
                         <SelectInRegister
                             onChange={(e) => {
-                                valueChangeHandler(e, "role");
+                                ObjValueChangeHandler(e,setLoginRegisterData)
                             }}
+                            name="userRole"
                         >
                             <option value="">Select a role you wish to register</option>
                             <option value="student">Student</option>

@@ -14,6 +14,7 @@ import { FaFileDownload } from "react-icons/fa"
 import { jsPDF } from "jspdf";
 import { FetchApi } from "../../utils/FetchApi"
 import { ErrorToast, Toaster } from "../../utils/Toaster"
+import { GradeValidation, GrNoOrSubIdValidation, PasswordValidation, StringValidator } from "../../utils/Validations"
 
 
 export const TeacherInputTabContainer = styled.div`
@@ -95,16 +96,13 @@ export const DownloadHandler = async (e, studentName, content) => {
 
 const fetchData = async (e, grNo, setter, setDisplayData, apiUrl, methodtype, dataObj, todo, errorComp, cleanup) => {
     e.preventDefault()
-    console.log("main data", dataObj, "----", grNo);
-
-    const regex = /^[A-Za-z ]*$/;
     const errarr = ["invalid gr no", "passwords are needed to be 8 digits", "standard shall have range of 1 - 12", "invalid name", "invalid section"]
     let flagarr = [false, false, false, false, false]
-    if (dataObj?.studPwd !== undefined && dataObj?.studPwd !== null && (dataObj?.studPwd.toString().length !== 8)) flagarr[1] = true
-    if ((grNo < 0 || grNo > 99999999) && grNo !== undefined && grNo !== null) flagarr[0] = true
-    if ((dataObj?.std < 1 || dataObj?.std > 12) && dataObj?.std !== undefined && dataObj?.std !== null) flagarr[2] = true
-    if (!(regex.test(dataObj?.studName)) && dataObj?.studName !== undefined && dataObj?.studName !== null && dataObj?.studName !== "") flagarr[3] = true
-    if (!(regex.test(dataObj?.section)) && dataObj?.section !== undefined && dataObj?.section !== null) flagarr[4] = true
+    if (!PasswordValidation(dataObj?.studPwd)) flagarr[1] = true
+    if (!GrNoOrSubIdValidation(grNo)) flagarr[0] = true
+    if (!GradeValidation(dataObj?.std)) flagarr[2] = true
+    if (!StringValidator(dataObj?.studName)) flagarr[3] = true
+    if (!StringValidator(dataObj?.section)) flagarr[4] = true
     let errstr = ""
     let anyErr = false
     flagarr.forEach((v, i) => {
@@ -156,7 +154,7 @@ const fetchData = async (e, grNo, setter, setDisplayData, apiUrl, methodtype, da
             return
         }
     } catch (err) {
-        ErrorToast(err.error,toast)
+        ErrorToast(err,toast)
     } finally {
         cleanup.forEach(e => e(null))
         e.target.reset();

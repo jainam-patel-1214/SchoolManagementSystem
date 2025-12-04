@@ -9,6 +9,7 @@ import { FloatingInput, FloatingLabel, InputWrapper } from "../../styled-compone
 import { PiExamFill, PiExamLight } from "react-icons/pi"
 import { ErrorToast, Toaster } from "../../utils/Toaster"
 import { FetchApi } from "../../utils/FetchApi"
+import { GrNoOrSubIdValidation, PracticalMarksValidation, TheoryMarksValidation } from "../../utils/Validations"
 
 export const TeacherInputTabContainer = styled.div`
     display: flex;
@@ -23,10 +24,10 @@ const fetchData = async (e, grNo, setter, setDisplayData, apiUrl, methodtype, da
     e.preventDefault()
     const errarr = ["invalid gr no", "invalid sub id", "theory marks range shall be from 0 to 80", "practical marks range shall be from 0 to 20"]
     let flagarr = [false, false, false, false]
-    if ((dataObj.theoryMarks < 0 || dataObj.theoryMarks > 80) && dataObj.theoryMarks !== undefined && dataObj.theoryMarks !== null) flagarr[2] = true
-    if ((dataObj.practicalMarks < 0 || dataObj.practicalMarks > 20) && dataObj.practicalMarks !== undefined && dataObj.practicalMarks !== null) flagarr[3] = true
-    if (grNo < 0 || grNo > 99999999 && grNo !== undefined && grNo !== null) flagarr[0] = true
-    if ((dataObj.subId < 0 || dataObj.subId > 99999999) && dataObj.subId !== undefined && dataObj.subId !== null) flagarr[1] = true
+    if ( !TheoryMarksValidation(dataObj?.theoryMarks)) flagarr[2] = true
+    if ( !(PracticalMarksValidation(dataObj?.practicalMarks))) flagarr[3] = true
+    if (!GrNoOrSubIdValidation(grNo)) flagarr[0] = true
+    if ( !GrNoOrSubIdValidation(dataObj?.subId)) flagarr[1] = true
 
     let errstr = ""
     let anyErr = false
@@ -74,7 +75,7 @@ const fetchData = async (e, grNo, setter, setDisplayData, apiUrl, methodtype, da
             return
         }
     } catch (err) {
-        ErrorToast(err.error,toast)
+        ErrorToast(err,toast)
     } finally {
         cleanup.forEach(e => { e(null) })
         e.target.reset();
