@@ -1,9 +1,16 @@
 export const ObjValueChangeHandler = (e,setter,type) => {
-        const { name, value } = e.target
+    const { name, value } = e.target
+    if (type==='string') {
         setter(prevdata => ({
             ...prevdata,
             [name]: value
         }))
+    } else {
+        setter(prevdata => ({
+            ...prevdata,
+            [name]: Number(value)
+        }))    
+    }
     }
 export const ResetState = (obj,setter) => {
         const nullifiedUserData = Object.keys(obj).reduce((acc, key) => {
