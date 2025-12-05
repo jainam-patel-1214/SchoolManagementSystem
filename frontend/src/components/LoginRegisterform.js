@@ -116,6 +116,8 @@ export const LoginRegisterForm = () => {
         }
     }, [validInp])
     useEffect(() => {
+        console.log("hi");
+        
         if ((showLogin && loginRegisterData.userId?.length > 0 && loginRegisterData?.userId?.length <= 8 && loginRegisterData?.password?.length === 8) || (showRegister && loginRegisterData?.userName?.length >= 2 && loginRegisterData?.password?.length === 8 && loginRegisterData?.userRole?.toString() !== "")) {
             setValidInp(true)
         } else setValidInp(false)
@@ -138,7 +140,7 @@ export const LoginRegisterForm = () => {
                             id="userid"
                             placeholder="user id here"
                             onChange={(e) => {
-                                ObjValueChangeHandler(e,setLoginRegisterData)
+                                ObjValueChangeHandler(e,setLoginRegisterData,'string')
                             }}
                         />
                         <label htmlFor="password">
@@ -150,7 +152,7 @@ export const LoginRegisterForm = () => {
                             name="password"
                             placeholder="password here"
                             onChange={(e) => {
-                                ObjValueChangeHandler(e,setLoginRegisterData)
+                                ObjValueChangeHandler(e,setLoginRegisterData,'string')
                             }}
                         />
                         <SignInBtn className="applyNoAfter" type="submit">Login</SignInBtn>

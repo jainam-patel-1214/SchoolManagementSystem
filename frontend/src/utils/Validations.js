@@ -32,3 +32,8 @@ export const PracticalMarksValidation = (g)=>{
     if ((g < 0 || g > 20) && g !== undefined && g !== null) return false
     else return true
 }
+
+export const TeacherAdminIdValid = (h)=>{
+    if ((h?.length < 1 || h?.length > 8) && h !== null && h !== undefined) return false
+    else return true
+}

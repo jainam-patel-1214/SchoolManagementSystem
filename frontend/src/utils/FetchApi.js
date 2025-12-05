@@ -1,5 +1,3 @@
-import { toast } from "react-toastify";
-
 export const FetchApi = async (url, methodtype, bodyObj) => {
     const fetchParams = {
         method: methodtype,

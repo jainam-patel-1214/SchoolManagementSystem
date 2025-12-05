@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { toast, ToastContainer } from "react-toastify";
-import { CommentContent, CommentsContainer, CommentTeacher, DownloadHandler, StudentResultContainer } from "../teacherComponents/StudentsTab";
+import { CommentContent, CommentsContainer, CommentTeacher, DownloadHandler } from "../teacherComponents/StudentsTab";
 import { FaRegCommentDots } from "react-icons/fa6";
-import { TableHeader } from "../../styled-components/TableComponents";
 import getCookie from "../../utils/getCookie";
 import { GradeCalculator } from "../../utils/gradeCalculator";
 import { FaFileDownload } from "react-icons/fa";
@@ -11,6 +10,8 @@ import { DownloadBtn } from "../../styled-components/styledButton";
 import { SearchOutputSection } from "./SchoolRes";
 import { FetchApi } from "../../utils/FetchApi";
 import { ErrorToast } from "../../utils/Toaster";
+import { ReactTableComponent } from "../helperComponents/ResultTable";
+import { LabelValuePair } from "../helperComponents/LabelValuePair";
 
 export const StudentHomeSection = styled.div`
     display: flex;
@@ -69,7 +70,42 @@ export const StudentHomePage = () => {
     const [uName, setuName] = useState('')
     const performanceComponent = useRef(null)
     const [totalMsg, setTotalMsg] = useState("");
-
+    const marksColumnDef = [
+        {
+            header: 'Subject Id',
+            accessorKey: 'subId',
+        },
+        {
+            header: 'Subject Name',
+            accessorKey: 'subjectName',
+        },
+        {
+            header: 'Practical Marks',
+            accessorKey: 'practicalMM',
+        },
+        {
+            header: 'Theory Marks',
+            accessorKey: 'theoryMM',
+        },
+        {
+            header: 'Grade',
+            accessorKey: 'grade',
+        },
+    ]
+    const subjectColumnDef = [
+        {
+            header: 'Subject Id',
+            accessorKey: 'Subid',
+        },
+        {
+            header: 'Name',
+            accessorKey: 'Subname',
+        },
+        {
+            header: 'Credits',
+            accessorKey: 'Credit',
+        },
+    ]
     useEffect(() => {
         const name = getCookie("username")
         setuName(name)
@@ -78,7 +114,7 @@ export const StudentHomePage = () => {
             try {
                 const name = getCookie("username")
                 console.log(name);
-                
+
                 setuName(name)
                 const [report, data] = await Promise.all([
                     FetchApi(`${baseUrl}/report`, "GET", {}),
@@ -86,6 +122,8 @@ export const StudentHomePage = () => {
                 ]);
                 setDisplayReport(report.output)
                 setDisplayData(data.output)
+                console.log(data.output, report.output);
+
                 let sum = 0
                 report.output?.MarkInfo?.forEach(e => {
                     sum += Number(e.practicalMM) + Number(e.theoryMM)
@@ -93,7 +131,7 @@ export const StudentHomePage = () => {
                 const res = GradeCalculator((sum * 100) / (100 * displayReport?.MarkInfo?.length))
                 setTotalMsg(res)
             } catch (err) {
-                console.log({ here : "catch"})
+                console.log({ here: "catch" })
                 ErrorToast(err, toast)
             }
         };
@@ -105,43 +143,12 @@ export const StudentHomePage = () => {
             <StudentHomeSection>
                 < ToastContainer />
                 <StudentInfo>
-                    <LabelValue>
-                        <Label><strong>Name:&nbsp;</strong></Label>
-                        <Value>{uName}</Value>
-                    </LabelValue>
-                    <LabelValue>
-                        <Label><strong>Standard:&nbsp;</strong></Label>
-                        <Value>{displayData.Std}</Value>
-                    </LabelValue>
-                    <LabelValue>
-                        <Label><strong>Password:&nbsp;</strong></Label>
-                        <Value>{displayData.Password}</Value>
-                    </LabelValue>
-                    <LabelValue>
-                        <Label><strong>Section:&nbsp;</strong></Label>
-                        <Value>{displayData.Section}</Value>
-                    </LabelValue>
+                    <LabelValuePair label={"Name:"} value={uName}></LabelValuePair>
+                    <LabelValuePair label={"Standard:"} value={displayData?.Std}></LabelValuePair>
+                    <LabelValuePair label={"Password:"} value={displayData?.Password}></LabelValuePair>
+                    <LabelValuePair label={"Section:"} value={displayData?.Section}></LabelValuePair>
                 </StudentInfo>
-                {displayData.SubList?.length > 0 ? <SubInfo>
-                    <thead>
-                        <tr>
-                            <th>Subject Id</th>
-                            <th>Name</th>
-                            <th>Credits</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {displayData.SubList?.map((element, index) => {
-                            return (
-                                <tr key={index}>
-                                    <TableEntry>{element.Subid}</TableEntry>
-                                    <TableEntry>{element.Subname}</TableEntry>
-                                    <TableEntry>{element.Credit}</TableEntry>
-                                </tr>
-                            )
-                        })}
-                    </tbody>
-                </SubInfo> : <>No Subject Info Found</>}
+                {(typeof (displayData?.SubList) !== 'string' && displayData.SubList?.length > 0 && displayData !== null && displayData !== undefined) ? <ReactTableComponent data={displayData?.SubList} columnDefinition={subjectColumnDef} heading={"Your Modules"}></ReactTableComponent> : <>No Subject Info Found</>}
             </StudentHomeSection>
             {displayReport !== undefined && displayReport !== null ? <SearchOutputSection>
                 <PerformanceWindow ref={performanceComponent}>
@@ -155,7 +162,7 @@ export const StudentHomePage = () => {
                                         return (
                                             <div key={index} style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", margin: "3px 0" }}>
                                                 <CommentTeacher>
-                                                    <h2>{element.tName}</h2>
+                                                    <h3>{element.tName}</h3>
                                                     <p>ID:{element.tId}</p>
                                                 </CommentTeacher>
                                                 <CommentContent>
@@ -168,35 +175,7 @@ export const StudentHomePage = () => {
                                 </CommentsContainer>
                             </> : <>No review made by any teacher</>}
                         </div>
-                        <StudentResultContainer>
-                            <h3 style={{ textAlign: "center" }}>Academic Performance</h3>
-                            {displayReport.MarkInfo?.length > 0 ? <>
-                                <SubInfo style={{ width: "100%" }}>
-                                    <thead>
-                                        <tr>
-                                            <TableHeader>Subject Id</TableHeader>
-                                            <TableHeader>Subject Name</TableHeader>
-                                            <TableHeader>Practical Marks</TableHeader>
-                                            <TableHeader>Theory Marks</TableHeader>
-                                            <TableHeader>Grade</TableHeader>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {displayReport.MarkInfo?.map((element, index) => {
-                                            return (
-                                                <tr key={index}>
-                                                    <TableEntry>{element.subId}</TableEntry>
-                                                    <TableEntry>{element.subjectName}</TableEntry>
-                                                    <TableEntry>{element.practicalMM}</TableEntry>
-                                                    <TableEntry>{element.theoryMM}</TableEntry>
-                                                    <TableEntry>{element.grade}</TableEntry>
-                                                </tr>
-                                            )
-                                        })}
-                                    </tbody>
-                                </SubInfo>
-                            </> : <>No entry of marks scroed in exam by any teacher</>}
-                        </StudentResultContainer>
+                        {(typeof (displayReport?.MarkInfo) !== 'string' && displayReport.MarkInfo?.length > 0 && displayReport !== null && displayReport !== undefined) ? <ReactTableComponent data={displayReport?.MarkInfo} columnDefinition={marksColumnDef} heading={"Academic Performance"}></ReactTableComponent> : <>No entry of marks scroed in exam by any teacher</>}
                     </div>
                 </PerformanceWindow>
             </SearchOutputSection> : <></>}

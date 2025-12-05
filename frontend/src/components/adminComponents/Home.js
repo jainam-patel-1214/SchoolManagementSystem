@@ -7,14 +7,16 @@ import { StyledNavbar } from "../../styled-components/styledNav"
 import imgpfp from '../../assets/pfp.webp'
 import { ErrorToast, SuccessToast, Toaster } from "../../utils/Toaster"
 import { FetchApi } from "../../utils/FetchApi"
+import { roleExtractor } from "../../utils/RoleExtractor"
 
 export const AdminHome = (props) => {
     const [displayData, setDisplayData] = useState({})
 
     useEffect(() => {
+        const role = roleExtractor(window.location.pathname)
         const fetchData = async () => {
             try {
-                const res = await FetchApi(`http://localhost:8090/${props.roleOfPerson}/data`,'GET',{})
+                const res = await FetchApi(`http://localhost:8090/${role}/data`,'GET',{})
                 setDisplayData(res.output);
             } catch (err) {
                 ErrorToast(err,toast)
@@ -146,6 +148,8 @@ export const AdminPendingReqTab = (props) => {
     const ErrorComponent = useRef(null)
     const SubmitButtonComponent = useRef(null)
 
+    const [data,setData] = useState()
+
     const [id, setId] = useState(null)
     const [name, setName] = useState(null)
     const [pwd, setPwd] = useState(null)
@@ -154,8 +158,8 @@ export const AdminPendingReqTab = (props) => {
     const [subid, setSubid] = useState(null)
     const [std, setStd] = useState(null)
     const [section, setSection] = useState(null)
-    const [isStudent, setstud] = useState(false)
     const [validateErr, setValidateErr] = useState(false)
+    const [isStudent, setstud] = useState(false)
     const [isTeacher, setteach] = useState(false)
     const [displayData, setDisplayData] = useState([])
 

@@ -9,38 +9,35 @@ import { FaCircleUser } from "react-icons/fa6"
 import { FetchApi } from "../../utils/FetchApi"
 import { ErrorToast, Toaster } from "../../utils/Toaster"
 import { GrNoOrSubIdValidation } from "../../utils/Validations"
+import { roleExtractor } from "../../utils/RoleExtractor"
 
 export const ReviewTab = (props) => {
     const errorComp = useRef(null)
-    
-    const [grNO, setGrNo] = useState(0)
-    const [comment, setComment] = useState(null)
-
-    const changeHandler = (e, type) => {
-        switch (type) {
-            case "grno":
-                setGrNo(Number(e.target.value))
-                break;
-            case "comment":
-                setComment(e.target.value)
-                break;
-            default:
-                break;
-        }
+    const userrole = roleExtractor(window.location.pathname)
+    const [data, setData] = useState({
+        grNo: null,
+        comment: null,
+    })
+    const dataChangeHandler = (key, value) => {
+        setData(prevdata => ({
+            ...prevdata,
+            [key]: value
+        }))
     }
-    const fetchData = async (e) => {
+    const sumbitHandler = async (e) => {
         e.preventDefault()
-        let flagarr = [false, false]
-        let errarr = ["Please provide a comment to add, ", "Invalid GrNO, "]
-        if (comment.length <= 0) flagarr[0] = true
-        if (!GrNoOrSubIdValidation(grNO)) flagarr[1] = true
+        const errobj = { "grno": { "condition": false, "message": "invalid gr no" }, "comment": { "condition": false, "message": "Please provide a comment to add" }}
+        if (data?.comment?.length <= 0) errobj.comment.condition = true
+        if (!GrNoOrSubIdValidation(data?.grNo)) errobj.grno.condition = true
         let errstr = ""
-        flagarr.forEach((v, i) => {
-            if (v === true) {
-                errstr += errarr[i]
+        let anyErr = false
+        for (const val of Object.values(errobj)) {
+            if (val?.condition) {
+                errstr += `\n${val?.message}`;
+                anyErr = true
             }
-        })
-        if ((flagarr[0] || flagarr[1])) {
+        }
+        if (anyErr) {
             errorComp.current.innerText = errstr
             errorComp.current.style.display = "block"
             return
@@ -49,14 +46,16 @@ export const ReviewTab = (props) => {
             errorComp.current.style.display = "none"
         }
         try {
-            const apiUrl = `http://localhost:8090/${props.roleOfPerson}/addReview`;
-            const res = await FetchApi(apiUrl,"POST",{ "grNo": grNO, "comment": comment })
+            const apiUrl = `http://localhost:8090/${userrole}/addReview`;
+            const res = await FetchApi(apiUrl,"POST",{ "grNo": data?.grNo, "comment": data?.comment })
             Toaster(res,toast)
         } catch (err) {
             ErrorToast(err,toast)
         } finally {
-            setComment(null)
-            setGrNo(null)
+            setData({
+                grNo:null,
+                comment:null
+            })
             e.target.reset();
         }
     }
@@ -65,19 +64,19 @@ export const ReviewTab = (props) => {
         <SearchBoxSection>
             < ToastContainer />
             <SearchParamSection>
-                <SearchForm onSubmit={(e) => { fetchData(e) }}>
+                <SearchForm onSubmit={(e) => { sumbitHandler(e) }}>
                     <TeacherInputTabContainer>
                         <InputContainer style={{ width: "50%" }}>
                             <FaCircleUser style={{ fontSize: "xx-large" }} />
                             <InputWrapper>
-                                <FloatingInput type="number" value={grNO || ""} required name="grno" placeholder=" " onChange={(e) => { changeHandler(e, "grno") }} />
+                                <FloatingInput type="number" value={data.grNo || ""} required name="grno" placeholder=" " onChange={(e) => { dataChangeHandler("grNo",Number(e.target.value)) }} />
                                 <FloatingLabel>Provide Gr NO. of the student:</FloatingLabel>
                             </InputWrapper>
                         </InputContainer>
                         <InputContainer style={{ width: "50%" }}>
                             <MdRateReview style={{ fontSize: "xx-large" }} />
                             <InputWrapper>
-                                <FloatingInput type="text" required name="review" value={comment || ""} placeholder=" " onChange={(e) => { changeHandler(e, "comment") }} maxLength={254} />
+                                <FloatingInput type="text" required name="review" value={data.comment || ""} placeholder=" " onChange={(e) => { dataChangeHandler("comment",e.target.value) }} maxLength={254} />
                                 <FloatingLabel>Enter a review:</FloatingLabel>
                             </InputWrapper>
                         </InputContainer>

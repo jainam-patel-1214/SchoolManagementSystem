@@ -9,8 +9,9 @@ import { FloatingInput, FloatingLabel, InputWrapper } from "../../styled-compone
 import { GiBookPile } from "react-icons/gi";
 import { ErrorToast, Toaster } from "../../utils/Toaster"
 import { FetchApi } from "../../utils/FetchApi"
+import { roleExtractor } from "../../utils/RoleExtractor"
 
-export const SubjectLImit = (props) => {
+export const SubjectLimit = (props) => {
     const errorComp = useRef(null)
     const [grade, setGrade] = useState(null)
     const [limit, setLimit] = useState(null)
@@ -30,8 +31,9 @@ export const SubjectLImit = (props) => {
             errorComp.current.style.display = 'none'
         }
         try {
+            const role = roleExtractor(window.location.pathname)
             const temp = { "std": grade, "limit": limit }
-            const res = await FetchApi(`http://localhost:8090/${props.roleOfPerson}/setSubLimit`, 'POST', temp)
+            const res = await FetchApi(`http://localhost:8090/${role}/setSubLimit`, 'POST', temp)
             Toaster(res,toast)
         } catch (error) {
             ErrorToast(error,toast)
