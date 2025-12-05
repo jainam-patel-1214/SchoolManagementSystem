@@ -32,51 +32,51 @@ function ProjectRouter() {
       <Route path="signIn" element={<SignIn />}></Route>
       <Route path="app/student" element={<Navbar/>}>
         <Route index element={<StudentHomePage />}/>
-        <Route path='schoolResult' element={<SchoolResult roleOfPerson="student"/>}></Route>
-        <Route path='searchSubject' element={<DisplaySubTabComp roleOfPerson="student" />}></Route>
+        <Route path='schoolResult' element={<SchoolResult />}></Route>
+        <Route path='searchSubject' element={<DisplaySubTabComp/>}></Route>
       </Route>
-      <Route path='app/teacher' element={<Navbar roleOfPerson="teacher" />}>
-        <Route index element={<TeacherHome roleOfPerson="teacher" />}/>
-        <Route path='reviews' element={<ReviewTab roleOfPerson="teacher"/>}></Route>
+      <Route path='app/teacher' element={<Navbar/>}>
+        <Route index element={<TeacherHome/>}/>
+        <Route path='reviews' element={<ReviewTab />}></Route>
 
-        <Route path='displayStudent' element={<StudentDataComponent roleOfPerson="teacher"/>}></Route>
-        <Route path='addStudent' element={<StudentAddComponent roleOfPerson="teacher"/>}></Route>
-        <Route path='editStudent' element={<StudentEditComponent roleOfPerson="teacher"/>}></Route>
-        <Route path='deleteStudent' element={<StudentDelComponent roleOfPerson="teacher"/>}></Route>
+        <Route path='displayStudent' element={<StudentDataComponent />}></Route>
+        <Route path='addStudent' element={<StudentAddComponent />}></Route>
+        <Route path='editStudent' element={<StudentEditComponent />}></Route>
+        <Route path='deleteStudent' element={<StudentDelComponent />}></Route>
 
-        <Route path='displaySubject' element={<DisplaySubTabComp roleOfPerson="teacher"/>}></Route>
-        <Route path='addSubject' element={<SubAddTabComp roleOfPerson="teacher"/>}></Route>
-        <Route path='editSubject' element={<SubEditTabComp roleOfPerson="teacher"/>}></Route>
-        <Route path='deleteSubject' element={<SubDelTabComp roleOfPerson="teacher"/>}></Route>
+        <Route path='displaySubject' element={<DisplaySubTabComp />}></Route>
+        <Route path='addSubject' element={<SubAddTabComp />}></Route>
+        <Route path='editSubject' element={<SubEditTabComp />}></Route>
+        <Route path='deleteSubject' element={<SubDelTabComp />}></Route>
 
-        <Route path='enterMarks' element={<AddMarkTab roleOfPerson="teacher"/>}></Route>
-        <Route path='editMarks' element={<EditMarkTab roleOfPerson="teacher"/>}></Route>
+        <Route path='enterMarks' element={<AddMarkTab />}></Route>
+        <Route path='editMarks' element={<EditMarkTab />}></Route>
       </Route>
-      <Route path='app/admin' element={<Navbar roleOfPerson="admin" />}>
-        <Route index element={<AdminHome roleOfPerson="admin" />}/>
-        <Route path='reviews' element={<ReviewTab roleOfPerson="admin"/>}></Route>
+      <Route path='app/admin' element={<Navbar />}>
+        <Route index element={<AdminHome />}/>
+        <Route path='reviews' element={<ReviewTab />}></Route>
 
-        <Route path='displayStudent' element={<StudentDataComponent roleOfPerson="admin"/>}></Route>
-        <Route path='addStudent' element={<StudentAddComponent roleOfPerson="admin"/>}></Route>
-        <Route path='editStudent' element={<StudentEditComponent roleOfPerson="admin"/>}></Route>
-        <Route path='deleteStudent' element={<StudentDelComponent roleOfPerson="admin"/>}></Route>
+        <Route path='displayStudent' element={<StudentDataComponent />}></Route>
+        <Route path='addStudent' element={<StudentAddComponent />}></Route>
+        <Route path='editStudent' element={<StudentEditComponent />}></Route>
+        <Route path='deleteStudent' element={<StudentDelComponent />}></Route>
 
-        <Route path='displaySubject' element={<DisplaySubTabComp roleOfPerson="admin"/>}></Route>
-        <Route path='addSubject' element={<SubAddTabComp roleOfPerson="admin"/>}></Route>
-        <Route path='editSubject' element={<SubEditTabComp roleOfPerson="admin"/>}></Route>
-        <Route path='deleteSubject' element={<SubDelTabComp roleOfPerson="admin"/>}></Route>
+        <Route path='displaySubject' element={<DisplaySubTabComp />}></Route>
+        <Route path='addSubject' element={<SubAddTabComp />}></Route>
+        <Route path='editSubject' element={<SubEditTabComp />}></Route>
+        <Route path='deleteSubject' element={<SubDelTabComp />}></Route>
 
-        <Route path='setSubjectLimit' element={<SubjectLimit roleOfPerson="admin"/>}></Route>
+        <Route path='setSubjectLimit' element={<SubjectLimit />}></Route>
 
-        <Route path='enterMarks' element={<AddMarkTab roleOfPerson="admin"/>}></Route>
-        <Route path='editMarks' element={<EditMarkTab roleOfPerson="admin"/>}></Route>
+        <Route path='enterMarks' element={<AddMarkTab />}></Route>
+        <Route path='editMarks' element={<EditMarkTab />}></Route>
 
-        <Route path='teacherPerformance' element={<DisplayTeacherPerformanceComponent roleOfPerson="admin"/>}></Route>
-        <Route path='addTeacher' element={<CreateTeacherComponent roleOfPerson="admin"/>}></Route>
-        <Route path='editTeacher' element={<TeacherEditComponent roleOfPerson="admin"/>}></Route>
-        <Route path='delTeacher' element={<TeacherDelComponent roleOfPerson="admin"/>}></Route>
+        <Route path='teacherPerformance' element={<DisplayTeacherPerformanceComponent />}></Route>
+        <Route path='addTeacher' element={<CreateTeacherComponent />}></Route>
+        <Route path='editTeacher' element={<TeacherEditComponent />}></Route>
+        <Route path='delTeacher' element={<TeacherDelComponent />}></Route>
 
-        <Route path='pendingApplications' element={<AdminPendingReqTab roleOfPerson="admin"/>}></Route>
+        <Route path='pendingApplications' element={<AdminPendingReqTab />}></Route>
       </Route>
     </Routes>
   )

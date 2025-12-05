@@ -162,7 +162,7 @@ export const AdminPendingReqTab = (props) => {
     const [isStudent, setstud] = useState(false)
     const [isTeacher, setteach] = useState(false)
     const [displayData, setDisplayData] = useState([])
-
+    const userrole = roleExtractor(window.location.pathname)
     const stateChange = (e, type) => {
         e.preventDefault()
         switch (type) {
@@ -215,7 +215,7 @@ export const AdminPendingReqTab = (props) => {
         const pId = Number(e.target.getAttribute("pend"));
         try {
             const temp = { "pendingId": pId, "uName": name, "uPwd": pwd, "uRole": role }
-            const res = await FetchApi(`http://localhost:8090/${props.roleOfPerson}/rejectRequest`, 'DELETE', temp)
+            const res = await FetchApi(`http://localhost:8090/${userrole}/rejectRequest`, 'DELETE', temp)
             Toaster(res, toast)
             if (res.output) {
                 emptystates()
@@ -244,7 +244,7 @@ export const AdminPendingReqTab = (props) => {
         }
         try {
             console.log(temp);
-            const res = await FetchApi(`http://localhost:8090/${props.roleOfPerson}/acceptRequest`, 'POST', temp)
+            const res = await FetchApi(`http://localhost:8090/${userrole}/acceptRequest`, 'POST', temp)
             Toaster(res, toast)
         } catch (error) {
             ErrorToast(error, toast);
@@ -260,7 +260,7 @@ export const AdminPendingReqTab = (props) => {
     }
     const fetchPendingApps = async () => {
         try {
-            const res = await FetchApi(`http://localhost:8090/${props.roleOfPerson}/pendingRequest`,'GET',{})
+            const res = await FetchApi(`http://localhost:8090/${userrole}/pendingRequest`,'GET',{})
             if (typeof (res.output) === "string") {
                 SuccessToast(res.output,toast)
             } else {

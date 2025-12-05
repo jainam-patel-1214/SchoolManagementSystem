@@ -118,12 +118,12 @@ export const Navbar = (props) => {
                             <NavbarTabs onClick={() => { handleNavigation("searchSubject") }}>Subjects</NavbarTabs>
                         </StyledNavbarSubTabs> : <></>}
                         {urole === "teacher" ? <StyledNavbarSubTabs>
-                            <NavbarTabs onClick={() => { handleNavigation(`/app/${props.roleOfPerson}`) }}>Account</NavbarTabs>
+                            <NavbarTabs onClick={() => { handleNavigation(`/app/teacher`) }}>Account</NavbarTabs>
                             
                             <NavbarTabs onClick={()=>{handleNavigation("reviews")}}>Add Review</NavbarTabs>
                         </StyledNavbarSubTabs> : <></>}
                         {urole === "admin" ? <StyledNavbarSubTabs>
-                            <NavbarTabs onClick={() => { handleNavigation(`/app/${props.roleOfPerson}`) }}>Account</NavbarTabs>
+                            <NavbarTabs onClick={() => { handleNavigation(`/app/admin`) }}>Account</NavbarTabs>
                             
                             <NavbarTabs onClick={() => { handleNavigation(`pendingApplications`) }}>Pending req</NavbarTabs>
                             
