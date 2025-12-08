@@ -1,19 +1,26 @@
-import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table'
+import { flexRender, getCoreRowModel, useReactTable, getSortedRowModel } from '@tanstack/react-table'
 import { TableHeader } from '../../styled-components/TableComponents'
 import { SubInfo, TableEntry } from '../studentComponents/Home'
 import { SearchOutputSection } from '../studentComponents/SchoolRes'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { FaArrowUpZA,FaArrowUpAZ } from "react-icons/fa6";
 
 
 export const RequestsTableComponent = (props) => {
 
     const finalData = useMemo(()=>props?.data,[props?.data])
-    const finalCOlumnDef = useMemo(()=>props?.columnDefinition,[])
+    const finalColumnDef = useMemo(()=>props?.columnDefinition,[props?.columnDefinition])
+    const [sorting,setSorting] = useState([])
 
     const tableInstance = useReactTable({
-        columns: finalCOlumnDef,
+        columns: finalColumnDef,
         data: finalData,
-        getCoreRowModel: getCoreRowModel()
+        state: {
+            sorting,
+        },
+        onSortingChange: setSorting,
+        getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
     })
 
     return (
@@ -23,10 +30,14 @@ export const RequestsTableComponent = (props) => {
                 <thead>
                     {tableInstance.getHeaderGroups().map((headElem, i) => {
                         return <tr key={i}>{headElem.headers.map((colElem, i) => {
-                            return <TableHeader key={i} colSpan={colElem.colSpan}>{flexRender(
+                            return <TableHeader key={i} colSpan={colElem.colSpan} onClick={colElem.column.getToggleSortingHandler()}>{flexRender(
                                 colElem.column.columnDef.header,
                                 colElem.getContext()
-                            )}</TableHeader>
+                            )}{
+                                colElem?.column.getIsSorted() === "asc" ? <FaArrowUpAZ />: ""
+                            }{
+                                colElem?.column.getIsSorted() === "desc" ? <FaArrowUpZA />: ""
+                            }</TableHeader>
                         })}</tr>
                     })}
                 </thead>

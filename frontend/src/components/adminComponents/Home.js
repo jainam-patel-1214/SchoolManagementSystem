@@ -1,5 +1,5 @@
 import styled from "styled-components"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, Fragment } from "react"
 import { Label, LabelValue, StudentHomeSection, StudentInfo, SubInfo, TableEntry, Value } from "../studentComponents/Home"
 import { ToastContainer, toast } from "react-toastify"
 import { ErrorSpan, SearchForm } from "../studentComponents/SchoolRes"
@@ -8,6 +8,13 @@ import imgpfp from '../../assets/pfp.webp'
 import { ErrorToast, SuccessToast, Toaster } from "../../utils/Toaster"
 import { FetchApi } from "../../utils/FetchApi"
 import { roleExtractor } from "../../utils/RoleExtractor"
+import { createColumnHelper } from "@tanstack/react-table"
+import { RequestsTableComponent } from "../helperComponents/RequestsTable"
+import { TeacherInputTabContainer } from "./TeachersTab"
+import { InputContainer } from "../teacherComponents/StudentsTab"
+import { FloatingInput, FloatingLabel, InputWrapper } from "../../styled-components/InputComp"
+import { TiSortAlphabetically } from "react-icons/ti"
+import { RiBookShelfLine } from "react-icons/ri"
 
 export const AdminHome = (props) => {
     const [displayData, setDisplayData] = useState({})
@@ -16,10 +23,10 @@ export const AdminHome = (props) => {
         const role = roleExtractor(window.location.pathname)
         const fetchData = async () => {
             try {
-                const res = await FetchApi(`http://localhost:8090/${role}/data`,'GET',{})
+                const res = await FetchApi(`http://localhost:8090/${role}/data`, 'GET', {})
                 setDisplayData(res.output);
             } catch (err) {
-                ErrorToast(err,toast)
+                ErrorToast(err, toast)
             }
         };
         fetchData()
@@ -146,51 +153,38 @@ export const AdminPendingReqTab = (props) => {
     const overlayComp = useRef(null)
     const detailsComp = useRef(null)
     const ErrorComponent = useRef(null)
-    const SubmitButtonComponent = useRef(null)
 
-    const [data,setData] = useState()
+    const [data, setData] = useState({
+        id: null,
+        name: null,
+        password: null,
+        role: null,
+        pendingId: null,
+        subjectId: null,
+        std: null,
+        section: null
+    })
+    const dataChangeHandler = (key, value) => {
+        setData(prevdata => ({
+            ...prevdata,
+            [key]: value
+        }))
+    }
+    const emptyDataHandler = () => {
+        const nullifiedUserData = Object.keys(data).reduce((acc, key) => {
+            acc[key] = null;
+            return acc;
+        }, {});
+        setstud(false)
+        setteach(false)
+        setData(nullifiedUserData);
+    }
 
-    const [id, setId] = useState(null)
-    const [name, setName] = useState(null)
-    const [pwd, setPwd] = useState(null)
-    const [role, setRole] = useState(null)
-    const [pendId, setPendid] = useState(null)
-    const [subid, setSubid] = useState(null)
-    const [std, setStd] = useState(null)
-    const [section, setSection] = useState(null)
-    const [validateErr, setValidateErr] = useState(false)
     const [isStudent, setstud] = useState(false)
     const [isTeacher, setteach] = useState(false)
     const [displayData, setDisplayData] = useState([])
     const userrole = roleExtractor(window.location.pathname)
-    const stateChange = (e, type) => {
-        e.preventDefault()
-        switch (type) {
-            case "subid":
-                // console.log(name, pwd, role);
-                setSubid(Number(e.target.value))
-                break;
-            case "grade":
-                // console.log(name, pwd, role);
-                setStd(Number(e.target.value))
-                break;
-            case "section":
-                // console.log(name, pwd, role);
-                setSection(e.target.value)
-                break;
-            case "uid":
-                // console.log(name, pwd, role);
-                if (isStudent) {
-                    setId(Number(e.target.value))
-                } else if (isTeacher) {
-                    setId(e.target.value)
-                } else setId(e.target.value)
 
-                break;
-            default:
-                break;
-        }
-    }
     const handleAccept = async (e) => {
         e.preventDefault()
         const name = e.target.getAttribute("userName");
@@ -200,8 +194,10 @@ export const AdminPendingReqTab = (props) => {
 
         if (role === "student") setstud(true);
         if (role === "teacher") setteach(true);
-        setPendid(Number(pId));
-        setName(name); setPwd(pwd); setRole(role)
+        dataChangeHandler("pendingId", Number(pId))
+        dataChangeHandler("name", name)
+        dataChangeHandler("password", pwd)
+        dataChangeHandler("role", role)
         overlayComp.current.style.display = "block"
         detailsComp.current.style.display = "flex"
         document.querySelector("body").style.overflow = "hidden"
@@ -218,89 +214,130 @@ export const AdminPendingReqTab = (props) => {
             const res = await FetchApi(`http://localhost:8090/${userrole}/rejectRequest`, 'DELETE', temp)
             Toaster(res, toast)
             if (res.output) {
-                emptystates()
+                emptyDataHandler()
                 fetchPendingApps()
             }
         } catch (error) {
-            ErrorToast(error,toast);
+            ErrorToast(error, toast);
         }
     }
-    const handleHide = () => {
+    const handleHide = (e) => {
+        e.preventDefault()
+        emptyDataHandler()
         overlayComp.current.style.display = "none"
         detailsComp.current.style.display = "none"
         document.querySelector("body").style.overflow = "auto"
-        emptystates()
     }
 
     const handleSubmitForm = async (e) => {
         e.preventDefault()
         let temp;
         if (isStudent) {
-            temp = { "pendingId": pendId, "uName": name, "uPwd": pwd, "uRole": role, "Uid": id, "std": std, "section": section }
+            temp = { "pendingId": data?.pendingId, "uName": data?.name, "uPwd": data?.password, "uRole": data?.role, "Uid": data?.id, "std": data?.std, "section": data?.section }
         } else if (isTeacher) {
-            temp = { "pendingId": pendId, "uName": name, "uPwd": pwd, "uRole": role, "Uid": id, "std": std, "section": section, "subId": subid }
+            temp = { "pendingId": data?.pendingId, "uName": data?.name, "uPwd": data?.password, "uRole": data?.role, "Uid": data?.id, "std": data?.std, "section": data?.section, "subId": data?.subjectId }
         } else if (!isStudent && !isTeacher) {
-            temp = { "pendingId": pendId, "uName": name, "uPwd": pwd, "uRole": role, "Uid": id }
+            temp = { "pendingId": data?.pendingId, "uName": data?.name, "uPwd": data?.password, "uRole": data?.role, "Uid": data?.id }
         }
         try {
             console.log(temp);
             const res = await FetchApi(`http://localhost:8090/${userrole}/acceptRequest`, 'POST', temp)
+            console.log(res,"result");
+            
             Toaster(res, toast)
         } catch (error) {
             ErrorToast(error, toast);
-        }finally{
-            handleHide()
-            emptystates()
+        } finally {
+            handleHide(e)
+            emptyDataHandler()
             fetchPendingApps()
             e.target.reset()
         }
     }
-    const emptystates = () => {
-        setName(null); setPwd(null); setRole(null); setId(null); setSubid(null); setStd(null); setSection(null); setstud(false); setteach(false); setPendid(null)
-    }
     const fetchPendingApps = async () => {
         try {
-            const res = await FetchApi(`http://localhost:8090/${userrole}/pendingRequest`,'GET',{})
+            const res = await FetchApi(`http://localhost:8090/${userrole}/pendingRequest`, 'GET', {})
             if (typeof (res.output) === "string") {
-                SuccessToast(res.output,toast)
+                SuccessToast(res.output, toast)
             } else {
                 setDisplayData(res.output)
             }
         } catch (err) {
-            ErrorToast(err,toast)
+            ErrorToast(err, toast)
         }
     }
     useEffect(() => {
         fetchPendingApps()
     }, [])
+
+    const columnHelper = createColumnHelper();
+    const columns = [
+        columnHelper.accessor("roleReq", {
+            header: "Role requested",
+            cell: info => info.getValue(),
+            enableSorting: false
+        }),
+
+        columnHelper.accessor("userName", {
+            header: "Name",
+            cell: info => info.getValue(),
+            enableSorting: true
+        }),
+
+        columnHelper.accessor("pwd", {
+            header: "Password",
+            cell: info => info.getValue(),
+            enableSorting: false
+        }),
+
+        columnHelper.display({
+            id: "accept",
+            header: "Accept",
+            cell: ({ row }) => {
+                const v = row.original;
+                return (
+                    <AcceptBtn
+                        userName={v.userName}
+                        userPwd={v.pwd}
+                        userRole={v.roleReq}
+                        pend={v.pendingId}
+                        type="button"
+                        onClick={(e) => handleAccept(e)}
+                    >
+                        Accept
+                    </AcceptBtn>
+                );
+            },
+        }),
+
+        columnHelper.display({
+            id: "reject",
+            header: "Reject",
+            cell: ({ row }) => {
+                const v = row.original;
+                return (
+                    <RejectBtn
+                        userName={v.userName}
+                        userPwd={v.pwd}
+                        userRole={v.roleReq}
+                        pend={v.pendingId}
+                        type="button"
+                        onClick={(e) => handleReject(e)}
+                    >
+                        Reject
+                    </RejectBtn>
+                );
+            },
+        }),
+    ];
+
     return (
         <>
             <Overlay ref={overlayComp}></Overlay>
             <PendingReqSection>
-                <Popoup refprop={detailsComp} close={handleHide} changeHandler={stateChange} isteach={isTeacher} isStud={isStudent} submitHandler={handleSubmitForm} setvalidation={setValidateErr} validation={validateErr} userId={id} userStd={std} userSec={section} userSub={subid} errComp={ErrorComponent} btnComp={SubmitButtonComponent}></Popoup>
+                <Popoup refprop={detailsComp} close={handleHide} isteach={isTeacher} isStud={isStudent} submitHandler={handleSubmitForm} errComp={ErrorComponent} data={data} newHandler={dataChangeHandler}></Popoup>
                 {displayData?.length > 0 ?
-                    <SubInfo style={{ border: "1px solid black", width: "100%" }}>
-                        <thead>
-                            <tr>
-                                <th>Role requested</th>
-                                <th>Name</th>
-                                <th>Password</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {displayData?.map((v, i) => {
-                                return (
-                                    <tr key={i}>
-                                        <TableEntry>{v.roleReq}</TableEntry>
-                                        <TableEntry>{v.userName}</TableEntry>
-                                        <TableEntry>{v.pwd}</TableEntry>
-                                        <TableEntry><AcceptBtn userName={v.userName} userPwd={v.pwd} userRole={v.roleReq} pend={v.pendingId} type="button" onClick={(e) => { handleAccept(e) }}>Accept</AcceptBtn></TableEntry>
-                                        <TableEntry><RejectBtn userName={v.userName} userPwd={v.pwd} userRole={v.roleReq} pend={v.pendingId} type="button" onClick={(e) => { handleReject(e) }}> Reject</RejectBtn></TableEntry>
-                                    </tr>
-                                )
-                            })}
-                        </tbody>
-                    </SubInfo>
+                    < RequestsTableComponent heading={"Pending user requests"} data={displayData} columnDefinition={columns} />
                     : <>There are no pending applications</>}
             </PendingReqSection>
         </>
@@ -311,37 +348,47 @@ const Popoup = (props) => {
     return (
         <DetailsForm ref={props.refprop}>
             <SearchForm onSubmit={(e) => { props.submitHandler(e) }} style={{ width: "100%" }}>
-                <PopupDiv>
-                    <SpanComp style={{ width: "50%" }}>
-                        <label htmlFor="uid">
-                            Provide unique {props.isStud ? "student" : props.isteach ? "teacher" : "admin"} id:
-                        </label>
-                        <input type="text" maxLength={8} name="uid" placeholder="Enter user id here" onChange={(e) => { props.changeHandler(e, "uid") }} style={{ margin: "0" }} setValid={props.setvalidation} />
-                    </SpanComp >
-                    {props.isteach ? <SpanComp style={{ width: "50%" }}>
-                        <label htmlFor="sub">
-                            Provide sub id if teacher is assigned one:
-                        </label>
-                        <input type="number" name="sub" placeholder="Enter subject id here" onChange={(e) => { props.changeHandler(e, "subid") }} style={{ margin: "0" }} setValid={props.setvalidation} />
-                    </SpanComp> : <></>}
-                </PopupDiv>
-                {props.isStud || props.isteach ? <PopupDiv >
-                    <SpanComp style={{ width: "50%" }}>
-                        <label htmlFor="std">
-                            Provide standard:
-                        </label>
-                        <input type="number" name="std" placeholder="Enter standard to assign" onChange={(e) => { props.changeHandler(e, "grade") }} style={{ margin: "0" }} setValid={props.setvalidation} />
-                    </SpanComp>
-                    <SpanComp style={{ width: "50%" }}>
-                        <label htmlFor="section">
-                            Provide section:
-                        </label>
-                        <input type="text" maxLength={2} name="section" placeholder="Enter section to assign" onChange={(e) => { props.changeHandler(e, "section") }} style={{ margin: "0" }} setValid={props.setvalidation} />
-                    </SpanComp>
-                </PopupDiv> : <></>}
-                <AcceptBtn ref={props.btnComp} type="submit">Submit</AcceptBtn>
-                <ErrorSpan id="minmaxerror" ref={props.errComp}></ErrorSpan>
-                <CloseBtn id="closeBtn" type="reset" onClick={(e) => { props.close(e) }}>X</CloseBtn>
+                <TeacherInputTabContainer>
+                    <InputContainer style={{ width: "100%" }}>
+                        <RiBookShelfLine style={{ fontSize: "xx-large" }} />
+                        <InputWrapper>
+                            <FloatingInput type="text" maxLength={8} name="uid" value={props?.data?.id || ''} placeholder=" " onChange={(e) => { props?.newHandler("id", (e.target.value)) }} required />
+                            <FloatingLabel>Provide unique {props.isStud ? "student" : props.isteach ? "teacher" : "admin"} id:</FloatingLabel>
+                        </InputWrapper>
+                    </InputContainer>
+                </TeacherInputTabContainer>
+                {props.isteach ? <TeacherInputTabContainer>
+                    <InputContainer style={{ width: "100%" }}>
+                        <TiSortAlphabetically style={{ fontSize: "xx-large" }} />
+                        <InputWrapper>
+                            <FloatingInput type="number" value={props?.data?.subjectId || ''} name="sub" placeholder=" " onChange={(e) => { props?.newHandler("subjectId", Number(e.target.value)) }} />
+                            <FloatingLabel>Provide sub id if teacher is assigned one:</FloatingLabel>
+                        </InputWrapper>
+                    </InputContainer>
+                </TeacherInputTabContainer> : <></>}
+                {props.isStud || props.isteach ? <Fragment>
+                    <TeacherInputTabContainer>
+                        <InputContainer style={{ width: "100%" }}>
+                            <TiSortAlphabetically style={{ fontSize: "xx-large" }} />
+                            <InputWrapper>
+                                <FloatingInput type="number" value={props?.data?.std || ''} name="std" placeholder=" " onChange={(e) => { props?.newHandler("std", Number(e.target.value)) }} />
+                                <FloatingLabel>Provide standard:</FloatingLabel>
+                            </InputWrapper>
+                        </InputContainer>
+                    </TeacherInputTabContainer>
+                    <TeacherInputTabContainer>
+                        <InputContainer style={{ width: "100%" }}>
+                            <TiSortAlphabetically style={{ fontSize: "xx-large" }} />
+                            <InputWrapper>
+                                <FloatingInput type="text" value={props?.data?.section || ''} name="section" placeholder=" " onChange={(e) => { props?.newHandler("section", (e.target.value)) }} />
+                                <FloatingLabel>Provide section:</FloatingLabel>
+                            </InputWrapper>
+                        </InputContainer>
+                    </TeacherInputTabContainer>
+                </Fragment> : <></>}
+                <AcceptBtn type="submit">Submit</AcceptBtn>
+                <ErrorSpan ref={props.errComp}></ErrorSpan>
+                <CloseBtn id="closeBtn" type="reset" onClick={(e) => { props?.close(e) }}>X</CloseBtn>
             </SearchForm>
         </DetailsForm>
     )
