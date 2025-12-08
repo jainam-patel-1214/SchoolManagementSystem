@@ -171,9 +171,12 @@ func AcceptPendingReq(ctx *gin.Context) {
 			return
 		}
 		if body.UserRole == "student" {
+			body.UserId, _ = strconv.Atoi(body.UserId.(string))
+		}
+		if body.UserRole == "student" {
 			switch body.UserId.(type) {
-			case float64:
-				temp := int(body.UserId.(float64))
+			case int:
+				temp := int(body.UserId.(int))
 				if temp <= 0 || temp > 99999999 {
 					ctx.JSON(http.StatusBadRequest, gin.H{"error": "student gr number shall be non negative and max 8 digit"})
 					return
