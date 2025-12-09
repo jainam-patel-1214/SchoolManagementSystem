@@ -722,7 +722,7 @@ func AddReviews(ctx *gin.Context) {
 		return
 	}
 
-	if _, err := db.Exec("INSERT INTO reviews (tId, grNo, comment) VALUES (?,?,?)", tid.(string), reviewInfo.StudId, reviewInfo.Comment); err != nil {
+	if _, err := db.Exec("INSERT INTO reviews (tId, grNo, comment) VALUES (?,?,?)", tid.(int), reviewInfo.StudId, reviewInfo.Comment); err != nil {
 		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error while inserting error"})
 		return
@@ -762,7 +762,7 @@ func Performance(ctx *gin.Context) {
 	}
 
 	type Teachers struct {
-		Tid                 string
+		Tid                 int
 		TName               string
 		StdAllocated        int
 		SubName             string
@@ -777,7 +777,7 @@ func Performance(ctx *gin.Context) {
 	}
 	var tempres Teachers
 	for res2.Next() {
-		var temp any
+		var temp int
 		err = res2.Scan(&temp)
 		if err != nil {
 			fmt.Println("cannot scan", err)
@@ -1024,23 +1024,20 @@ func SelfData(ctx *gin.Context) {
 			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "id not found"})
 			return
 		}
-		temp := fmt.Sprintf("%v", tid)
-		fmt.Println("useriddddd", tid, temp)
 
 		var otpt struct {
-			Id       string
+			Id       int
 			Password string
 			Name     string
 			SubId    int
 			Std      int
 			Section  string
 		}
-		err = db.QueryRow("SELECT t.tId,t.tPwd,t.tName,t.subId,t.stdAllocated,t.sectionAllocated FROM teachers t WHERE t.tId=?", temp).Scan(&otpt.Id, &otpt.Password, &otpt.Name, &otpt.SubId, &otpt.Std, &otpt.Section)
+		err = db.QueryRow("SELECT t.tId,t.tPwd,t.tName,t.subId,t.stdAllocated,t.sectionAllocated FROM teachers t WHERE t.tId=?", tid).Scan(&otpt.Id, &otpt.Password, &otpt.Name, &otpt.SubId, &otpt.Std, &otpt.Section)
 		if err != nil && err != sql.ErrNoRows {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		fmt.Println("PPPPL", otpt)
 		ctx.JSON(http.StatusOK, gin.H{"output": otpt})
 	}
 }

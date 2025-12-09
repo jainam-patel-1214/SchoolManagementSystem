@@ -20,14 +20,6 @@ func Random8DigitInt() int {
 	return rand.Intn(90000000) + 10000000
 }
 
-func RandomString(length int) string {
-	result := make([]byte, length)
-	for i := range result {
-		result[i] = charset[rand.Intn(len(charset))]
-	}
-	return string(result)
-}
-
 func CreatePendingReq(ctx *gin.Context) {
 	var PendingDb struct {
 		RoleRequested string `json:"roleReq" binding:"required"`
@@ -80,7 +72,7 @@ func CreatePendingReq(ctx *gin.Context) {
 				return
 			}
 		case "teacher":
-			id := RandomString(8)
+			id := Random8DigitInt()
 			_, err = db.Exec("INSERT INTO teachers (tId,tPwd,userRole,tName) VALUES (?,?,?,?)", id, PendingDb.Pwd, PendingDb.RoleRequested, PendingDb.Username)
 			if err != nil {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error creating id"})
@@ -90,7 +82,7 @@ func CreatePendingReq(ctx *gin.Context) {
 				return
 			}
 		case "admin":
-			id := RandomString(8)
+			id := Random8DigitInt()
 			fmt.Println(id, PendingDb.Username, PendingDb.Pwd)
 			_, err = db.Exec("INSERT INTO admins (admin_id,admin_name,admin_pwd) VALUES (?,?,?)", id, PendingDb.Username, PendingDb.Pwd)
 			if err != nil {
@@ -130,7 +122,7 @@ func AcceptPendingReq(ctx *gin.Context) {
 			UserName  string `json:"uName" binding:"required"`
 			UserPwd   string `json:"uPwd" binding:"required"`
 			UserRole  string `json:"uRole" binding:"required"`
-			UserId    any    `json:"Uid" binding:"required"`
+			UserId    int    `json:"Uid" binding:"required"`
 			Std       int    `json:"std"`
 			Section   string `json:"section"`
 			SubId     int    `json:"subId"`
@@ -152,6 +144,11 @@ func AcceptPendingReq(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "please provide password"})
 			return
 		}
+		temp := body.UserId
+		if temp <= 0 || temp > 99999999 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
+			return
+		}
 		if len(body.UserPwd) != 8 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "size limit of passoword is 8"})
 			return
@@ -170,80 +167,71 @@ func AcceptPendingReq(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "no such pending request exist"})
 			return
 		}
+
 		if body.UserRole == "student" {
-			body.UserId, _ = strconv.Atoi(body.UserId.(string))
+
+			var amt int
+			if err = db.QueryRow("SELECT COUNT(grNo) FROM students WHERE grNo=?", temp).Scan(&amt); err != nil && err != sql.ErrNoRows {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+			if amt > 0 {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "student already exist with gr number provided, try updating student details"})
+				return
+			}
+			if body.Section == "" || body.Std == 0 {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "student requires a class and section to be assigned"})
+				return
+			}
+			if body.Std < 1 || body.Std > 12 {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "standar shall be between 1 and 12"})
+				return
+			}
+			if !HasOnlyAlphabets(body.Section) {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "section only has letters"})
+				return
+			}
 		}
-		if body.UserRole == "student" {
-			switch body.UserId.(type) {
-			case int:
-				fmt.Println("in testing")
-				temp := int(body.UserId.(int))
-				if temp <= 0 || temp > 99999999 {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": "student gr number shall be non negative and max 8 digit"})
+		if body.UserRole == "teacher" {
+
+			var amt int
+			if err = db.QueryRow("SELECT COUNT(tId) FROM teachers WHERE tId=?", temp).Scan(&amt); err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			if amt > 0 {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "teacher id you wish to add already exist"})
+				return
+			}
+			if body.SubId != 0 && (body.SubId <= 0 || body.SubId > 99999999) && body.Section == "" && body.Std == 0 {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "to allocate subject allocate std and section so we can calculate peformance"})
+				return
+			}
+			if body.Std != 0 && (body.Std < 13 && body.Std > 0) && body.Section == "" {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "standard needs a section to be provided"})
+				return
+			}
+			if body.Section != "" {
+				if !HasOnlyAlphabets(body.Section) {
+					ctx.JSON(http.StatusBadRequest, gin.H{"error": "section only has letters"})
 					return
 				}
-				var amt int
-				if err = db.QueryRow("SELECT COUNT(grNo) FROM students WHERE grNo=?", temp).Scan(&amt); err != nil && err != sql.ErrNoRows {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-					return
-				}
-				if amt > 0 {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": "student already exist with gr number provided, try updating student details"})
-					return
-				}
-				if body.Section == "" || body.Std == 0 {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": "student requires a class and section to be assigned"})
+				if body.Std == 0 {
+					ctx.JSON(http.StatusBadRequest, gin.H{"error": "section needs a standard to be provided"})
 					return
 				}
 				if body.Std < 1 || body.Std > 12 {
 					ctx.JSON(http.StatusBadRequest, gin.H{"error": "standar shall be between 1 and 12"})
 					return
 				}
-				if !HasOnlyAlphabets(body.Section) {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": "section only has letters"})
-					return
-				}
-			default:
-				ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id for student role, provid 8digit unique int only"})
-				return
-			}
-		}
-		if body.UserRole == "teacher" {
-			switch body.UserId.(type) {
-			case string:
-				temp := body.UserId.(string)
-				if temp == "" {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": "teacher id is required to move forward"})
-					return
-				}
-				if len(temp) > 8 {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": "teacher id shall be less than 8 characters in size"})
-					return
-				}
-				var amt int
-				if err = db.QueryRow("SELECT COUNT(tId) FROM teachers WHERE tId=?", temp).Scan(&amt); err != nil {
-					ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-					return
-				}
-				if amt > 0 {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": "teacher id you wish to add already exist"})
-					return
-				}
-				if body.SubId != 0 && (body.SubId <= 0 || body.SubId > 99999999) && body.Section == "" && body.Std == 0 {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": "to allocate subject allocate std and section so we can calculate peformance"})
-					return
-				}
-				if body.Std != 0 && (body.Std < 13 && body.Std > 0) && body.Section == "" {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": "standard needs a section to be provided"})
-					return
-				}
-				if body.Section != "" {
-					if !HasOnlyAlphabets(body.Section) {
-						ctx.JSON(http.StatusBadRequest, gin.H{"error": "section only has letters"})
+				if body.SubId != 0 && (body.SubId > 0 || body.SubId < 99999999) {
+					var amt int
+					if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", body.SubId).Scan(&amt); err != nil && err != sql.ErrNoRows {
+						ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 						return
 					}
-					if body.Std == 0 {
-						ctx.JSON(http.StatusBadRequest, gin.H{"error": "section needs a standard to be provided"})
+					if amt <= 0 {
+						ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject donot exist you want to assign"})
 						return
 					}
 					if body.Std < 1 || body.Std > 12 {
@@ -265,40 +253,25 @@ func AcceptPendingReq(ctx *gin.Context) {
 						ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject id"})
 					}
 				}
-			default:
-				ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id for teacher/admin role, provid 8 digit unique string only"})
-				return
 			}
+
 		}
 		if body.UserRole == "admin" {
-			switch body.UserId.(type) {
-			case string:
-				temp := body.UserId.(string)
-				if temp == "" {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": "admin id required to move forward"})
-					return
-				}
-				if len(temp) > 8 {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": "admin id shall be less than 8 characters in size"})
-					return
-				}
-				var amt int
-				if err = db.QueryRow("SELECT COUNT(admin_id) FROM admins WHERE admin_id=?", temp).Scan(&amt); err != nil {
-					ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-					return
-				}
-				if amt > 0 {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": "admin id you wish to add already exist"})
-					return
-				}
-			default:
-				ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id for admin role, provid 8 digit unique string only"})
+
+			var amt int
+			if err = db.QueryRow("SELECT COUNT(admin_id) FROM admins WHERE admin_id=?", temp).Scan(&amt); err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
+			if amt > 0 {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "admin id you wish to add already exist"})
+				return
+			}
+
 		}
 		switch body.UserRole {
 		case "student":
-			if body.Std == 0 || body.Section == "" || body.UserId == 0 || body.UserId == "" || body.UserName == "" || body.UserPwd == "" {
+			if body.Std == 0 || body.Section == "" || body.UserId <= 0 || body.UserName == "" || body.UserPwd == "" {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": "fill userid/std/section accurately"})
 				return
 			}
@@ -307,7 +280,13 @@ func AcceptPendingReq(ctx *gin.Context) {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error while updating VAL in DB"})
 				return
 			}
-			_, err = db.Exec(fmt.Sprintf("DELETE FROM pendingApplications WHERE username='%s' AND role_requested='%s' AND user_pwd='%s' AND id='%d'", body.UserName, body.UserRole, body.UserPwd, body.PendingId))
+			_, err = db.Exec(
+				"DELETE FROM pendingApplications WHERE username = ? AND role_requested = ? AND user_pwd = ? AND id = ?",
+				body.UserName,
+				body.UserRole,
+				body.UserPwd,
+				body.PendingId,
+			)
 			if err != nil {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
@@ -315,7 +294,7 @@ func AcceptPendingReq(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, gin.H{"output": "student created"})
 			return
 		case "teacher":
-			if body.UserId == "" || body.UserName == "" || body.UserPwd == "" {
+			if body.UserId <= 0 || body.UserName == "" || body.UserPwd == "" {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": "fill userid/std/section accurately"})
 				return
 			}
@@ -332,7 +311,7 @@ func AcceptPendingReq(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, gin.H{"output": "teacher created"})
 			return
 		case "admin":
-			if body.UserId == "" || body.UserName == "" || body.UserPwd == "" {
+			if body.UserId <= 0 || body.UserName == "" || body.UserPwd == "" {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": "fill userid/name/pwd accurately"})
 				return
 			}
@@ -403,20 +382,17 @@ func DeleteTeacher(ctx *gin.Context) {
 		return
 	} else if role == "admin" {
 		var tid struct {
-			TId string `json:"teacherId" binding:"required"`
+			TId int `json:"teacherId" binding:"required"`
 		}
 		if err := ctx.ShouldBindJSON(&tid); err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "unable to read body"})
 			return
 		}
-		if tid.TId == "" {
+		if tid.TId <= 0 || tid.TId > 99999999 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "provide a teacher id"})
 			return
 		}
-		if len(tid.TId) > 8 {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "provide a valid teacher id"})
-			return
-		}
+
 		var amt int
 
 		db, err := sql.Open("mysql", dsn)
@@ -499,7 +475,7 @@ func AddTeacher(ctx *gin.Context) {
 		return
 	} else if role == "admin" {
 		var tdata struct {
-			TId              string `json:"teacherId" binding:"required"`
+			TId              int    `json:"teacherId" binding:"required"`
 			Tpwd             string `json:"tPwd" binding:"required"`
 			Role             string `json:"role" binding:"required"`
 			Name             string `json:"tName" binding:"required"`
@@ -511,7 +487,7 @@ func AddTeacher(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "unable to read body"})
 			return
 		}
-		if tdata.TId == "" || len(tdata.TId) > 8 {
+		if tdata.TId <= 0 || tdata.TId > 99999999 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "provide a valid teacher id"})
 			return
 		}
@@ -609,7 +585,7 @@ func EditTeacher(ctx *gin.Context) {
 		}
 		defer db.Close()
 		var tdata struct {
-			TId              string `json:"teacherId" binding:"required"`
+			TId              int    `json:"teacherId" binding:"required"`
 			Tpwd             string `json:"tPwd"`
 			Role             string `json:"role"`
 			Name             string `json:"tName"`
@@ -630,7 +606,7 @@ func EditTeacher(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "unable to read body"})
 			return
 		}
-		if tdata.TId == "" || len(tdata.TId) > 8 {
+		if tdata.TId <= 0 || tdata.TId > 99999999 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "provide a teacher id"})
 			return
 		}
@@ -655,10 +631,6 @@ func EditTeacher(ctx *gin.Context) {
 		}
 		if tdata.Role != "" && tdata.Role != "teacher" {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid role provided, it shall always be teacher"})
-			return
-		}
-		if len(tdata.TId) > 8 || len(tdata.TId) <= 0 {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "provide a valid teacher id"})
 			return
 		}
 		if tdata.Tpwd != "" && len(tdata.Tpwd) != 8 {
@@ -767,7 +739,7 @@ func EditTeacher(ctx *gin.Context) {
 				dbstr += " "
 			}
 		}
-		dbstr += ("WHERE tId = '" + tdata.TId + "'")
+		dbstr += ("WHERE tId = '" + strconv.Itoa(tdata.TId) + "'")
 		if _, err = db.Exec(dbstr); err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error() + dbstr})
 			return

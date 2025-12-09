@@ -64,14 +64,9 @@ func DisplayStudents(ctx *gin.Context) {
 		return
 	} else {
 		var constraints DisplayConditions
-		fmt.Println(constraints, "constraintssss1")
-		if ctx.Query("viewBySection") == "null" {
-			fmt.Println("jugadddd")
-		}
 		constraints.MaxPercent, _ = strconv.Atoi(ctx.Query("maxPercent"))
 		constraints.MinPercent, _ = strconv.Atoi(ctx.Query("minPercent"))
 		constraints.ViewBySection = ctx.Query("viewBySection")
-		fmt.Println(constraints, "constraintssss2", "---------", ctx.Query("viewBySection"))
 		constraints.ViewByStd, _ = strconv.Atoi(ctx.Query("viewByStd"))
 		if constraints.MaxPercent > 100 || constraints.MaxPercent < 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "max percent shall be within range of 0 and 100"})
@@ -102,7 +97,7 @@ func DisplayStudents(ctx *gin.Context) {
 			}
 			dbstr += "s.std = " + strconv.Itoa(constraints.ViewByStd)
 		}
-		if constraints.ViewBySection != "" {
+		if constraints.ViewBySection != "" && constraints.ViewBySection != "null" {
 			if count == 0 {
 				dbstr += " WHERE "
 				count++
@@ -261,7 +256,7 @@ func Report(ctx *gin.Context) {
 			Grade         string `json:"grade"`
 		}
 		type Comments struct {
-			TeacherId   string `json:"tId"`
+			TeacherId   int    `json:"tId"`
 			TeacherName string `json:"tName"`
 			Comment     string `json:"comment"`
 		}
