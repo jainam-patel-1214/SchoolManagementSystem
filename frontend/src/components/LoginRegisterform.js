@@ -116,7 +116,6 @@ export const LoginRegisterForm = () => {
             console.log(error);
         } finally {
             emptyStates()
-            setData(nullifiedUserData);
             setValidInp(false)
         }
 
