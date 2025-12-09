@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS subjectAllocation (
     subject_limit int NOT NULL
 );
 CREATE TABLE IF NOT EXISTS reviews (
-    tId VARCHAR(8) NOT NULL,
+    tId int NOT NULL,
     grNo int NOT NULL,
     comment VARCHAR(255),
     FOREIGN KEY (tId) REFERENCES teachers(tId) ON DELETE CASCADE,

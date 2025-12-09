@@ -1,6 +1,7 @@
---002.sql
+-- 002.SQL
 ALTER TABLE teachers
-ALTER COLUMN tId int;
-
+MODIFY COLUMN tId INT;
 ALTER TABLE admins
-ALTER COLUMN admin_id int;
+MODIFY COLUMN admin_id INT;
+ALTER TABLE reviews
+MODIFY COLUMN tId INT;
