@@ -34,14 +34,22 @@ export const LoginRegisterForm = () => {
 
     const registerChangeHandler = () => {
         setShowLogin(false);
+        emptyStates()
         setShowRegister(true);
     };
     const loginChangeHandler = () => {
         setShowLogin(true);
+        emptyStates()
         setShowRegister(false);
     };
 
-
+    const emptyState = ()=>{
+        const nullifiedUserData = Object.keys(data).reduce((acc, key) => {
+                acc[key] = null;
+                return acc;
+            }, {});
+            setData(nullifiedUserData);
+    }
     const handleSignUp = async (e) => {
         e.preventDefault();
         if (data?.userRole === "") {
@@ -69,11 +77,7 @@ export const LoginRegisterForm = () => {
             ErrorToast(error)
             console.log(error);
         } finally {
-            const nullifiedUserData = Object.keys(data).reduce((acc, key) => {
-                acc[key] = null;
-                return acc;
-            }, {});
-            setData(nullifiedUserData);
+            emptyStates()
             e.target.reset()
             setValidInp(false)
         }
@@ -111,11 +115,7 @@ export const LoginRegisterForm = () => {
         } catch (error) {
             console.log(error);
         } finally {
-            e.target.reset()
-            const nullifiedUserData = Object.keys(data).reduce((acc, key) => {
-                acc[key] = null;
-                return acc;
-            }, {});
+            emptyStates()
             setData(nullifiedUserData);
             setValidInp(false)
         }
