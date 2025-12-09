@@ -36,6 +36,67 @@ func AddTempStudent(body string) {
 	router.ServeHTTP(w, req)
 }
 func DeleteTempStudent(body string) {
+	HelperData = UserGenerator("admin")
+	router := routes.InitializeRouter()
+	w := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(w)
+	req, err := http.NewRequest(http.MethodDelete, "/admin/delStudent", bytes.NewBufferString(body))
+	if err != nil {
+		log.Fatalf("failed to create request: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	ctx.Request = req
+	token := tokenSetter()
+	req.Header.Set("Cookie", token)
+	router.ServeHTTP(w, req)
+}
+func AddTempTeacher(body string) {
+	HelperData = UserGenerator("admin")
+	router := routes.InitializeRouter()
+	w := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(w)
+	req, err := http.NewRequest(http.MethodPost, "/admin/addTeacher", bytes.NewBufferString(body))
+	if err != nil {
+		log.Fatalf("failed to create request: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	ctx.Request = req
+	token := tokenSetter()
+	req.Header.Set("Cookie", token)
+	router.ServeHTTP(w, req)
+}
+func DeleteTempTeacher(body string) {
+	HelperData = UserGenerator("admin")
+	router := routes.InitializeRouter()
+	w := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(w)
+	req, err := http.NewRequest(http.MethodDelete, "/admin/delTeacher", bytes.NewBufferString(body))
+	if err != nil {
+		log.Fatalf("failed to create request: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	ctx.Request = req
+	token := tokenSetter()
+	req.Header.Set("Cookie", token)
+	router.ServeHTTP(w, req)
+}
+func AddTempMarks(studentbody string, subjectbody string, markbody string) {
+	HelperData = UserGenerator("admin")
+	router := routes.InitializeRouter()
+	p := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(p)
+	req, err := http.NewRequest(http.MethodPost, "/admin/createStud", bytes.NewBufferString(studentbody))
+	if err != nil {
+		log.Fatalf("failed to create request: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	ctx.Request = req
+	token := tokenSetter()
+	req.Header.Set("Cookie", token)
+	router.ServeHTTP(p, req)
+}
+func DeleteTempMarks(body string) {
+	HelperData = UserGenerator("admin")
 	router := routes.InitializeRouter()
 	w := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(w)
