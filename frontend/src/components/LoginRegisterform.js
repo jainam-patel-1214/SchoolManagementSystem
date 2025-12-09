@@ -1,6 +1,6 @@
 import { FaRegUser } from "react-icons/fa";
 import { FaKey } from "react-icons/fa";
-import { Fragment, useState, useEffect } from "react";
+import { Fragment, useState, useEffect, useRef } from "react";
 import axios from "axios";
 import styled from "styled-components";
 import { SignInBtn } from "../styled-components/LoginSigninButton";
@@ -8,7 +8,6 @@ import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { ErrorToast, SuccessToast } from "../utils/Toaster";
 import { CookieSetter } from "../utils/setCookie";
-import { NullStateObjGenerator, ObjValueChangeHandler, ResetState } from "../utils/StateSetter";
 const SelectInRegister = styled.select`
   border: 1px solid #b9b9b9;
   padding: 5px;
@@ -16,8 +15,20 @@ const SelectInRegister = styled.select`
 
 export const LoginRegisterForm = () => {
     const navigate = useNavigate()
+    const buttonRef = useRef(null)
     const [validInp, setValidInp] = useState(false)
-    const [loginRegisterData, setLoginRegisterData] = useState(NullStateObjGenerator(["userId","password","userName","userRole"]))
+    const [data, setData] = useState({
+        userId: null,
+        password: null,
+        userName: null,
+        userRole: null
+    })
+    const dataChangeHandler = (key, value) => {
+        setData(prevdata => ({
+            ...prevdata,
+            [key]: value
+        }))
+    }
     const [showLogin, setShowLogin] = useState(true);
     const [showRegister, setShowRegister] = useState(false);
 
@@ -29,15 +40,15 @@ export const LoginRegisterForm = () => {
         setShowLogin(true);
         setShowRegister(false);
     };
-    
+
 
     const handleSignUp = async (e) => {
         e.preventDefault();
-        if (loginRegisterData?.userRole === "") {
+        if (data?.userRole === "") {
             alert("pick a role for yourself to register with");
             return;
         }
-        if (loginRegisterData?.userName === "" || loginRegisterData?.password === "") {
+        if (data?.userName === "" || data?.password === "") {
             alert("enter userid and password properly");
             return;
         }
@@ -45,7 +56,7 @@ export const LoginRegisterForm = () => {
             await axios
                 .post(
                     "http://localhost:8090/register",
-                    { yourName: loginRegisterData?.userName, password: loginRegisterData?.password, roleReq: loginRegisterData?.userRole },
+                    { yourName: data?.userName, password: data?.password, roleReq: data?.userRole },
                     { headers: { "Content-Type": "application/json" } }
                 )
                 .then((res) => {
@@ -55,9 +66,14 @@ export const LoginRegisterForm = () => {
                     ErrorToast(err.response.data.error || err, toast)
                 });
         } catch (error) {
+            ErrorToast(error)
             console.log(error);
         } finally {
-            ResetState(loginRegisterData,setLoginRegisterData)
+            const nullifiedUserData = Object.keys(data).reduce((acc, key) => {
+                acc[key] = null;
+                return acc;
+            }, {});
+            setData(nullifiedUserData);
             e.target.reset()
             setValidInp(false)
         }
@@ -65,7 +81,7 @@ export const LoginRegisterForm = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        if (loginRegisterData.userId === "" || loginRegisterData.password === "") {
+        if (data?.userId === "" || data?.password === "") {
             alert("enter userid and password properly");
             return;
         }
@@ -73,12 +89,12 @@ export const LoginRegisterForm = () => {
             await axios
                 .post(
                     "http://localhost:8090/login",
-                    { userId: loginRegisterData.userId, password: loginRegisterData.password },
+                    { userId: data?.userId, password: data?.password },
                     { headers: { "Content-Type": "application/json" } }
                 )
                 .then((res) => {
                     SuccessToast('Login Successful!', toast)
-                    CookieSetter(loginRegisterData.userId, res.data.username, res.data.output, res.data.role)
+                    CookieSetter(data?.userId, res.data.username, res.data.output, res.data.role)
                     if (res.data.role === "student") {
                         navigate("/app/student")
                     }
@@ -96,32 +112,45 @@ export const LoginRegisterForm = () => {
             console.log(error);
         } finally {
             e.target.reset()
-            ResetState(loginRegisterData,setLoginRegisterData)
+            const nullifiedUserData = Object.keys(data).reduce((acc, key) => {
+                acc[key] = null;
+                return acc;
+            }, {});
+            setData(nullifiedUserData);
             setValidInp(false)
         }
 
     };
 
     useEffect(() => {
-        if (validInp) {
-            document.querySelectorAll(".applyNoAfter").forEach(e => {
-                e.classList.add("noAfter")
-                e.removeAttribute("disabled")
-            })
+        if (!buttonRef.current) return;
+        if (!validInp) {
+            buttonRef.current.disabled = true;
+            buttonRef.current.classList.remove("noAfter");
         } else {
-            document.querySelectorAll(".applyNoAfter").forEach(e => {
-                e.classList.remove("noAfter")
-                e.setAttribute("disabled", true)
-            })
+            buttonRef.current.disabled = false;
+            buttonRef.current.classList.add("noAfter");
         }
+
     }, [validInp])
     useEffect(() => {
-        console.log("hi");
-        
-        if ((showLogin && loginRegisterData.userId?.length > 0 && loginRegisterData?.userId?.length <= 8 && loginRegisterData?.password?.length === 8) || (showRegister && loginRegisterData?.userName?.length >= 2 && loginRegisterData?.password?.length === 8 && loginRegisterData?.userRole?.toString() !== "")) {
-            setValidInp(true)
-        } else setValidInp(false)
-    }, [loginRegisterData])
+        const isLoginValid = showLogin &&
+            data?.password !== null &&
+            data?.userId !== null &&
+            data?.userId > 0 &&
+            data?.userId <= 99999999 &&
+            data?.password?.length === 8;
+
+        const isRegisterValid = showRegister &&
+            data?.password !== null &&
+            data?.userName !== null &&
+            data?.userRole !== null &&
+            data?.userName?.length >= 2 &&
+            data?.password?.length === 8 &&
+            data?.userRole?.toString() !== "";
+
+        setValidInp((showLogin&&isLoginValid) || (showRegister&&isRegisterValid));
+    }, [data])
 
 
     return (
@@ -129,18 +158,19 @@ export const LoginRegisterForm = () => {
             <ToastContainer />
             {showLogin ?
                 <Fragment>
-                    <form id="loginform" onSubmit={handleLogin}>
+                    <form id="loginform" onSubmit={(e) => { handleLogin(e) }}>
                         <h2>Welcome to Scholar</h2>
                         <label htmlFor="userId">
                             <FaRegUser /> User Id
                         </label>
                         <input
-                            type="text"
+                            type="number"
                             name="userId"
                             id="userid"
                             placeholder="user id here"
+                            value={data?.userId || ""}
                             onChange={(e) => {
-                                ObjValueChangeHandler(e,setLoginRegisterData,'string')
+                                dataChangeHandler("userId", Number(e.target.value))
                             }}
                         />
                         <label htmlFor="password">
@@ -150,12 +180,13 @@ export const LoginRegisterForm = () => {
                             type="password"
                             id="password"
                             name="password"
+                            value={data?.password || ""}
                             placeholder="password here"
                             onChange={(e) => {
-                                ObjValueChangeHandler(e,setLoginRegisterData,'string')
+                                dataChangeHandler("password", e.target.value)
                             }}
                         />
-                        <SignInBtn className="applyNoAfter" type="submit">Login</SignInBtn>
+                        <SignInBtn ref={buttonRef} type="submit">Login</SignInBtn>
                     </form>
                     <p>Or sign up using</p>
                     <h3 onClick={registerChangeHandler}>Sign Up</h3>
@@ -165,7 +196,7 @@ export const LoginRegisterForm = () => {
             }
             {showRegister ? (
                 <Fragment>
-                    <form id="signupform" onSubmit={handleSignUp}>
+                    <form id="signupform" onSubmit={(e) => { handleSignUp(e) }}>
                         <h2>Welcome to Scholar</h2>
                         <label htmlFor="userName">
                             <FaRegUser /> Your name
@@ -173,10 +204,11 @@ export const LoginRegisterForm = () => {
                         <input
                             type="text"
                             name="userName"
-                            id="userid"
+                            id="username"
+                            value={data?.userName}
                             placeholder="provide your name"
                             onChange={(e) => {
-                                ObjValueChangeHandler(e,setLoginRegisterData)
+                                dataChangeHandler("userName", e.target.value)
                             }}
                         />
                         <label htmlFor="password">
@@ -186,15 +218,17 @@ export const LoginRegisterForm = () => {
                             type="password"
                             id="password"
                             name="password"
+                            value={data?.password}
                             placeholder="provide a password"
                             onChange={(e) => {
-                                ObjValueChangeHandler(e,setLoginRegisterData)
+                                dataChangeHandler("password", e.target.value)
                             }}
                         />
                         <SelectInRegister
                             onChange={(e) => {
-                                ObjValueChangeHandler(e,setLoginRegisterData)
+                                dataChangeHandler("userRole", e.target.value)
                             }}
+                            value={data?.userRole}
                             name="userRole"
                         >
                             <option value="">Select a role you wish to register</option>
@@ -202,7 +236,7 @@ export const LoginRegisterForm = () => {
                             <option value="teacher">Teacher</option>
                             <option value="admin">Admin</option>
                         </SelectInRegister>
-                        <SignInBtn className="applyNoAfter" type="submit">SignUp</SignInBtn>
+                        <SignInBtn ref={buttonRef} type="submit">SignUp</SignInBtn>
                     </form>
                     <p>Or log in using</p>
                     <h3 onClick={loginChangeHandler}>Log In</h3>
