@@ -2,10 +2,7 @@ package admin_test
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
-	"io"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -24,86 +21,12 @@ type TestingStructure struct {
 	expectedCode int
 }
 
-type UserData struct {
-	UID  string `json:"uid"`
-	UPwd string `json:"upwd"`
-}
-
-type LoginResponse struct {
-	Token string `json:"output"`
-	UName string `json:"username"`
-	Urole string `json:"role"`
-}
-
 var CurrentData struct {
 	UserId string
 	Token  string
+	Role   string
 }
 
-func AdminGenerator() {
-	router := routes.InitializeRouter()
-	data := map[string]string{
-		"yourName": "John Doe",
-		"password": "password",
-		"roleReq":  "admin",
-		"secretK":  "$2a$15$NXTb8AxndfnaA82JWAxr2.apFmJkU.S1ROK10HmFBf69KxSCtW7S",
-	}
-	w := httptest.NewRecorder()
-	v := httptest.NewRecorder()
-	jsonData, err := json.Marshal(data)
-	if err != nil {
-		fmt.Println("Error marshaling JSON:", err)
-		return
-	}
-	ctx, _ := gin.CreateTestContext(w)
-
-	req, err := http.NewRequest(http.MethodPost, "/register", bytes.NewBuffer(jsonData))
-	if err != nil {
-		log.Fatalf("failed to create request: %v", err)
-	}
-	ctx.Request = req
-	req.Header.Set("Content-Type", "application/json")
-	router.ServeHTTP(w, req)
-	body, err := io.ReadAll(w.Body)
-	if err != nil {
-		fmt.Println("Error reading response body:", err)
-		return
-	}
-	var result UserData
-
-	err = json.Unmarshal(body, &result)
-	if err != nil {
-		log.Fatalf("Error unmarshaling JSON: %v", err)
-	}
-	CurrentData.UserId = result.UID
-	logindata := map[string]any{
-		"userId":   result.UID,
-		"password": result.UPwd,
-	}
-	jsonData, err = json.Marshal(logindata)
-	if err != nil {
-		fmt.Println("Error marshaling JSON:", err)
-		return
-	}
-	req, err = http.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(jsonData))
-	if err != nil {
-		log.Fatalf("failed to create request: %v", err)
-	}
-	ctx.Request = req
-	req.Header.Set("Content-Type", "application/json")
-	router.ServeHTTP(v, req)
-	body, err = io.ReadAll(v.Body)
-	if err != nil {
-		fmt.Println("Error reading response body:", err)
-		return
-	}
-	var LoginOp LoginResponse
-	err = json.Unmarshal(body, &LoginOp)
-	if err != nil {
-		log.Fatalf("Error unmarshaling JSON: %v", err)
-	}
-	CurrentData.Token = LoginOp.Token
-}
 func AdminDeleter() {
 	utils.Cleaner([]string{`DELETE FROM activeSessions where sessiontoken="` + CurrentData.Token + `"`})
 	utils.Cleaner([]string{`DELETE FROM admins where admin_id="` + CurrentData.UserId + `"`})
@@ -182,7 +105,7 @@ func TestAddStudentsByAdmin(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 	}
-	AdminGenerator()
+	CurrentData = utils.UserGenerator("admin")
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -206,7 +129,6 @@ func TestAddStudentsByAdmin(t *testing.T) {
 			router.ServeHTTP(w, req)
 			if w.Code != tc.expectedCode {
 				fmt.Printf("%s in this test - expected status %d, got %v", tc.name, tc.expectedCode, w.Body.String())
-
 			}
 			t.Logf("%s - testname, Response = %s", tc.name, w.Body.String())
 			if len(tc.cleanup) > 0 {
@@ -279,7 +201,7 @@ func TestEditStudentsByAdmin(t *testing.T) {
 			expectedCode: http.StatusOK,
 		},
 	}
-	AdminGenerator()
+	CurrentData = utils.UserGenerator("admin")
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -355,7 +277,7 @@ func TestAddSubjectByAdmin(t *testing.T) {
 			expectedCode: http.StatusOK,
 		},
 	}
-	AdminGenerator()
+	CurrentData = utils.UserGenerator("admin")
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -439,7 +361,7 @@ func TestEditSubjectsByAdmin(t *testing.T) {
 			expectedCode: http.StatusOK,
 		},
 	}
-	AdminGenerator()
+	CurrentData = utils.UserGenerator("admin")
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -565,7 +487,7 @@ func TestAddTeacherByAdmin(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 	}
-	AdminGenerator()
+	CurrentData = utils.UserGenerator("admin")
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -682,7 +604,7 @@ func TestEditTeacherByAdmin(t *testing.T) {
 			expectedCode: http.StatusOK,
 		},
 	}
-	AdminGenerator()
+	CurrentData = utils.UserGenerator("admin")
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -754,7 +676,7 @@ func TestDisplaySubjectsByAdmin(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 	}
-	AdminGenerator()
+	CurrentData = utils.UserGenerator("admin")
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -844,7 +766,7 @@ func TestAddMarksByAdmin(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 	}
-	AdminGenerator()
+	CurrentData = utils.UserGenerator("admin")
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -926,7 +848,7 @@ func TestEditMarksByAdmin(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 	}
-	AdminGenerator()
+	CurrentData = utils.UserGenerator("admin")
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -991,7 +913,7 @@ func TestTeacherPerformanceByAdmin(t *testing.T) {
 			expectedCode: http.StatusUnauthorized,
 		},
 	}
-	AdminGenerator()
+	CurrentData = utils.UserGenerator("admin")
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -1060,7 +982,7 @@ func TestStudentReportByAdmin(t *testing.T) {
 			expectedCode: http.StatusUnauthorized,
 		},
 	}
-	AdminGenerator()
+	CurrentData = utils.UserGenerator("admin")
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -1122,7 +1044,7 @@ func TestDeleteTeacherByAdmin(t *testing.T) {
 			expectedCode: http.StatusOK,
 		},
 	}
-	AdminGenerator()
+	CurrentData = utils.UserGenerator("admin")
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -1184,7 +1106,7 @@ func TestDeleteStudentByAdmin(t *testing.T) {
 			expectedCode: http.StatusOK,
 		},
 	}
-	AdminGenerator()
+	CurrentData = utils.UserGenerator("admin")
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -1247,7 +1169,7 @@ func TestDeleteSubjectByAdmin(t *testing.T) {
 			expectedCode: http.StatusOK,
 		},
 	}
-	AdminGenerator()
+	CurrentData = utils.UserGenerator("admin")
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -1309,7 +1231,7 @@ func TestSetSubLimitByAdmin(t *testing.T) {
 			expectedCode: http.StatusOK,
 		},
 	}
-	AdminGenerator()
+	CurrentData = utils.UserGenerator("admin")
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -1356,7 +1278,7 @@ func TestPendingRequestByAdmin(t *testing.T) {
 			expectedCode: http.StatusOK,
 		},
 	}
-	AdminGenerator()
+	CurrentData = utils.UserGenerator("admin")
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -1466,7 +1388,7 @@ func TestAcceptPendingRequestByAdmin(t *testing.T) {
 			name:         "Valid case student",
 			prior:        []string{`INSERT INTO pendingApplications VALUES (99,"SINGHAM","student","password")`},
 			cleanup:      []string{`DELETE FROM students WHERE grNo=187`},
-			reqbody:      `{"pendingId":99,"uName":"SINGHAM","uPwd":"password","uRole":"student","Uid":187,"std":5,"section":"A"}`,
+			reqbody:      `{"pendingId":99,"uName":"SINGHAM","uPwd":"password","uRole":"student","Uid":"187","std":5,"section":"A"}`,
 			expectedCode: http.StatusOK,
 		},
 		{
@@ -1491,7 +1413,7 @@ func TestAcceptPendingRequestByAdmin(t *testing.T) {
 			expectedCode: http.StatusOK,
 		},
 	}
-	AdminGenerator()
+	CurrentData = utils.UserGenerator("admin")
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -1549,7 +1471,7 @@ func TestRejectPendingRequestByAdmin(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 	}
-	AdminGenerator()
+	CurrentData = utils.UserGenerator("admin")
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -1639,7 +1561,7 @@ func TestRegister(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 	}
-	AdminGenerator()
+	CurrentData = utils.UserGenerator("admin")
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
