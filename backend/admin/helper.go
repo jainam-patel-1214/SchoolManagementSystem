@@ -156,7 +156,7 @@ func Report(ctx *gin.Context) {
 			Grade         string `json:"grade"`
 		}
 		type Comments struct {
-			TeacherId   string `json:"tId"`
+			TeacherId   int    `json:"tId"`
 			TeacherName string `json:"tName"`
 			Comment     string `json:"comment"`
 		}
@@ -244,7 +244,7 @@ func Report(ctx *gin.Context) {
 			err = res2.Scan(&tp.TeacherId, &tp.TeacherName, &tp.Comment)
 			if err != nil {
 				fmt.Println(err)
-				// ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cant process query output"})
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cant process query output"})
 				return
 			}
 			otpt.CommentInfo = append(otpt.CommentInfo, tp)
@@ -899,21 +899,17 @@ func Performance(ctx *gin.Context) {
 		return
 	}
 	var TeacherId struct {
-		Tid string
+		Tid int
 	}
-	TeacherId.Tid = ctx.Param("tid")
-	fmt.Println("teacher id inocming", TeacherId.Tid)
-	if TeacherId.Tid == "" {
+	TeacherId.Tid, _ = strconv.Atoi(ctx.Param("tid"))
+
+	if TeacherId.Tid <= 0 || TeacherId.Tid > 99999999 {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "no id found"})
 		return
 	}
-	if TeacherId.Tid != "" {
-		if len(TeacherId.Tid) > 8 {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid teacher's id"})
-			return
-		}
+	if TeacherId.Tid != 0 {
 		var amt int
-		if err = db.QueryRow(fmt.Sprintf("SELECT COUNT(tId) FROM teachers WHERE tId = '%s'", TeacherId.Tid)).Scan(&amt); err != nil && err != sql.ErrNoRows {
+		if err = db.QueryRow("SELECT COUNT(tId) FROM teachers WHERE tId = ?", TeacherId.Tid).Scan(&amt); err != nil && err != sql.ErrNoRows {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -925,7 +921,7 @@ func Performance(ctx *gin.Context) {
 		if err = db.QueryRow("SELECT subId FROM teachers WHERE tId=?", TeacherId.Tid).Scan(&teachFlag); teachFlag == 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "teacher id you provided doesnt take any subject, so no performance can be evaluated"})
 			return
-		} else if err == sql.ErrNoRows {
+		} else if err == sql.ErrNoRows || teachFlag <= 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "teacher id you provided doesnt take any subject, so no performance can be evaluated"})
 			return
 		}
@@ -937,13 +933,13 @@ func Performance(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "please provide teacher's id"})
 		return
 	}
-	res := db.QueryRow(fmt.Sprintf("SELECT subId,stdAllocated FROM teachers WHERE tId = '%s'", TeacherId.Tid))
-	var std int
+	res := db.QueryRow("SELECT subId,stdAllocated FROM teachers WHERE tId = ?", TeacherId.Tid)
+	var sub int
 	var stda int
-	if err = res.Scan(&std, &stda); err != nil && err != sql.ErrNoRows {
+	if err = res.Scan(&sub, &stda); err != nil && err != sql.ErrNoRows {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
 		return
-	} else if std == 0 || stda == 0 {
+	} else if sub == 0 || stda == 0 {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject/standard is not allocated to teacher whose performance you requested. thus no performance can be fetched"})
 		return
 	} else if err == sql.ErrNoRows {
@@ -951,7 +947,7 @@ func Performance(ctx *gin.Context) {
 		return
 	}
 	type Teachers struct {
-		Tid                 string
+		Tid                 int
 		TName               string
 		StdAllocated        int
 		SubName             string
@@ -964,14 +960,14 @@ func Performance(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong hwile fetching db"})
 		return
 	}
-	var tempres Teachers
 	for res2.Next() {
-		var temp any
+		var tempres Teachers
+		var temp int
 		err = res2.Scan(&temp)
 		if err != nil {
 			fmt.Println("cannot scan", err)
 		} else {
-			res3, err := db.Query(fmt.Sprintf("SELECT t.tId, t.tName, t.stdAllocated, s.subName, SUM(m.theoryM) AS totalTheory, SUM(m.practicalM) AS totalPractical FROM marks m LEFT JOIN teachers t ON m.subId = t.subId INNER JOIN subjects s ON t.subId = s.subId WHERE t.tId = '%s' GROUP BY t.tId, t.tName, t.stdAllocated, s.subName", temp))
+			res3, err := db.Query("SELECT t.tId, t.tName, t.stdAllocated, s.subName, SUM(m.theoryM) AS totalTheory, SUM(m.practicalM) AS totalPractical FROM marks m LEFT JOIN teachers t ON m.subId = t.subId INNER JOIN subjects s ON t.subId = s.subId WHERE t.tId = ? GROUP BY t.tId, t.tName, t.stdAllocated, s.subName", temp)
 			if err != nil {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
