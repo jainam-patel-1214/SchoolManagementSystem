@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS students (
     CONSTRAINT check_std_input CHECK (std BETWEEN 1 AND 12)
 );
 CREATE TABLE IF NOT EXISTS teachers (
-    tId int PRIMARY KEY,
+    tId VARCHAR(8) PRIMARY KEY,
     tPwd varchar(8) NOT NULL,
     userRole varchar(10) DEFAULT 'teacher',
     tName VARCHAR(50) NOT NULL,
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS subjectAllocation (
     subject_limit int NOT NULL
 );
 CREATE TABLE IF NOT EXISTS reviews (
-    tId int NOT NULL,
+    tId VARCHAR(8) NOT NULL,
     grNo int NOT NULL,
     comment VARCHAR(255),
     FOREIGN KEY (tId) REFERENCES teachers(tId) ON DELETE CASCADE,
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS pendingApplications(
     PRIMARY KEY(id)
 );
 CREATE TABLE IF NOT EXISTS admins(
-    admin_id int NOT NULL PRIMARY KEY,
+    admin_id VARCHAR(8) NOT NULL PRIMARY KEY,
     admin_name VARCHAR(20) NOT NULL,
     admin_pwd VARCHAR(8) NOT NULL
 )
