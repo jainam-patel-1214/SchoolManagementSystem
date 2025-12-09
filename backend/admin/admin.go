@@ -14,8 +14,6 @@ import (
 
 var dsn = database.InitDb()
 
-const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-
 func Random8DigitInt() int {
 	return rand.Intn(90000000) + 10000000
 }
