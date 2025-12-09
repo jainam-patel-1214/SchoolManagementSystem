@@ -21,7 +21,9 @@ func RunMigrations(db *sql.DB, dirName string) {
 	}
 	fmt.Println(fileName)
 	for _, file := range fileName {
+		db.Exec("set foreign_key_checks=0")
 		path := filepath.Join(dirName, file)
+		fmt.Println(path)
 		content, err := os.ReadFile(path)
 		if err != nil {
 			log.Fatal(err)
@@ -29,5 +31,6 @@ func RunMigrations(db *sql.DB, dirName string) {
 		if _, err := db.Exec(string(content)); err != nil {
 			log.Fatal(err)
 		}
+		db.Exec("set foreign_key_checks=1")
 	}
 }
