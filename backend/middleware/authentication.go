@@ -43,6 +43,7 @@ func CreateSession(ctx *gin.Context) {
 	var credentials struct {
 		UserId   int    `json:"userId"`
 		Password string `json:"password"`
+		UserRole string `json:"userRole"`
 	}
 	claim := &JwtClaims{}
 	idExist := false
@@ -61,30 +62,37 @@ func CreateSession(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid pwd"})
 		return
 	}
-	res, err := db.Query("SELECT grNo, userRole, studName FROM students WHERE grNo=? AND sPwd=? ", credentials.UserId, credentials.Password)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err})
+	if credentials.UserRole != "student" && credentials.UserRole != "teacher" && credentials.UserRole != "admin" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid role provided"})
 		return
 	}
-	temptime := time.Now().Add(24 * time.Hour)
-	fmt.Println("time added 1 day", temptime)
 	var name string
 	var role string
-	if res.Next() {
-		var grNo int
-		err = res.Scan(&grNo, &role, &name)
+	temptime := time.Now().Add(24 * time.Hour)
+	switch credentials.UserRole {
+	case "student":
+		res, err := db.Query("SELECT grNo, userRole, studName FROM students WHERE grNo=? AND sPwd=? ", credentials.UserId, credentials.Password)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err})
 			return
 		}
-		idExist = true
-		fmt.Println("in student")
-		claim.Uid = grNo
-		claim.Role = role
-		claim.RegisteredClaims.IssuedAt = jwt.NewNumericDate(time.Now())
-		claim.RegisteredClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(24 * time.Hour))
-	} else if !res.Next() {
-		res, err = db.Query("SELECT tId, userRole, tName FROM teachers WHERE tId=? AND tPwd=? ", credentials.UserId, credentials.Password)
+		fmt.Println("time added 1 day", temptime)
+		if res.Next() {
+			var grNo int
+			err = res.Scan(&grNo, &role, &name)
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err})
+				return
+			}
+			idExist = true
+			fmt.Println("in student")
+			claim.Uid = grNo
+			claim.Role = role
+			claim.RegisteredClaims.IssuedAt = jwt.NewNumericDate(time.Now())
+			claim.RegisteredClaims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(24 * time.Hour))
+		}
+	case "teacher":
+		res, err := db.Query("SELECT tId, userRole, tName FROM teachers WHERE tId=? AND tPwd=? ", credentials.UserId, credentials.Password)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err})
 			return
@@ -101,21 +109,25 @@ func CreateSession(ctx *gin.Context) {
 			claim.Role = role
 			claim.RegisteredClaims.IssuedAt = jwt.NewNumericDate(time.Now())
 			claim.RegisteredClaims.ExpiresAt = jwt.NewNumericDate(temptime)
-		} else {
-			var aId int
-			err := db.QueryRow("SELECT admin_id,admin_name FROM admins WHERE admin_id=? AND admin_pwd=? ", credentials.UserId, credentials.Password).Scan(&aId, &name)
-			if err != nil {
-				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "invalid credentials"})
-				return
-			}
-			role = "admin"
-			idExist = true
-			claim.Uid = aId
-			claim.Role = "admin"
-			claim.RegisteredClaims.IssuedAt = jwt.NewNumericDate(time.Now())
-			claim.RegisteredClaims.ExpiresAt = jwt.NewNumericDate(temptime)
 		}
+	case "admin":
+		var aId int
+		err := db.QueryRow("SELECT admin_id,admin_name FROM admins WHERE admin_id=? AND admin_pwd=? ", credentials.UserId, credentials.Password).Scan(&aId, &name)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "invalid credentials"})
+			return
+		}
+		role = "admin"
+		idExist = true
+		claim.Uid = aId
+		claim.Role = "admin"
+		claim.RegisteredClaims.IssuedAt = jwt.NewNumericDate(time.Now())
+		claim.RegisteredClaims.ExpiresAt = jwt.NewNumericDate(temptime)
+	default:
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "invalid role"})
+		return
 	}
+
 	if !idExist {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 		return
