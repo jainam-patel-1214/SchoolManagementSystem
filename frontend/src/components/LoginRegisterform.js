@@ -29,6 +29,13 @@ export const LoginRegisterForm = () => {
             [key]: value
         }))
     }
+    const emptyStates = ()=>{
+        const nullifiedUserData = Object.keys(data).reduce((acc, key) => {
+                acc[key] = null;
+                return acc;
+            }, {});
+            setData(nullifiedUserData);
+    }
     const [showLogin, setShowLogin] = useState(true);
     const [showRegister, setShowRegister] = useState(false);
 
@@ -43,13 +50,6 @@ export const LoginRegisterForm = () => {
         setShowRegister(false);
     };
 
-    const emptyState = ()=>{
-        const nullifiedUserData = Object.keys(data).reduce((acc, key) => {
-                acc[key] = null;
-                return acc;
-            }, {});
-            setData(nullifiedUserData);
-    }
     const handleSignUp = async (e) => {
         e.preventDefault();
         if (data?.userRole === "") {
