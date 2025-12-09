@@ -93,7 +93,7 @@ export const LoginRegisterForm = () => {
             await axios
                 .post(
                     "http://localhost:8090/login",
-                    { userId: data?.userId, password: data?.password },
+                    { userId: data?.userId, password: data?.password, userRole: data?.userRole },
                     { headers: { "Content-Type": "application/json" } }
                 )
                 .then((res) => {
@@ -136,9 +136,11 @@ export const LoginRegisterForm = () => {
         const isLoginValid = showLogin &&
             data?.password !== null &&
             data?.userId !== null &&
+            data?.userRole !== null &&
             data?.userId > 0 &&
             data?.userId <= 99999999 &&
-            data?.password?.length === 8;
+            data?.password?.length === 8 &&
+            data?.userRole?.toString() !== "";
 
         const isRegisterValid = showRegister &&
             data?.password !== null &&
@@ -185,6 +187,18 @@ export const LoginRegisterForm = () => {
                                 dataChangeHandler("password", e.target.value)
                             }}
                         />
+                        <SelectInRegister
+                            onChange={(e) => {
+                                dataChangeHandler("userRole", e.target.value)
+                            }}
+                            value={data?.userRole}
+                            name="userRole"
+                        >
+                            <option value="">Provide your role</option>
+                            <option value="student">Student</option>
+                            <option value="teacher">Teacher</option>
+                            <option value="admin">Admin</option>
+                        </SelectInRegister>
                         <SignInBtn ref={buttonRef} type="submit">Login</SignInBtn>
                     </form>
                     <p>Or sign up using</p>
