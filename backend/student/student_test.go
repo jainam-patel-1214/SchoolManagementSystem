@@ -2,15 +2,11 @@ package student_test
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"net/http/httptest"
-	"strconv"
 	"testing"
-
-	"io"
 
 	"example.com/main/routes"
 	"example.com/main/utils"
@@ -26,90 +22,15 @@ type TestingStructure struct {
 	expectedCode int
 }
 
-type UserData struct {
-	UID  int    `json:"uid"`
-	UPwd string `json:"upwd"`
-}
-
-type LoginResponse struct {
-	Token string `json:"output"`
-	UName string `json:"username"`
-	Urole string `json:"role"`
-}
-
 var CurrentData struct {
-	UserId int
+	UserId string
 	Token  string
+	Role   string
 }
 
-func StudentGenerator() {
-	router := routes.InitializeRouter()
-	log.Printf("%v", "within generator function")
-	data := map[string]string{
-		"yourName": "John Doe",
-		"password": "password",
-		"roleReq":  "student",
-		"secretK":  "$2a$15$NXTb8AxndfnaA82JWAxr2.apFmJkU.S1ROK10HmFBf69KxSCtW7S",
-	}
-	jsonData, err := json.Marshal(data)
-	if err != nil {
-		fmt.Println("Error marshaling JSON:", err)
-		return
-	}
-	w := httptest.NewRecorder()
-	v := httptest.NewRecorder()
-	ctx, _ := gin.CreateTestContext(w)
-
-	req, err := http.NewRequest(http.MethodPost, "/register", bytes.NewBuffer(jsonData))
-	if err != nil {
-		log.Fatalf("failed to create request: %v", err)
-	}
-	ctx.Request = req
-	req.Header.Set("Content-Type", "application/json")
-	router.ServeHTTP(w, req)
-	body, err := io.ReadAll(w.Body)
-	if err != nil {
-		fmt.Println("Error reading response body:", err)
-		return
-	}
-	var result UserData
-
-	err = json.Unmarshal(body, &result)
-	if err != nil {
-		log.Fatalf("Error unmarshaling JSON: %v", err)
-	}
-	CurrentData.UserId = result.UID
-	logindata := map[string]any{
-		"userId":   result.UID,
-		"password": result.UPwd,
-	}
-	jsonData, err = json.Marshal(logindata)
-	if err != nil {
-		fmt.Println("Error marshaling JSON:", err)
-		return
-	}
-	req, err = http.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(jsonData))
-	if err != nil {
-		log.Fatalf("failed to create request: %v", err)
-	}
-	ctx.Request = req
-	req.Header.Set("Content-Type", "application/json")
-	router.ServeHTTP(v, req)
-	body, err = io.ReadAll(v.Body)
-	if err != nil {
-		fmt.Println("Error reading response body:", err)
-		return
-	}
-	var LoginOp LoginResponse
-	err = json.Unmarshal(body, &LoginOp)
-	if err != nil {
-		log.Fatalf("Error unmarshaling JSON: %v", err)
-	}
-	CurrentData.Token = LoginOp.Token
-}
 func StudentDeleter() {
 	utils.Cleaner([]string{`DELETE FROM activeSessions where sessiontoken="` + CurrentData.Token + `"`})
-	utils.Cleaner([]string{`DELETE FROM students where grNo=` + strconv.Itoa(CurrentData.UserId)})
+	utils.Cleaner([]string{`DELETE FROM students where grNo=` + CurrentData.UserId})
 }
 
 func tokenSetter(tokentype string) string {
@@ -175,7 +96,7 @@ func TestDisplayStudents(t *testing.T) {
 	}
 
 	router := routes.InitializeRouter()
-	StudentGenerator()
+	CurrentData = utils.UserGenerator("student")
 	for _, tc := range testcases {
 		fmt.Println(CurrentData.Token)
 		t.Run(tc.name, func(t *testing.T) {
@@ -245,7 +166,7 @@ func TestDisplaySubject(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 	}
-	StudentGenerator()
+	CurrentData = utils.UserGenerator("student")
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
