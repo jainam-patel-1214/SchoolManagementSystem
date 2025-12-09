@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS students (
     CONSTRAINT check_std_input CHECK (std BETWEEN 1 AND 12)
 );
 CREATE TABLE IF NOT EXISTS teachers (
-    tId VARCHAR(8) PRIMARY KEY,
+    tId int PRIMARY KEY,
     tPwd varchar(8) NOT NULL,
     userRole varchar(10) DEFAULT 'teacher',
     tName VARCHAR(50) NOT NULL,
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS pendingApplications(
     PRIMARY KEY(id)
 );
 CREATE TABLE IF NOT EXISTS admins(
-    admin_id VARCHAR(10) NOT NULL PRIMARY KEY,
+    admin_id int NOT NULL PRIMARY KEY,
     admin_name VARCHAR(20) NOT NULL,
     admin_pwd VARCHAR(8) NOT NULL
 )
