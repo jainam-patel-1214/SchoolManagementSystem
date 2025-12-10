@@ -24,14 +24,20 @@ func RunMigrations(db *sql.DB, dirName string) {
 		log.Fatal(err)
 	}
 	for _, file := range fileName {
+		fmt.Println("filess", file)
 		path := filepath.Join(dirName, file)
 		fmt.Println(path)
 		content, err := os.ReadFile(path)
 		if err != nil {
 			log.Fatal(err)
 		}
-		if _, err := db.Exec(string(content)); err != nil {
-			log.Fatal(err)
+		_, err = db.Exec(string(content))
+		if err != nil {
+			if file == "001.sql" {
+				log.Fatal("Error in 001.sql:", err)
+			} else {
+				fmt.Println("Ignoring error in", file, ":", err)
+			}
 		}
 	}
 	db.Exec("set foreign_key_checks=1")
