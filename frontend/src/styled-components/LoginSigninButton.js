@@ -14,7 +14,7 @@ export const SignInBtn = styled.button`
     color: white;
     transition: 0.3s ease-out;
     cursor: pointer;
-    &::after {
+    /* &::after {
         content: "";
         position: absolute;
         inset: 0;
@@ -22,14 +22,14 @@ export const SignInBtn = styled.button`
         border: none;
         border-radius: 15px;
         cursor: not-allowed;
-    }
-    &:hover::after {
+    } */
+    /* &:hover::after {
         content: "Invalid/Empty Fields";
         color: red;
         position: absolute;
         background-color: transparent;
         top: -20px;
-    }
+    } */
     &:hover{
         background: linear-gradient(to right,
             rgba(61, 255, 255, 0.7),

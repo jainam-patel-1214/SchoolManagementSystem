@@ -2,7 +2,7 @@ import { FaRegUser } from "react-icons/fa";
 import { FaKey } from "react-icons/fa";
 import { Fragment, useState, useEffect, useRef } from "react";
 import axios from "axios";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { SignInBtn } from "../styled-components/LoginSigninButton";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
@@ -12,7 +12,78 @@ const SelectInRegister = styled.select`
   border: 1px solid #b9b9b9;
   padding: 5px;
 `;
+const SignInForm = styled.div`
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: fit-content;
+        padding: 3rem;
+        background-color: whitesmoke;
+        border: none;
+        border-radius: 5px;
+        h3{
+            cursor: pointer;
+            margin: 0;
+            margin-top: 10px;
+            transition: 0.3s;
 
+            &:hover{
+                border-bottom: 1px solid black;
+                border-top: none;
+                border-left: none;
+                border-right: none;
+                color: blue;
+            }
+        }
+        p{
+            margin: 0;
+        }
+        
+    `
+    const typing = keyframes`
+    from {
+        text-align: center;
+        width: 0;
+    }
+    to {
+        width: 100%;
+    }
+    `;
+    const SignUpAndLoginForm = styled.form`
+        display: flex;
+        flex-direction: column;
+
+        h2{
+            text-align: center;
+            animation: ${typing} 2s steps(19) forwards;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        label{
+            color: rgb(67, 66, 66);
+            margin-top: 1rem;
+        }
+        input{
+            background-color: transparent;
+            border-bottom: 1px solid black;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+            margin-bottom: 1rem;
+            font-size: large;
+            &::placeholder{
+                color: rgb(144, 144, 144);
+                font-size: small;
+            }
+            &:focus{
+                border-bottom: 1px solid black;
+                border-top: none;
+                border-left: none;
+                border-right: none;
+                outline: none;
+            }
+        }
+    `
 export const LoginRegisterForm = () => {
     const navigate = useNavigate()
     const buttonRef = useRef(null)
@@ -31,7 +102,7 @@ export const LoginRegisterForm = () => {
     }
     const emptyStates = () => {
         const nullifiedUserData = Object.keys(data).reduce((acc, key) => {
-            acc[key] = null;
+            acc[key] = "";
             return acc;
         }, {});
         setData(nullifiedUserData);
@@ -52,6 +123,10 @@ export const LoginRegisterForm = () => {
 
     const handleSignUp = async (e) => {
         e.preventDefault();
+        if (!validInp) {
+            ErrorToast("invalid values in below fields",toast)
+            return
+        }
         if (data?.userRole === "") {
             alert("pick a role for yourself to register with");
             return;
@@ -74,7 +149,7 @@ export const LoginRegisterForm = () => {
                     ErrorToast(err.response.data.error || err, toast)
                 });
         } catch (error) {
-            ErrorToast(error)
+            ErrorToast(error,toast)
             console.log(error);
         } finally {
             setData({
@@ -90,6 +165,12 @@ export const LoginRegisterForm = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        console.log(validInp,"input validity");
+        
+        if (!validInp) {
+            ErrorToast("invalid values in below fields",toast)
+            return
+        }
         if (data?.userId === "" || data?.password === "") {
             alert("enter userid and password properly");
             return;
@@ -120,27 +201,16 @@ export const LoginRegisterForm = () => {
         } catch (error) {
             console.log(error);
         } finally {
-            const nullifiedUserData = Object.keys(data).reduce((acc, key) => {
-                acc[key] = "";
-                return acc;
-            }, {});
-            setData(nullifiedUserData);
+            setData({
+                userId: "",
+                password: "",
+                userName: "",
+                userRole: ""
+            });
             setValidInp(false)
         }
 
     };
-
-    useEffect(() => {
-        if (!buttonRef.current) return;
-        if (!validInp) {
-            buttonRef.current.disabled = true;
-            buttonRef.current.classList.remove("noAfter");
-        } else {
-            buttonRef.current.disabled = false;
-            buttonRef.current.classList.add("noAfter");
-        }
-
-    }, [validInp])
     useEffect(() => {
         const isLoginValid = showLogin &&
             data?.password !== null &&
@@ -164,11 +234,11 @@ export const LoginRegisterForm = () => {
 
 
     return (
-        <div id="signInForm">
+        <SignInForm>
             <ToastContainer />
             {showLogin ?
                 <Fragment>
-                    <form id="loginform" onSubmit={(e) => { handleLogin(e) }}>
+                    <SignUpAndLoginForm onSubmit={(e) => { handleLogin(e) }}>
                         <h2>Welcome to Scholar</h2>
                         <label htmlFor="userId">
                             <FaRegUser /> User Id
@@ -200,7 +270,7 @@ export const LoginRegisterForm = () => {
                             onChange={(e) => {
                                 dataChangeHandler("userRole", e.target.value)
                             }}
-                            value={data?.userRole}
+                            value={data?.userRole || ""}
                             name="userRole"
                         >
                             <option value="">Provide your role</option>
@@ -209,7 +279,7 @@ export const LoginRegisterForm = () => {
                             <option value="admin">Admin</option>
                         </SelectInRegister>
                         <SignInBtn ref={buttonRef} type="submit">Login</SignInBtn>
-                    </form>
+                    </SignUpAndLoginForm>
                     <p>Or sign up using</p>
                     <h3 onClick={registerChangeHandler}>Sign Up</h3>
                 </Fragment>
@@ -218,7 +288,7 @@ export const LoginRegisterForm = () => {
             }
             {showRegister ? (
                 <Fragment>
-                    <form id="signupform" onSubmit={(e) => { handleSignUp(e); e.target.reset() }}>
+                    <SignUpAndLoginForm onSubmit={(e) => { handleSignUp(e) }}>
                         <h2>Welcome to Scholar</h2>
                         <label htmlFor="userName">
                             <FaRegUser /> Your name
@@ -227,7 +297,7 @@ export const LoginRegisterForm = () => {
                             type="text"
                             name="userName"
                             id="username"
-                            value={data?.userName}
+                            value={data?.userName || ""}
                             placeholder="provide your name"
                             onChange={(e) => {
                                 dataChangeHandler("userName", e.target.value)
@@ -240,7 +310,7 @@ export const LoginRegisterForm = () => {
                             type="password"
                             id="password"
                             name="password"
-                            value={data?.password}
+                            value={data?.password || ""}
                             placeholder="provide a password"
                             onChange={(e) => {
                                 dataChangeHandler("password", e.target.value)
@@ -250,7 +320,7 @@ export const LoginRegisterForm = () => {
                             onChange={(e) => {
                                 dataChangeHandler("userRole", e.target.value)
                             }}
-                            value={data?.userRole}
+                            value={data?.userRole || ""}
                             name="userRole"
                         >
                             <option value="">Select a role you wish to register</option>
@@ -259,13 +329,13 @@ export const LoginRegisterForm = () => {
                             <option value="admin">Admin</option>
                         </SelectInRegister>
                         <SignInBtn ref={buttonRef} type="submit">SignUp</SignInBtn>
-                    </form>
+                    </SignUpAndLoginForm>
                     <p>Or log in using</p>
                     <h3 onClick={loginChangeHandler}>Log In</h3>
                 </Fragment>
             ) : (
                 <></>
             )}
-        </div>
+        </SignInForm>
     );
 };

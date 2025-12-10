@@ -221,7 +221,7 @@ export const AdminPendingReqTab = (props) => {
             temp = { "pendingId": Number(data?.pendingId), "uName": data?.name, "uPwd": data?.password, "uRole": data?.role, "Uid": Number(data?.id) }
         }
         if (data?.role==="student" && (data?.section==="" || (!(data?.std>0) && !(data?.std<13)))) {
-            ErrorToast("provide section and std for student")
+            ErrorToast("provide section and std for student",toast)
             return   
         }
         try {
