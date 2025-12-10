@@ -704,7 +704,7 @@ func AddReviews(ctx *gin.Context) {
 		return
 	}
 	var amt int
-	err = db.QueryRow("SELECT COUNT(grNo) FROM reviews WHERE grNo = ? AND tId = ?", reviewInfo.StudId, tid.(string)).Scan(&amt)
+	err = db.QueryRow("SELECT COUNT(grNo) FROM reviews WHERE grNo = ? AND tId = ?", reviewInfo.StudId, tid.(int)).Scan(&amt)
 	if err != nil && err != sql.ErrNoRows {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
