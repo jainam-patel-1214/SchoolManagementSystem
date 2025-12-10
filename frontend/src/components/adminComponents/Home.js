@@ -329,7 +329,7 @@ export const AdminPendingReqTab = (props) => {
         <>
             <Overlay ref={overlayComp}></Overlay>
             <PendingReqSection>
-                <Popoup refprop={detailsComp} close={handleHide} isteach={isTeacher} isStud={isStudent} submitHandler={handleSubmitForm} errComp={ErrorComponent} data={data} newHandler={dataChangeHandler}></Popoup>
+                <PopoupComponent refprop={detailsComp} close={handleHide} isteach={isTeacher} isStud={isStudent} submitHandler={handleSubmitForm} errComp={ErrorComponent} data={data} newHandler={dataChangeHandler}></PopoupComponent>
                 {displayData?.length > 0 ?
                     < RequestsTableComponent heading={"Pending user requests"} data={displayData} columnDefinition={columns} />
                     : <>There are no pending applications</>}
@@ -338,7 +338,7 @@ export const AdminPendingReqTab = (props) => {
     )
 }
 
-const Popoup = (props) => {
+const PopoupComponent = (props) => {
     return (
         <DetailsForm ref={props.refprop}>
             <SearchForm onSubmit={(e) => { props.submitHandler(e) }} style={{ width: "100%" }}>
