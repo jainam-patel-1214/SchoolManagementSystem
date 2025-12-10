@@ -1,6 +1,6 @@
 import styled from "styled-components"
 import { useState, useEffect, useRef, Fragment } from "react"
-import { Label, LabelValue, StudentHomeSection, StudentInfo, SubInfo, TableEntry, Value } from "../studentComponents/Home"
+import { Label, LabelValue, StudentHomeSection, StudentInfo, Value } from "../studentComponents/Home"
 import { ToastContainer, toast } from "react-toastify"
 import { ErrorSpan, SearchForm } from "../studentComponents/SchoolRes"
 import { StyledNavbar } from "../../styled-components/styledNav"
@@ -69,7 +69,6 @@ export const PendingReqSection = styled.div`
     display: flex;
     flex-direction: column;
     padding: 1rem;
-    border: 1px double blue;
 `
 export const PendingReqTab = styled.div`
     display: flex;
@@ -80,26 +79,16 @@ export const PendingReqTab = styled.div`
     margin: .3rem;
     border: 1px solid blue;
 `
-export const AcceptBtn = styled.button`
+const PendingBtnComp = styled.button`
     background-color: lightgreen;
     padding: 1rem;
     margin: .5rem;
     border: 1px double lightgreen;
     &:hover{
-        background-color: #15d200ff;
+        background-color: ${(props)=>{return props.variant==='accept'?"#15d200ff":"#ff4f4fff"}};
         cursor: pointer;
     }
-    
-`
-export const RejectBtn = styled.button`
-    background-color: red;
-    padding: 1rem;
-    margin: .5rem;
-    border: 1px double red;
-    &:hover{
-        background-color: #ff4f4fff;
-        cursor: pointer;
-    }
+    background-color: ${(props)=>{return props.variant==='accept'?"lightgreen":"red"}};
 `
 
 const Overlay = styled.div`
@@ -185,32 +174,31 @@ export const AdminPendingReqTab = (props) => {
     const [displayData, setDisplayData] = useState([])
     const userrole = roleExtractor(window.location.pathname)
 
-    const handleAccept = async (e) => {
+    const handleAccept = async (e,v) => {
         e.preventDefault()
-        const name = e.target.getAttribute("userName");
-        const pwd = e.target.getAttribute("userPwd");
-        const role = e.target.getAttribute("userRole");
-        const pId = e.target.getAttribute("pend");
-
-        if (role === "student") setstud(true);
-        if (role === "teacher") setTeacher(true);
-        dataChangeHandler("pendingId", Number(pId))
-        dataChangeHandler("name", name)
-        dataChangeHandler("password", pwd)
-        dataChangeHandler("role", role)
+        let userName=v.userName
+        let userPwd=v.pwd
+        let userRole=v.roleReq
+        let pend=v.pendingId
+        if (userRole === "student") setstud(true);
+        if (userRole === "teacher") setTeacher(true);
+        dataChangeHandler("pendingId", Number(pend))
+        dataChangeHandler("name", userName)
+        dataChangeHandler("password", userPwd)
+        dataChangeHandler("role", userRole)
         overlayComp.current.style.display = "block"
         detailsComp.current.style.display = "flex"
         document.querySelector("body").style.overflow = "hidden"
 
     }
-    const handleReject = async (e) => {
+    const handleReject = async (e,v) => {
         e.preventDefault()
-        const name = e.target.getAttribute("userName");
-        const pwd = e.target.getAttribute("userPwd");
-        const role = e.target.getAttribute("userRole");
-        const pId = Number(e.target.getAttribute("pend"));
+        let userName=v.userName
+        let userPwd=v.pwd
+        let userRole=v.roleReq
+        let pend= v.pendingId
         try {
-            const temp = { "pendingId": pId, "uName": name, "uPwd": pwd, "uRole": role }
+            const temp = { "pendingId": Number(pend), "uName": userName, "uPwd": userPwd, "uRole": userRole }
             const res = await FetchApi(`http://localhost:8090/${userrole}/rejectRequest`, 'DELETE', temp)
             Toaster(res, toast)
             if (res.output) {
@@ -233,11 +221,15 @@ export const AdminPendingReqTab = (props) => {
         e.preventDefault()
         let temp;
         if (isStudent) {
-            temp = { "pendingId": data?.pendingId, "uName": data?.name, "uPwd": data?.password, "uRole": data?.role, "Uid": data?.id, "std": data?.std, "section": data?.section }
+            temp = { "pendingId": Number(data?.pendingId), "uName": data?.name, "uPwd": data?.password, "uRole": data?.role, "Uid": Number(data?.id), "std": Number(data?.std), "section": data?.section }
         } else if (isTeacher) {
-            temp = { "pendingId": data?.pendingId, "uName": data?.name, "uPwd": data?.password, "uRole": data?.role, "Uid": data?.id, "std": data?.std, "section": data?.section, "subId": data?.subjectId }
+            temp = { "pendingId": Number(data?.pendingId), "uName": data?.name, "uPwd": data?.password, "uRole": data?.role, "Uid": Number(data?.id), "std": Number(data?.std), "section": data?.section, "subId": data?.subjectId }
         } else if (!isStudent && !isTeacher) {
-            temp = { "pendingId": data?.pendingId, "uName": data?.name, "uPwd": data?.password, "uRole": data?.role, "Uid": data?.id }
+            temp = { "pendingId": Number(data?.pendingId), "uName": data?.name, "uPwd": data?.password, "uRole": data?.role, "Uid": Number(data?.id) }
+        }
+        if (data?.role==="student" && (data?.section==="" || (!(data?.std>0) && !(data?.std<13)))) {
+            ErrorToast("provide section and std for student")
+            return   
         }
         try {
             console.log(temp);
@@ -296,16 +288,17 @@ export const AdminPendingReqTab = (props) => {
             cell: ({ row }) => {
                 const v = row.original;
                 return (
-                    <AcceptBtn
+                    <PendingBtnComp
                         userName={v.userName}
                         userPwd={v.pwd}
                         userRole={v.roleReq}
                         pend={v.pendingId}
                         type="button"
-                        onClick={(e) => handleAccept(e)}
+                        variant={"accept"}
+                        onClick={(e) => handleAccept(e,v)}
                     >
                         Accept
-                    </AcceptBtn>
+                    </PendingBtnComp>
                 );
             },
         }),
@@ -316,16 +309,17 @@ export const AdminPendingReqTab = (props) => {
             cell: ({ row }) => {
                 const v = row.original;
                 return (
-                    <RejectBtn
+                    <PendingBtnComp
                         userName={v.userName}
                         userPwd={v.pwd}
                         userRole={v.roleReq}
                         pend={v.pendingId}
                         type="button"
-                        onClick={(e) => handleReject(e)}
+                        variant={"reject"}
+                        onClick={(e) => handleReject(e,v)}
                     >
                         Reject
-                    </RejectBtn>
+                    </PendingBtnComp>
                 );
             },
         }),
@@ -386,7 +380,7 @@ const Popoup = (props) => {
                         </InputContainer>
                     </TeacherInputTabContainer>
                 </Fragment> : <></>}
-                <AcceptBtn type="submit">Submit</AcceptBtn>
+                <PendingBtnComp type="submit" variant={"accept"}>Submit</PendingBtnComp>
                 <ErrorSpan ref={props.errComp}></ErrorSpan>
                 <CloseBtn id="closeBtn" type="reset" onClick={(e) => { props?.close(e) }}>X</CloseBtn>
             </SearchForm>

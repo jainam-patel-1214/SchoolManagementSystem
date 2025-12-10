@@ -29,12 +29,12 @@ export const LoginRegisterForm = () => {
             [key]: value
         }))
     }
-    const emptyStates = ()=>{
+    const emptyStates = () => {
         const nullifiedUserData = Object.keys(data).reduce((acc, key) => {
-                acc[key] = null;
-                return acc;
-            }, {});
-            setData(nullifiedUserData);
+            acc[key] = null;
+            return acc;
+        }, {});
+        setData(nullifiedUserData);
     }
     const [showLogin, setShowLogin] = useState(true);
     const [showRegister, setShowRegister] = useState(false);
@@ -77,7 +77,12 @@ export const LoginRegisterForm = () => {
             ErrorToast(error)
             console.log(error);
         } finally {
-            emptyStates()
+            setData({
+                userId: "",
+                password: "",
+                userName: "",
+                userRole: ""
+            });
             e.target.reset()
             setValidInp(false)
         }
@@ -93,7 +98,7 @@ export const LoginRegisterForm = () => {
             await axios
                 .post(
                     "http://localhost:8090/login",
-                    { userId: data?.userId, password: data?.password, userRole: data?.userRole },
+                    { userId: Number(data?.userId), password: data?.password, userRole: data?.userRole },
                     { headers: { "Content-Type": "application/json" } }
                 )
                 .then((res) => {
@@ -115,7 +120,11 @@ export const LoginRegisterForm = () => {
         } catch (error) {
             console.log(error);
         } finally {
-            emptyStates()
+            const nullifiedUserData = Object.keys(data).reduce((acc, key) => {
+                acc[key] = "";
+                return acc;
+            }, {});
+            setData(nullifiedUserData);
             setValidInp(false)
         }
 
@@ -150,7 +159,7 @@ export const LoginRegisterForm = () => {
             data?.password?.length === 8 &&
             data?.userRole?.toString() !== "";
 
-        setValidInp((showLogin&&isLoginValid) || (showRegister&&isRegisterValid));
+        setValidInp((showLogin && isLoginValid) || (showRegister && isRegisterValid));
     }, [data])
 
 
@@ -209,7 +218,7 @@ export const LoginRegisterForm = () => {
             }
             {showRegister ? (
                 <Fragment>
-                    <form id="signupform" onSubmit={(e) => { handleSignUp(e) }}>
+                    <form id="signupform" onSubmit={(e) => { handleSignUp(e); e.target.reset() }}>
                         <h2>Welcome to Scholar</h2>
                         <label htmlFor="userName">
                             <FaRegUser /> Your name
