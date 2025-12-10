@@ -165,8 +165,6 @@ export const LoginRegisterForm = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        console.log(validInp,"input validity");
-        
         if (!validInp) {
             ErrorToast("invalid values in below fields",toast)
             return

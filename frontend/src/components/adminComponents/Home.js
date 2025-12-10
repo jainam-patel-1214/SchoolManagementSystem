@@ -225,10 +225,7 @@ export const AdminPendingReqTab = (props) => {
             return   
         }
         try {
-            console.log(temp);
             const res = await FetchApi(`http://localhost:8090/${userrole}/acceptRequest`, 'POST', temp)
-            console.log(res,"result");
-            
             Toaster(res, toast)
         } catch (error) {
             ErrorToast(error, toast);

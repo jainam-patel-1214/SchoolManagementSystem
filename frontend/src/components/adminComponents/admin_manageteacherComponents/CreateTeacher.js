@@ -71,12 +71,10 @@ export const CreateTeacherComponent = (props) => {
             let res;
             let bodyObj = {}
             for (const [key, value] of Object.entries(dataObj)) {
-                console.log(key, value);
                 if (value !== null && value !== undefined) {
                     bodyObj[key] = value
                 }
             }
-            console.log(bodyObj);
             
             res = await FetchApi(apiUrl, "POST", bodyObj)
             Toaster(res, toast)

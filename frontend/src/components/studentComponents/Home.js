@@ -113,7 +113,6 @@ export const StudentHomePage = () => {
         const fetchReport = async () => {
             try {
                 const name = getCookie("username")
-                console.log(name);
 
                 setuName(name)
                 const [report, data] = await Promise.all([
@@ -122,7 +121,6 @@ export const StudentHomePage = () => {
                 ]);
                 setDisplayReport(report.output)
                 setDisplayData(data.output)
-                console.log(data.output, report.output);
 
                 let sum = 0
                 report.output?.MarkInfo?.forEach(e => {

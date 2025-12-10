@@ -70,7 +70,6 @@ export const TeacherEditComponent = (props) => {
             let res;
             let bodyObj = {}
             for (const [key, value] of Object.entries(dataObj)) {
-                console.log(key, value);
                 if (value !== null && value !== undefined) {
                     bodyObj[key] = value
                 }

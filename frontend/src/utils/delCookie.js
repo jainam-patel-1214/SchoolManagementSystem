@@ -7,7 +7,6 @@ async function delCookie(...cname) {
     for (const c of cname) {
         if (c === "token") {
             const tokenVal = getCookie(c)
-            console.log("token val to del", tokenVal);
             const obj = { token: tokenVal }
             try {
                 const response = await FetchApi("http://localhost:8090/deleteCookieFromDB","DELETE",obj)

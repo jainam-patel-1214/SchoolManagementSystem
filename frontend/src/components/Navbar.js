@@ -21,7 +21,6 @@ export const Navbar = (props) => {
     const signOutHandler = async (e) => {
         e.preventDefault()
         const msg = await delCookie("userid", "username", "token", "role")
-        console.log("msg", msg);
         if (msg.output !== null || msg.output !== undefined) {
             toast(msg.output, {
                 position: "top-right",
