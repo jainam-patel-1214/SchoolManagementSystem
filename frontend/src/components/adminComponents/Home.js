@@ -176,12 +176,12 @@ export const AdminPendingReqTab = (props) => {
             return acc;
         }, {});
         setstud(false)
-        setteach(false)
+        setTeacher(false)
         setData(nullifiedUserData);
     }
 
     const [isStudent, setstud] = useState(false)
-    const [isTeacher, setteach] = useState(false)
+    const [isTeacher, setTeacher] = useState(false)
     const [displayData, setDisplayData] = useState([])
     const userrole = roleExtractor(window.location.pathname)
 
@@ -193,7 +193,7 @@ export const AdminPendingReqTab = (props) => {
         const pId = e.target.getAttribute("pend");
 
         if (role === "student") setstud(true);
-        if (role === "teacher") setteach(true);
+        if (role === "teacher") setTeacher(true);
         dataChangeHandler("pendingId", Number(pId))
         dataChangeHandler("name", name)
         dataChangeHandler("password", pwd)
