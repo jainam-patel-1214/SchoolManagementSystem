@@ -102,20 +102,6 @@ const Overlay = styled.div`
     display: none;
     z-index: 9;    
 `
-const PopupDiv = styled.div`
-    display: flex;
-    justify-content: space-between;
-    margin: 1rem; 
-    align-items: center;
-    width:100%;
-`
-
-const SpanComp = styled.span`
-    width: 40%;
-    display: flex;
-    margin-right: 2rem;
-    flex-direction: column;
-`
 const DetailsForm = styled.div`
     display: none;
     position: fixed;
@@ -131,18 +117,19 @@ const DetailsForm = styled.div`
 `
 const CloseBtn = styled.button`
     position: absolute;
+    background-color: red;
     top: 8px;
     right: 8px;
     padding: 5px 10px;
-    cursor: pointer;
+    &:hover{
+        background-color: ${(props)=>{return props.variant==='accept'?"#15d200ff":"#ff4f4fff"}};
+        cursor: pointer;
+    }
 `
 
 
 export const AdminPendingReqTab = (props) => {
-    const overlayComp = useRef(null)
-    const detailsComp = useRef(null)
     const ErrorComponent = useRef(null)
-
     const [data, setData] = useState({
         id: null,
         name: null,
@@ -172,6 +159,7 @@ export const AdminPendingReqTab = (props) => {
     const [isStudent, setstud] = useState(false)
     const [isTeacher, setTeacher] = useState(false)
     const [displayData, setDisplayData] = useState([])
+    const [styleDisplay,setStyleDisplay] = useState(false)
     const userrole = roleExtractor(window.location.pathname)
 
     const handleAccept = async (e,v) => {
@@ -186,8 +174,7 @@ export const AdminPendingReqTab = (props) => {
         dataChangeHandler("name", userName)
         dataChangeHandler("password", userPwd)
         dataChangeHandler("role", userRole)
-        overlayComp.current.style.display = "block"
-        detailsComp.current.style.display = "flex"
+        setStyleDisplay(true)
         document.querySelector("body").style.overflow = "hidden"
 
     }
@@ -212,9 +199,15 @@ export const AdminPendingReqTab = (props) => {
     const handleHide = (e) => {
         e.preventDefault()
         emptyDataHandler()
-        overlayComp.current.style.display = "none"
-        detailsComp.current.style.display = "none"
+        setStyleDisplay(false)
         document.querySelector("body").style.overflow = "auto"
+    }
+
+    const overlayDisplayObj = {
+        display: styleDisplay?"block":"none"
+    }
+    const popupDisplayObj ={
+        display: styleDisplay?"flex":"none"
     }
 
     const handleSubmitForm = async (e) => {
@@ -241,6 +234,7 @@ export const AdminPendingReqTab = (props) => {
             ErrorToast(error, toast);
         } finally {
             handleHide(e)
+            setStyleDisplay(false)
             emptyDataHandler()
             fetchPendingApps()
             e.target.reset()
@@ -327,9 +321,9 @@ export const AdminPendingReqTab = (props) => {
 
     return (
         <>
-            <Overlay ref={overlayComp}></Overlay>
+            <Overlay style={overlayDisplayObj}></Overlay>
             <PendingReqSection>
-                <PopoupComponent refprop={detailsComp} close={handleHide} isteach={isTeacher} isStud={isStudent} submitHandler={handleSubmitForm} errComp={ErrorComponent} data={data} newHandler={dataChangeHandler}></PopoupComponent>
+                <PopoupComponent componentStyle={popupDisplayObj} close={handleHide} isteach={isTeacher} isStud={isStudent} submitHandler={handleSubmitForm} errComp={ErrorComponent} data={data} newHandler={dataChangeHandler}></PopoupComponent>
                 {displayData?.length > 0 ?
                     < RequestsTableComponent heading={"Pending user requests"} data={displayData} columnDefinition={columns} />
                     : <>There are no pending applications</>}
@@ -340,7 +334,7 @@ export const AdminPendingReqTab = (props) => {
 
 const PopoupComponent = (props) => {
     return (
-        <DetailsForm ref={props.refprop}>
+        <DetailsForm style={props.componentStyle}>
             <SearchForm onSubmit={(e) => { props.submitHandler(e) }} style={{ width: "100%" }}>
                 <TeacherInputTabContainer>
                     <InputContainer style={{ width: "100%" }}>
