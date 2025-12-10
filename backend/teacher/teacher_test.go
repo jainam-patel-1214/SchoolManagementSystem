@@ -2,6 +2,8 @@ package teacher_test
 
 import (
 	"bytes"
+	"log"
+	"strconv"
 
 	"net/http"
 	"net/http/httptest"
@@ -15,8 +17,8 @@ import (
 type TestingStructure struct {
 	name         string
 	reqbody      string
-	prior        []string
-	cleanup      []string
+	priorFunc    []func()
+	postFunc     []func()
 	token        string
 	expectedCode int
 }
@@ -33,14 +35,14 @@ type LoginResponse struct {
 }
 
 var CurrentData struct {
-	UserId string
+	UserId int
 	Token  string
 	Role   string
 }
 
 func TeacherDeleter() {
 	utils.Cleaner([]string{`DELETE FROM activeSessions where sessiontoken="` + CurrentData.Token + `"`})
-	utils.Cleaner([]string{`DELETE FROM teachers where tId="` + CurrentData.UserId + `"`})
+	utils.Cleaner([]string{`DELETE FROM teachers where tId="` + strconv.Itoa(CurrentData.UserId) + `"`})
 }
 
 func tokenSetter(tokentype string) string {
@@ -97,22 +99,24 @@ func TestAddStudentsByTeacher(t *testing.T) {
 			expectedCode: http.StatusUnauthorized,
 		},
 		{
-			name:         "Valid case",
-			reqbody:      `{"grNo":14,"studPwd":"Asdf123@","userRole":"student","studName":"raj","std":8,"section":"A"}`,
-			cleanup:      []string{"DELETE FROM students WHERE grNo=14"},
+			name:    "Valid case",
+			reqbody: `{"grNo":14,"studPwd":"Asdf123@","userRole":"student","studName":"raj","std":8,"section":"A"}`,
+			postFunc: []func(){
+				func() { utils.DeleteTempSubStudent(`{"grNo":14}`, ``, ``) },
+			},
 			expectedCode: http.StatusOK,
 		},
 		{
-			name:         "Valid case",
-			reqbody:      `{"grNo":15,"studPwd":"Asdf123@","userRole":"student","studName":"raju","std":8,"section":"B"}`,
-			cleanup:      []string{"DELETE FROM students WHERE grNo=15"},
-			expectedCode: http.StatusOK,
-		},
-		{
-			name:         "student already exists",
-			reqbody:      `{"grNo":15,"studPwd":"Asdf1234","userRole":"student","studName":"raja","std":5,"section":"A"}`,
-			prior:        []string{`INSERT INTO students VALUES (15, "Asdf123@", "student", "raju", 8, "B")`},
-			cleanup:      []string{"DELETE FROM students WHERE grNo=15"},
+			name:    "student already exists",
+			reqbody: `{"grNo":15,"studPwd":"Asdf1234","userRole":"student","studName":"raja","std":5,"section":"A"}`,
+			priorFunc: []func(){
+				func() {
+					utils.AddTempSubMarksStudent(`{"grNo":15,"studPwd":"Asdf1234","userRole":"student","studName":"raja","std":5,"section":"A"}`, "", ``, ``)
+				},
+			},
+			postFunc: []func(){
+				func() { utils.DeleteTempSubStudent(`{"grNo":15}`, ``, ``) },
+			},
 			expectedCode: http.StatusBadRequest,
 		},
 	}
@@ -120,8 +124,8 @@ func TestAddStudentsByTeacher(t *testing.T) {
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			if len(tc.prior) > 0 {
-				utils.PriorRuns(tc.prior)
+			for _, task := range tc.priorFunc {
+				task()
 			}
 			w := httptest.NewRecorder()
 			ctx, _ := gin.CreateTestContext(w)
@@ -139,12 +143,13 @@ func TestAddStudentsByTeacher(t *testing.T) {
 			req.Header.Set("Cookie", tc.token)
 			router.ServeHTTP(w, req)
 			if w.Code != tc.expectedCode {
-				t.Errorf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
+				log.Fatalf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
 			}
 			t.Logf("%s - testname, Response = %s", tc.name, w.Body.String())
-			if len(tc.cleanup) > 0 {
-				utils.Cleaner(tc.cleanup)
+			for _, task := range tc.postFunc {
+				task()
 			}
+			utils.UserDeleter()
 		})
 	}
 	TeacherDeleter()
@@ -159,31 +164,55 @@ func TestEditStudentsByTeacher(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 		{
-			name:         "Invalid section",
-			prior:        []string{`INSERT INTO students VALUES (15, "Asdf123@", "student", "raju", 8, "B")`},
-			reqbody:      `{"grNo":15,"section":"A1"}`,
-			cleanup:      []string{"DELETE FROM students WHERE grNo=15"},
+			name:    "Invalid section",
+			reqbody: `{"grNo":15,"section":"A1"}`,
+			priorFunc: []func(){
+				func() {
+					utils.AddTempSubMarksStudent(`{"grNo":15,"studPwd":"Asdf1234","userRole":"student","studName":"raja","std":5,"section":"A"}`, "", ``, ``)
+				},
+			},
+			postFunc: []func(){
+				func() { utils.DeleteTempSubStudent(`{"grNo":15}`, ``, ``) },
+			},
 			expectedCode: http.StatusBadRequest,
 		},
 		{
-			name:         "Invalid std",
-			prior:        []string{`INSERT INTO students VALUES (15, "Asdf123@", "student", "raju", 8, "B")`},
-			cleanup:      []string{"DELETE FROM students WHERE grNo=15"},
-			reqbody:      `{"grNo":15,"std":15}`,
+			name:    "Invalid std",
+			reqbody: `{"grNo":15,"std":15}`,
+			priorFunc: []func(){
+				func() {
+					utils.AddTempSubMarksStudent(`{"grNo":15,"studPwd":"Asdf1234","userRole":"student","studName":"raja","std":5,"section":"A"}`, "", ``, ``)
+				},
+			},
+			postFunc: []func(){
+				func() { utils.DeleteTempSubStudent(`{"grNo":15}`, ``, ``) },
+			},
 			expectedCode: http.StatusBadRequest,
 		},
 		{
-			name:         "Invalid pwd",
-			prior:        []string{`INSERT INTO students VALUES (15, "Asdf123@", "student", "raju", 8, "B")`},
-			reqbody:      `{"grNo":15,"studPwd":"Asd"}`,
-			cleanup:      []string{"DELETE FROM students WHERE grNo=15"},
+			name:    "Invalid pwd",
+			reqbody: `{"grNo":15,"studPwd":"Asd"}`,
+			priorFunc: []func(){
+				func() {
+					utils.AddTempSubMarksStudent(`{"grNo":15,"studPwd":"Asdf1234","userRole":"student","studName":"raja","std":5,"section":"A"}`, "", ``, ``)
+				},
+			},
+			postFunc: []func(){
+				func() { utils.DeleteTempSubStudent(`{"grNo":15}`, ``, ``) },
+			},
 			expectedCode: http.StatusBadRequest,
 		},
 		{
-			name:         "Invalid student name",
-			prior:        []string{`INSERT INTO students VALUES (15, "Asdf123@", "student", "raju", 8, "B")`},
-			reqbody:      `{"grNo":15,"studName":"raj6"}`,
-			cleanup:      []string{"DELETE FROM students WHERE grNo=15"},
+			name:    "Invalid student name",
+			reqbody: `{"grNo":15,"studName":"raj6"}`,
+			priorFunc: []func(){
+				func() {
+					utils.AddTempSubMarksStudent(`{"grNo":15,"studPwd":"Asdf1234","userRole":"student","studName":"raja","std":5,"section":"A"}`, "", ``, ``)
+				},
+			},
+			postFunc: []func(){
+				func() { utils.DeleteTempSubStudent(`{"grNo":15}`, ``, ``) },
+			},
 			expectedCode: http.StatusBadRequest,
 		},
 		{
@@ -198,17 +227,28 @@ func TestEditStudentsByTeacher(t *testing.T) {
 			expectedCode: http.StatusUnauthorized,
 		},
 		{
-			name:         "old and new value same",
-			reqbody:      `{"grNo":15"studName":"raju"}`,
-			prior:        []string{`INSERT INTO students VALUES (15, "Asdf123@", "student", "raju", 8, "B")`},
-			cleanup:      []string{"DELETE FROM students WHERE grNo=15"},
+			name: "old and new value same",
+			priorFunc: []func(){
+				func() {
+					utils.AddTempSubMarksStudent(`{"grNo":15,"studPwd":"Asdf1234","userRole":"student","studName":"raja","std":5,"section":"A"}`, "", ``, ``)
+				},
+			},
+			postFunc: []func(){
+				func() { utils.DeleteTempSubStudent(`{"grNo":15}`, ``, ``) },
+			},
 			expectedCode: http.StatusBadRequest,
 		},
 		{
-			name:         "Valid case",
-			prior:        []string{`INSERT INTO students VALUES (15, "Asdf123@", "student", "raju", 8, "B")`},
-			reqbody:      `{"grNo":15,"studName":"ramu"}`,
-			cleanup:      []string{"DELETE FROM students WHERE grNo=15"},
+			name:    "Valid case",
+			reqbody: `{"grNo":15,"studName":"ramu"}`,
+			priorFunc: []func(){
+				func() {
+					utils.AddTempSubMarksStudent(`{"grNo":15,"studPwd":"Asdf1234","userRole":"student","studName":"raja","std":5,"section":"A"}`, "", ``, ``)
+				},
+			},
+			postFunc: []func(){
+				func() { utils.DeleteTempSubStudent(`{"grNo":15}`, ``, ``) },
+			},
 			expectedCode: http.StatusOK,
 		},
 	}
@@ -216,8 +256,8 @@ func TestEditStudentsByTeacher(t *testing.T) {
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			if len(tc.prior) > 0 {
-				utils.PriorRuns(tc.prior)
+			for _, task := range tc.priorFunc {
+				task()
 			}
 			w := httptest.NewRecorder()
 			ctx, _ := gin.CreateTestContext(w)
@@ -235,12 +275,13 @@ func TestEditStudentsByTeacher(t *testing.T) {
 			ctx.Request = req
 			router.ServeHTTP(w, req)
 			if w.Code != tc.expectedCode {
-				t.Errorf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
+				log.Fatalf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
 			}
 			t.Logf("%s - testname, Response = %s", tc.name, w.Body.String())
-			if len(tc.cleanup) > 0 {
-				utils.Cleaner(tc.cleanup)
+			for _, task := range tc.postFunc {
+				task()
 			}
+			utils.UserDeleter()
 		})
 	}
 	TeacherDeleter()
@@ -280,10 +321,16 @@ func TestAddSubjectByTeacher(t *testing.T) {
 			expectedCode: http.StatusUnauthorized,
 		},
 		{
-			name:         "Valid case",
-			reqbody:      `{"subId":125,"subName":"english","levelStd":12,"credits":5}`,
-			prior:        []string{"INSERT INTO subjectAllocation VALUES (12,5)"},
-			cleanup:      []string{"DELETE FROM subjects WHERE subId=125", "DELETE FROM subjectAllocation WHERE std=12"},
+			name:    "Valid case",
+			reqbody: `{"subId":125,"subName":"english","levelStd":12,"credits":5}`,
+			priorFunc: []func(){
+				func() {
+					utils.AddTempSubMarksStudent(``, `{"std":12,"limit":5}`, ``, ``)
+				},
+			},
+			postFunc: []func(){
+				func() { utils.DeleteTempSubStudent(``, `DELETE FROM subjectAllocation WHERE std=12`, `{"subId":125}`) },
+			},
 			expectedCode: http.StatusOK,
 		},
 	}
@@ -291,8 +338,8 @@ func TestAddSubjectByTeacher(t *testing.T) {
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			if len(tc.prior) > 0 {
-				utils.PriorRuns(tc.prior)
+			for _, task := range tc.priorFunc {
+				task()
 			}
 			w := httptest.NewRecorder()
 			ctx, _ := gin.CreateTestContext(w)
@@ -310,12 +357,13 @@ func TestAddSubjectByTeacher(t *testing.T) {
 			req.Header.Set("Cookie", tc.token)
 			router.ServeHTTP(w, req)
 			if w.Code != tc.expectedCode {
-				t.Errorf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
+				log.Fatalf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
 			}
 			t.Logf("%s - testname, Response = %s", tc.name, w.Body.String())
-			if len(tc.cleanup) > 0 {
-				utils.Cleaner(tc.cleanup)
+			for _, task := range tc.postFunc {
+				task()
 			}
+			utils.UserDeleter()
 		})
 	}
 	TeacherDeleter()
@@ -360,10 +408,16 @@ func TestEditSubjectsByTeacher(t *testing.T) {
 			expectedCode: http.StatusUnauthorized,
 		},
 		{
-			name:         "Valid case",
-			reqbody:      `{"subId":125,"subName":"german"}`,
-			prior:        []string{"INSERT INTO subjectAllocation VALUES (12,5)", `INSERT INTO subjects VALUES (125,"anatomy",12,10)`},
-			cleanup:      []string{"DELETE FROM subjects WHERE subId=125", "DELETE FROM subjectAllocation WHERE std=12"},
+			name:    "Valid case",
+			reqbody: `{"subId":125,"subName":"german"}`,
+			priorFunc: []func(){
+				func() {
+					utils.AddTempSubMarksStudent(``, `{"std":12,"limit":5}`, `{"subId":125,"subName":"english","levelStd":12,"credits":5}`, ``)
+				},
+			},
+			postFunc: []func(){
+				func() { utils.DeleteTempSubStudent(``, `DELETE FROM subjectAllocation WHERE std=12`, `{"subId":125}`) },
+			},
 			expectedCode: http.StatusOK,
 		},
 	}
@@ -371,8 +425,8 @@ func TestEditSubjectsByTeacher(t *testing.T) {
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			if len(tc.prior) > 0 {
-				utils.PriorRuns(tc.prior)
+			for _, task := range tc.priorFunc {
+				task()
 			}
 			w := httptest.NewRecorder()
 			ctx, _ := gin.CreateTestContext(w)
@@ -390,12 +444,13 @@ func TestEditSubjectsByTeacher(t *testing.T) {
 			req.Header.Set("Cookie", tc.token)
 			router.ServeHTTP(w, req)
 			if w.Code != tc.expectedCode {
-				t.Errorf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
+				log.Fatalf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
 			}
 			t.Logf("%s - testname, Response = %s", tc.name, w.Body.String())
-			if len(tc.cleanup) > 0 {
-				utils.Cleaner(tc.cleanup)
+			for _, task := range tc.postFunc {
+				task()
 			}
+			utils.UserDeleter()
 		})
 	}
 	TeacherDeleter()
@@ -416,17 +471,29 @@ func TestDisplaySubjectsByTeacher(t *testing.T) {
 			expectedCode: http.StatusUnauthorized,
 		},
 		{
-			name:         "Valid case with result",
-			reqbody:      "12",
-			prior:        []string{"INSERT INTO subjectAllocation VALUES (12,5)", `INSERT INTO subjects VALUES (125,"anatomy",12,10)`},
-			cleanup:      []string{"DELETE FROM subjects WHERE subId=125", "DELETE FROM subjectAllocation WHERE std=12"},
+			name:    "Valid case with result",
+			reqbody: "12",
+			priorFunc: []func(){
+				func() {
+					utils.AddTempSubMarksStudent(``, `{"std":12,"limit":5}`, `{"subId":125,"subName":"english","levelStd":12,"credits":5}`, ``)
+				},
+			},
+			postFunc: []func(){
+				func() { utils.DeleteTempSubStudent("", "DELETE FROM subjectAllocation WHERE std=12", `{"subId":125}`) },
+			},
 			expectedCode: http.StatusOK,
 		},
 		{
-			name:         "Valid case with no result",
-			reqbody:      "12",
-			prior:        []string{"INSERT INTO subjectAllocation VALUES (12,5)"},
-			cleanup:      []string{"DELETE FROM subjectAllocation WHERE std=12"},
+			name:    "Valid case with no result",
+			reqbody: "12",
+			priorFunc: []func(){
+				func() {
+					utils.AddTempSubMarksStudent(``, `{"std":12,"limit":5}`, ``, ``)
+				},
+			},
+			postFunc: []func(){
+				func() { utils.DeleteTempSubStudent("", "DELETE FROM subjectAllocation WHERE std=12", ``) },
+			},
 			expectedCode: http.StatusOK,
 		},
 		{
@@ -440,8 +507,8 @@ func TestDisplaySubjectsByTeacher(t *testing.T) {
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			if len(tc.prior) > 0 {
-				utils.Cleaner(tc.prior)
+			for _, task := range tc.priorFunc {
+				task()
 			}
 			w := httptest.NewRecorder()
 			ctx, _ := gin.CreateTestContext(w)
@@ -460,12 +527,13 @@ func TestDisplaySubjectsByTeacher(t *testing.T) {
 			router.ServeHTTP(w, req)
 
 			if w.Code != tc.expectedCode {
-				t.Errorf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
+				log.Fatalf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
 			}
 			t.Logf("%s - testname, Response = %s", tc.name, w.Body.String())
-			if len(tc.cleanup) > 0 {
-				utils.Cleaner(tc.cleanup)
+			for _, task := range tc.postFunc {
+				task()
 			}
+			utils.UserDeleter()
 		})
 	}
 	TeacherDeleter()
@@ -504,24 +572,48 @@ func TestAddMarksByTeacher(t *testing.T) {
 			expectedCode: http.StatusUnauthorized,
 		},
 		{
-			name:         "Valid case",
-			reqbody:      `{"subId":141,"grNo":1221,"theoryMarks":80,"practicalMarks":15}`,
-			prior:        []string{"INSERT INTO subjectAllocation VALUES (3,5)", `INSERT INTO students VALUES (1221,"password","student","selmon",3,"A")`, `INSERT INTO subjects VALUES (141,"HINDI",3,15)`},
-			cleanup:      []string{`DELETE FROM students WHERE grNo=1221`, `DELETE FROM subjects WHERE subId=141`, "DELETE FROM subjectAllocation WHERE std=3"},
+			name:    "Valid case",
+			reqbody: `{"subId":125,"grNo":15,"theoryMarks":80,"practicalMarks":15}`,
+			priorFunc: []func(){
+				func() {
+					utils.AddTempSubMarksStudent(`{"grNo":15,"studPwd":"Asdf123@","userRole":"student","studName":"raju","std":12,"section":"B"}`, `{"std":12,"limit":5}`, `{"subId":125,"subName":"english","levelStd":12,"credits":5}`, ``)
+				},
+			},
+			postFunc: []func(){
+				func() {
+					utils.DeleteTempSubStudent(`{"grNo":15}`, "DELETE FROM subjectAllocation WHERE std=12", `{"subId":125}`)
+				},
+			},
 			expectedCode: http.StatusOK,
 		},
 		{
-			name:         "record already present",
-			reqbody:      `{"subId":141,"grNo":1221,"theoryMarks":80,"practicalMarks":15}`,
-			prior:        []string{"INSERT INTO subjectAllocation VALUES (3,5)", `INSERT INTO students VALUES (1221,"password","student","selmon",3,"A")`, `INSERT INTO subjects VALUES (141,"HINDI",3,15)`, `INSERT INTO marks VALUES (1221,141,80,20,"AA")`},
+			name:    "record already present",
+			reqbody: `{"subId":125,"grNo":15,"theoryMarks":80,"practicalMarks":15}`,
+			priorFunc: []func(){
+				func() {
+					utils.AddTempSubMarksStudent(`{"grNo":15,"studPwd":"Asdf123@","userRole":"student","studName":"raju","std":12,"section":"B"}`, `{"std":12,"limit":5}`, `{"subId":125,"subName":"english","levelStd":12,"credits":5}`, `{"subId":125,"grNo":15,"theoryMarks":80,"practicalMarks":15}`)
+				},
+			},
+			postFunc: []func(){
+				func() {
+					utils.DeleteTempSubStudent(`{"grNo":15}`, "DELETE FROM subjectAllocation WHERE std=12", `{"subId":125}`)
+				},
+			},
 			expectedCode: http.StatusBadRequest,
-			cleanup:      []string{`DELETE FROM students WHERE grNo=1221`, `DELETE FROM subjects WHERE subId=141`, "DELETE FROM subjectAllocation WHERE std=3"},
 		},
 		{
-			name:         "standards donot match",
-			reqbody:      `{"subId":141,"grNo":1221,"theoryMarks":80,"practicalMarks":15}`,
-			prior:        []string{"INSERT INTO subjectAllocation VALUES (7,5)", `INSERT INTO students VALUES (1221,"password","student","selmon",3,"A")`, `INSERT INTO subjects VALUES (141,"HINDI",7,15)`},
-			cleanup:      []string{`DELETE FROM students WHERE grNo=1221`, `DELETE FROM subjects WHERE subId=141`, "DELETE FROM subjectAllocation WHERE std=7"},
+			name:    "standards donot match",
+			reqbody: `{"subId":125,"grNo":15,"theoryMarks":80,"practicalMarks":15}`,
+			priorFunc: []func(){
+				func() {
+					utils.AddTempSubMarksStudent(`{"grNo":15,"studPwd":"Asdf123@","userRole":"student","studName":"raju","std":12,"section":"B"}`, `{"std":11,"limit":5}`, `{"subId":125,"subName":"english","levelStd":11,"credits":5}`, ``)
+				},
+			},
+			postFunc: []func(){
+				func() {
+					utils.DeleteTempSubStudent(`{"grNo":15}`, "DELETE FROM subjectAllocation WHERE std=11", `{"subId":125}`)
+				},
+			},
 			expectedCode: http.StatusBadRequest,
 		},
 	}
@@ -529,8 +621,8 @@ func TestAddMarksByTeacher(t *testing.T) {
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			if len(tc.prior) > 0 {
-				utils.Cleaner(tc.prior)
+			for _, task := range tc.priorFunc {
+				task()
 			}
 			w := httptest.NewRecorder()
 			ctx, _ := gin.CreateTestContext(w)
@@ -548,12 +640,13 @@ func TestAddMarksByTeacher(t *testing.T) {
 			req.Header.Set("Cookie", tc.token)
 			router.ServeHTTP(w, req)
 			if w.Code != tc.expectedCode {
-				t.Errorf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
+				log.Fatalf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
 			}
 			t.Logf("%s - testname, Response = %s", tc.name, w.Body.String())
-			if len(tc.cleanup) > 0 {
-				utils.Cleaner(tc.cleanup)
+			for _, task := range tc.postFunc {
+				task()
 			}
+			utils.UserDeleter()
 		})
 	}
 	TeacherDeleter()
@@ -592,17 +685,33 @@ func TestEditMarksByTeacher(t *testing.T) {
 			expectedCode: http.StatusUnauthorized,
 		},
 		{
-			name:         "Valid case",
-			prior:        []string{`INSERT INTO students VALUES (1221,"password","student","selmon",3,"A")`, `INSERT INTO subjects VALUES (141,"HINDI",3,15)`, `INSERT INTO marks VALUES (1221,141,80,20,"AA")`},
-			reqbody:      `{"subId":141,"grNo":1221,"theoryMarks":50,"practicalMarks":15}`,
-			cleanup:      []string{`DELETE FROM students WHERE grNo=1221`, `DELETE FROM subjects WHERE subId=141`},
+			name:    "Valid case",
+			reqbody: `{"subId":125,"grNo":15,"theoryMarks":15,"practicalMarks":19}`,
+			priorFunc: []func(){
+				func() {
+					utils.AddTempSubMarksStudent(`{"grNo":15,"studPwd":"Asdf123@","userRole":"student","studName":"raju","std":12,"section":"B"}`, `{"std":12,"limit":5}`, `{"subId":125,"subName":"english","levelStd":12,"credits":5}`, `{"subId":125,"grNo":15,"theoryMarks":80,"practicalMarks":15}`)
+				},
+			},
+			postFunc: []func(){
+				func() {
+					utils.DeleteTempSubStudent(`{"grNo":15}`, "DELETE FROM subjectAllocation WHERE std=12", `{"subId":125}`)
+				},
+			},
 			expectedCode: http.StatusOK,
 		},
 		{
-			name:         "record not found to edit",
-			reqbody:      `{"subId":141,"grNo":1221,"theoryMarks":80,"practicalMarks":15}`,
-			prior:        []string{`INSERT INTO students VALUES (1221,"password","student","selmon",3,"A")`, `INSERT INTO subjects VALUES (141,"HINDI",3,15)`},
-			cleanup:      []string{`DELETE FROM students WHERE grNo=1221`, `DELETE FROM subjects WHERE subId=141`},
+			name:    "record not found to edit",
+			reqbody: `{"subId":125,"grNo":15,"theoryMarks":15,"practicalMarks":19}`,
+			priorFunc: []func(){
+				func() {
+					utils.AddTempSubMarksStudent(`{"grNo":15,"studPwd":"Asdf123@","userRole":"student","studName":"raju","std":12,"section":"B"}`, `{"std":12,"limit":5}`, `{"subId":125,"subName":"english","levelStd":12,"credits":5}`, ``)
+				},
+			},
+			postFunc: []func(){
+				func() {
+					utils.DeleteTempSubStudent(`{"grNo":15}`, "DELETE FROM subjectAllocation WHERE std=12", `{"subId":125}`)
+				},
+			},
 			expectedCode: http.StatusBadRequest,
 		},
 	}
@@ -610,8 +719,8 @@ func TestEditMarksByTeacher(t *testing.T) {
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			if len(tc.prior) > 0 {
-				utils.Cleaner(tc.prior)
+			for _, task := range tc.priorFunc {
+				task()
 			}
 			w := httptest.NewRecorder()
 			ctx, _ := gin.CreateTestContext(w)
@@ -631,12 +740,13 @@ func TestEditMarksByTeacher(t *testing.T) {
 			router.ServeHTTP(w, req)
 
 			if w.Code != tc.expectedCode {
-				t.Errorf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
+				log.Fatalf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
 			}
 			t.Logf("%s - testname, Response = %s", tc.name, w.Body.String())
-			if len(tc.cleanup) > 0 {
-				utils.Cleaner(tc.cleanup)
+			for _, task := range tc.postFunc {
+				task()
 			}
+			utils.UserDeleter()
 		})
 	}
 	TeacherDeleter()
@@ -646,10 +756,22 @@ func TestStudentReportByTeacher(t *testing.T) {
 
 	testcases := []TestingStructure{
 		{
-			name:         "Valid",
-			reqbody:      `1221`,
-			prior:        []string{`INSERT INTO students VALUES (1221,"password","student","selmon",3,"A")`, `INSERT INTO subjects VALUES (141,"HINDI",3,15)`, `INSERT INTO marks VALUES (1221,141,80,20,"AA")`},
-			cleanup:      []string{`DELETE FROM students WHERE grNo=1221`, `DELETE FROM subjects WHERE subId=141`},
+			name:    "Valid",
+			reqbody: `15`,
+			priorFunc: []func(){
+				func() {
+					utils.AddTempSubMarksStudent(`{"grNo":15,"studPwd":"Asdf123@","userRole":"student","studName":"raju","std":12,"section":"B"}`, `{"std":12,"limit":5}`, `{"subId":125,"subName":"english","levelStd":12,"credits":5}`, `{"subId":125,"grNo":15,"theoryMarks":80,"practicalMarks":15}`)
+				},
+				func() {
+					utils.AddTempSubMarksStudent(`{"grNo":16,"studPwd":"Asdf123@","userRole":"student","studName":"raja","std":12,"section":"A"}`, ``, ``, `{"subId":125,"grNo":16,"theoryMarks":20,"practicalMarks":15}`)
+				},
+			},
+			postFunc: []func(){
+				func() { utils.DeleteTempSubStudent(`{"grNo":15}`, ``, ``) },
+				func() {
+					utils.DeleteTempSubStudent(`{"grNo":16}`, `DELETE FROM subjectAllocation WHERE std=12`, `{"subId":125}}`)
+				},
+			},
 			expectedCode: http.StatusOK,
 		},
 		{
@@ -658,10 +780,22 @@ func TestStudentReportByTeacher(t *testing.T) {
 			expectedCode: http.StatusBadRequest,
 		},
 		{
-			name:         "valid but no result found",
-			prior:        []string{`INSERT INTO students VALUES (1443, "Asdf123@", "student", "raju", 8, "B")`},
-			cleanup:      []string{"DELETE FROM students WHERE grNo=1443"},
-			reqbody:      `1443`,
+			name: "valid but no result found",
+			priorFunc: []func(){
+				func() {
+					utils.AddTempSubMarksStudent(`{"grNo":15,"studPwd":"Asdf123@","userRole":"student","studName":"raju","std":12,"section":"B"}`, `{"std":12,"limit":5}`, `{"subId":125,"subName":"english","levelStd":12,"credits":5}`, `{"subId":125,"grNo":15,"theoryMarks":80,"practicalMarks":15}`)
+				},
+				func() {
+					utils.AddTempSubMarksStudent(`{"grNo":16,"studPwd":"Asdf123@","userRole":"student","studName":"raja","std":12,"section":"A"}`, ``, ``, ``)
+				},
+			},
+			postFunc: []func(){
+				func() { utils.DeleteTempSubStudent(`{"grNo":15}`, ``, ``) },
+				func() {
+					utils.DeleteTempSubStudent(`{"grNo":16}`, `DELETE FROM subjectAllocation WHERE std=12`, `{"subId":125}}`)
+				},
+			},
+			reqbody:      `16`,
 			expectedCode: http.StatusOK,
 		},
 		{
@@ -680,8 +814,8 @@ func TestStudentReportByTeacher(t *testing.T) {
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			if len(tc.prior) > 0 {
-				utils.Cleaner(tc.prior)
+			for _, task := range tc.priorFunc {
+				task()
 			}
 			w := httptest.NewRecorder()
 			ctx, _ := gin.CreateTestContext(w)
@@ -699,12 +833,13 @@ func TestStudentReportByTeacher(t *testing.T) {
 			req.Header.Set("Cookie", tc.token)
 			router.ServeHTTP(w, req)
 			if w.Code != tc.expectedCode {
-				t.Errorf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
+				log.Fatalf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
 			}
 			t.Logf("%s - testname, Response = %s", tc.name, w.Body.String())
-			if len(tc.cleanup) > 0 {
-				utils.Cleaner(tc.cleanup)
+			for _, task := range tc.postFunc {
+				task()
 			}
+			utils.UserDeleter()
 		})
 	}
 	TeacherDeleter()
@@ -731,9 +866,13 @@ func TestDeleteStudentByTeacher(t *testing.T) {
 			expectedCode: http.StatusUnauthorized,
 		},
 		{
-			name:         "Valid case",
-			reqbody:      `{"grNo":1265}`,
-			prior:        []string{`INSERT INTO students VALUES (1265, "Asdf123@", "student", "raju", 8, "B")`},
+			name:    "Valid case",
+			reqbody: `{"grNo":16}`,
+			priorFunc: []func(){
+				func() {
+					utils.AddTempSubMarksStudent(`{"grNo":16,"studPwd":"Asdf123@","userRole":"student","studName":"raja","std":12,"section":"A"}`, ``, ``, ``)
+				},
+			},
 			expectedCode: http.StatusOK,
 		},
 	}
@@ -741,8 +880,8 @@ func TestDeleteStudentByTeacher(t *testing.T) {
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			if len(tc.prior) > 0 {
-				utils.Cleaner(tc.prior)
+			for _, task := range tc.priorFunc {
+				task()
 			}
 			w := httptest.NewRecorder()
 			ctx, _ := gin.CreateTestContext(w)
@@ -760,12 +899,13 @@ func TestDeleteStudentByTeacher(t *testing.T) {
 			req.Header.Set("Cookie", tc.token)
 			router.ServeHTTP(w, req)
 			if w.Code != tc.expectedCode {
-				t.Errorf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
+				log.Fatalf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
 			}
 			t.Logf("%s - testname, Response = %s", tc.name, w.Body.String())
-			if len(tc.cleanup) > 0 {
-				utils.Cleaner(tc.cleanup)
+			for _, task := range tc.postFunc {
+				task()
 			}
+			utils.UserDeleter()
 		})
 	}
 	TeacherDeleter()
@@ -792,10 +932,16 @@ func TestDeleteSubjectByTeacher(t *testing.T) {
 			expectedCode: http.StatusUnauthorized,
 		},
 		{
-			name:         "Valid case",
-			reqbody:      `{"subId":125}`,
-			prior:        []string{"INSERT INTO subjectAllocation VALUES (12,5)", `INSERT INTO subjects VALUES (125,"anatomy",12,10)`},
-			cleanup:      []string{"DELETE FROM subjectAllocation WHERE std=12"},
+			name:    "Valid case",
+			reqbody: `{"subId":125}`,
+			priorFunc: []func(){
+				func() {
+					utils.AddTempSubMarksStudent(``, `{"std":12,"limit":5}`, `{"subId":125,"subName":"english","levelStd":12,"credits":5}`, ``)
+				},
+			},
+			postFunc: []func(){
+				func() { utils.DeleteTempSubStudent("", "DELETE FROM subjectAllocation WHERE std=12", "") },
+			},
 			expectedCode: http.StatusOK,
 		},
 	}
@@ -803,8 +949,8 @@ func TestDeleteSubjectByTeacher(t *testing.T) {
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			if len(tc.prior) > 0 {
-				utils.Cleaner(tc.prior)
+			for _, task := range tc.priorFunc {
+				task()
 			}
 			w := httptest.NewRecorder()
 			ctx, _ := gin.CreateTestContext(w)
@@ -822,12 +968,13 @@ func TestDeleteSubjectByTeacher(t *testing.T) {
 			req.Header.Set("Cookie", tc.token)
 			router.ServeHTTP(w, req)
 			if w.Code != tc.expectedCode {
-				t.Errorf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
+				log.Fatalf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
 			}
 			t.Logf("%s - testname, Response = %s", tc.name, w.Body.String())
-			if len(tc.cleanup) > 0 {
-				utils.Cleaner(tc.cleanup)
+			for _, task := range tc.postFunc {
+				task()
 			}
+			utils.UserDeleter()
 		})
 	}
 	TeacherDeleter()
@@ -852,17 +999,38 @@ func TestAddReviewByTeacher(t *testing.T) {
 			expectedCode: http.StatusUnauthorized,
 		},
 		{
-			name:         "Valid case",
-			reqbody:      `{"grNo":1221,"comment":"sincere"}`,
-			prior:        []string{`INSERT INTO students VALUES (1221, "Asdf123@", "student", "raju", 8, "B")`},
-			cleanup:      []string{"DELETE FROM students WHERE grNo=1221", "DELETE FROM reviews WHERE grNo=1221"},
+			name: "Valid case",
+			priorFunc: []func(){
+				func() {
+					utils.AddTempSubMarksStudent(`{"grNo":16,"studPwd":"Asdf123@","userRole":"student","studName":"raja","std":12,"section":"A"}`, ``, ``, ``)
+				},
+			},
+			postFunc: []func(){
+				func() { utils.DeleteTempSubStudent(`{"grNo":16}`, ``, ``) },
+				func() {
+					utils.DeleteReviews(`DELETE FROM reviews WHERE grNo=16`)
+				},
+			},
+			reqbody:      `{"grNo":16,"comment":"sincere"}`,
 			expectedCode: http.StatusOK,
 		},
 		{
-			name:         "Valid case but review already present",
-			reqbody:      `{"grNo":1221,"comment":"sincere"}`,
-			prior:        []string{`INSERT INTO students VALUES (1221, "Asdf123@", "student", "raju", 8, "B")`, `INSERT INTO reviews VALUES ("` + CurrentData.UserId + `", 1221, "bad boy")`},
-			cleanup:      []string{"DELETE FROM students WHERE grNo=1221", "DELETE FROM reviews WHERE grNo=1221"},
+			name: "Valid case but review already present",
+			priorFunc: []func(){
+				func() {
+					utils.AddTempSubMarksStudent(`{"grNo":16,"studPwd":"Asdf123@","userRole":"student","studName":"raja","std":12,"section":"A"}`, ``, ``, ``)
+				},
+				func() {
+					utils.AddReviews(`INSERT INTO reviews VALUES (` + strconv.Itoa(CurrentData.UserId) + `, 16, "bad boy")`)
+				},
+			},
+			postFunc: []func(){
+				func() { utils.DeleteTempSubStudent(`{"grNo":16}`, ``, ``) },
+				func() {
+					utils.DeleteReviews(`DELETE FROM reviews WHERE grNo=16`)
+				},
+			},
+			reqbody:      `{"grNo":16,"comment":"sincere"}`,
 			expectedCode: http.StatusBadRequest,
 		},
 		{
@@ -876,8 +1044,8 @@ func TestAddReviewByTeacher(t *testing.T) {
 	router := routes.InitializeRouter()
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			if len(tc.prior) > 0 {
-				utils.Cleaner(tc.prior)
+			for _, task := range tc.priorFunc {
+				task()
 			}
 			w := httptest.NewRecorder()
 			ctx, _ := gin.CreateTestContext(w)
@@ -896,12 +1064,13 @@ func TestAddReviewByTeacher(t *testing.T) {
 			router.ServeHTTP(w, req)
 
 			if w.Code != tc.expectedCode {
-				t.Errorf("%s in this test - expected status %d, got %d", tc.name, tc.expectedCode, w.Code)
+				log.Fatalf("%s in this test - expected status %d, got %d, %s", tc.name, tc.expectedCode, w.Code, w.Body.String())
 			}
 			t.Logf("%s - testname, Response = %s", tc.name, w.Body.String())
-			if len(tc.cleanup) > 0 {
-				utils.Cleaner(tc.cleanup)
+			for _, task := range tc.postFunc {
+				task()
 			}
+			utils.UserDeleter()
 		})
 	}
 }

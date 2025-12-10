@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
-	"strconv"
 
 	"example.com/main/routes"
 	"github.com/gin-gonic/gin"
@@ -26,7 +25,7 @@ type LoginResponse struct {
 }
 
 type ResStruct struct {
-	UserId string
+	UserId int
 	Token  string
 	Role   string
 }
@@ -62,31 +61,21 @@ func UserGenerator(role string) ResStruct {
 		fmt.Println("Error reading response body:", err)
 		return empty
 	}
-	var result UserData
 	var TempData struct {
-		UID  any    `json:"uid"`
+		UID  int    `json:"uid"`
 		UPwd string `json:"upwd"`
 	}
 	err = json.Unmarshal(body, &TempData)
 	if err != nil {
 		log.Fatalf("Error unmarshaling JSON: %v", err)
 	}
-	switch v := TempData.UID.(type) {
-	case string:
-		result.UID = v
-		result.UPwd = TempData.UPwd
-	case float64:
-		result.UID = strconv.Itoa(int(v))
-		result.UPwd = TempData.UPwd
-	default:
-		log.Fatal("error while generating id")
-	}
 
 	logindata := map[string]any{
-		"userId":   result.UID,
-		"password": result.UPwd,
+		"userId":   TempData.UID,
+		"password": TempData.UPwd,
+		"userRole": role,
 	}
-	CurrentData.UserId = result.UID
+	CurrentData.UserId = TempData.UID
 	jsonData, err = json.Marshal(logindata)
 	if err != nil {
 		fmt.Println("Error marshaling JSON:", err)
