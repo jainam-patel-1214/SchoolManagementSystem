@@ -76,7 +76,7 @@ func CreatePendingReq(ctx *gin.Context) {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error creating id"})
 				return
 			} else {
-				ctx.JSON(http.StatusOK, gin.H{"uid": id, "upwd": PendingDb.Pwd})
+				ctx.JSON(http.StatusOK, gin.H{"output": fmt.Sprintf("your_id = %d and pwd = %s", id, PendingDb.Pwd)})
 				return
 			}
 		case "admin":
@@ -87,7 +87,7 @@ func CreatePendingReq(ctx *gin.Context) {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error creating id"})
 				return
 			} else {
-				ctx.JSON(http.StatusOK, gin.H{"uid": id, "upwd": PendingDb.Pwd})
+				ctx.JSON(http.StatusOK, gin.H{"output": fmt.Sprintf("your_id = %d and pwd = %s for login", id, PendingDb.Pwd)})
 				return
 			}
 		default:
@@ -250,6 +250,11 @@ func AcceptPendingReq(ctx *gin.Context) {
 					} else {
 						ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject id"})
 					}
+					return
+				} else if body.SubId == 0 {
+
+				} else {
+					ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject id"})
 				}
 			}
 
@@ -267,6 +272,7 @@ func AcceptPendingReq(ctx *gin.Context) {
 			}
 
 		}
+
 		switch body.UserRole {
 		case "student":
 			if body.Std == 0 || body.Section == "" || body.UserId <= 0 || body.UserName == "" || body.UserPwd == "" {
