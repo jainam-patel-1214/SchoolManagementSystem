@@ -65,19 +65,10 @@ export const AdminHome = () => {
 }
 
 
-export const PendingReqSection = styled.div`
+const PendingReqSection = styled.div`
     display: flex;
     flex-direction: column;
     padding: 1rem;
-`
-export const PendingReqTab = styled.div`
-    display: flex;
-    flex-direction: row;
-    padding: 1rem;
-    justify-content: space-between;
-    align-items: center;
-    margin: .3rem;
-    border: 1px solid blue;
 `
 const PendingBtnComp = styled.button`
     background-color: lightgreen;
@@ -184,8 +175,8 @@ export const AdminPendingReqTab = () => {
         try {
             const temp = { "pendingId": Number(pend), "uName": userName, "uPwd": userPwd, "uRole": userRole }
             const res = await FetchApi(`http://localhost:8090/${userrole}/rejectRequest`, 'DELETE', temp)
-            Toaster(res, toast)
             if (res.output) {
+                SuccessToast("Rejected !!",toast)
                 emptyDataHandler()
                 fetchPendingApps()
             }

@@ -80,9 +80,7 @@ export const ReviewTab = () => {
                         </InputContainer>
                     </TeacherInputTabContainer>
                     <ErrorSpan id="minmaxerror" ref={errorComp}></ErrorSpan>
-                    <buttonComp>
-                        <StyledButton>Submit</StyledButton>
-                    </buttonComp>
+                    <StyledButton>Submit</StyledButton>
                 </SearchForm>
             </SearchParamSection>
         </SearchBoxSection>

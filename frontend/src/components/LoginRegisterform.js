@@ -131,7 +131,7 @@ export const LoginRegisterForm = () => {
         }
         try {
             const body = { yourName: data?.userName, password: data?.password, roleReq: data?.userRole }
-            const res = FetchApi("http://localhost:8090/register", "POST", body)
+            const res = await FetchApi("http://localhost:8090/register", "POST", body)
             Toaster(res, toast)
         } catch (error) {
             ErrorToast(error, toast)
