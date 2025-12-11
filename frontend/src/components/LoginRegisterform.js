@@ -1,13 +1,13 @@
 import { FaRegUser } from "react-icons/fa";
 import { FaKey } from "react-icons/fa";
 import { Fragment, useState, useEffect, useRef } from "react";
-import axios from "axios";
 import styled, { keyframes } from "styled-components";
 import { SignInBtn } from "../styled-components/LoginSigninButton";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import { ErrorToast, SuccessToast } from "../utils/Toaster";
+import { ErrorToast, SuccessToast, Toaster } from "../utils/Toaster";
 import { CookieSetter } from "../utils/setCookie";
+import { FetchApi } from "../utils/FetchApi";
 const SelectInRegister = styled.select`
   border: 1px solid #b9b9b9;
   padding: 5px;
@@ -40,7 +40,7 @@ const SignInForm = styled.div`
         }
         
     `
-    const typing = keyframes`
+const typing = keyframes`
     from {
         text-align: center;
         width: 0;
@@ -49,7 +49,7 @@ const SignInForm = styled.div`
         width: 100%;
     }
     `;
-    const SignUpAndLoginForm = styled.form`
+const SignUpAndLoginForm = styled.form`
         display: flex;
         flex-direction: column;
 
@@ -87,44 +87,38 @@ const SignInForm = styled.div`
 export const LoginRegisterForm = () => {
     const navigate = useNavigate()
     const buttonRef = useRef(null)
+    const initState = {
+        userId: 0,
+        password: "",
+        userName: "",
+        userRole: ""
+    }
     const [validInp, setValidInp] = useState(false)
-    const [data, setData] = useState({
-        userId: null,
-        password: null,
-        userName: null,
-        userRole: null
-    })
+    const [data, setData] = useState(initState)
     const dataChangeHandler = (key, value) => {
         setData(prevdata => ({
             ...prevdata,
             [key]: value
         }))
     }
-    const emptyStates = () => {
-        const nullifiedUserData = Object.keys(data).reduce((acc, key) => {
-            acc[key] = "";
-            return acc;
-        }, {});
-        setData(nullifiedUserData);
-    }
     const [showLogin, setShowLogin] = useState(true);
     const [showRegister, setShowRegister] = useState(false);
 
     const registerChangeHandler = () => {
         setShowLogin(false);
-        emptyStates()
+        setData(initState)
         setShowRegister(true);
     };
     const loginChangeHandler = () => {
         setShowLogin(true);
-        emptyStates()
+        setData(initState)
         setShowRegister(false);
     };
 
     const handleSignUp = async (e) => {
         e.preventDefault();
         if (!validInp) {
-            ErrorToast("invalid values in below fields",toast)
+            ErrorToast("invalid values in below fields", toast)
             return
         }
         if (data?.userRole === "") {
@@ -136,28 +130,14 @@ export const LoginRegisterForm = () => {
             return;
         }
         try {
-            await axios
-                .post(
-                    "http://localhost:8090/register",
-                    { yourName: data?.userName, password: data?.password, roleReq: data?.userRole },
-                    { headers: { "Content-Type": "application/json" } }
-                )
-                .then((res) => {
-                    SuccessToast(res.data.output + ". Wait till any admin accepts it.", toast)
-                })
-                .catch((err) => {
-                    ErrorToast(err.response.data.error || err, toast)
-                });
+            const body = { yourName: data?.userName, password: data?.password, roleReq: data?.userRole }
+            const res = FetchApi("http://localhost:8090/register", "POST", body)
+            Toaster(res, toast)
         } catch (error) {
-            ErrorToast(error,toast)
+            ErrorToast(error, toast)
             console.log(error);
         } finally {
-            setData({
-                userId: "",
-                password: "",
-                userName: "",
-                userRole: ""
-            });
+            setData(initState);
             e.target.reset()
             setValidInp(false)
         }
@@ -166,7 +146,7 @@ export const LoginRegisterForm = () => {
     const handleLogin = async (e) => {
         e.preventDefault();
         if (!validInp) {
-            ErrorToast("invalid values in below fields",toast)
+            ErrorToast("invalid values in below fields", toast)
             return
         }
         if (data?.userId === "" || data?.password === "") {
@@ -174,58 +154,47 @@ export const LoginRegisterForm = () => {
             return;
         }
         try {
-            await axios
-                .post(
-                    "http://localhost:8090/login",
-                    { userId: Number(data?.userId), password: data?.password, userRole: data?.userRole },
-                    { headers: { "Content-Type": "application/json" } }
-                )
-                .then((res) => {
-                    SuccessToast('Login Successful!', toast)
-                    CookieSetter(data?.userId, res.data.username, res.data.output, res.data.role)
-                    if (res.data.role === "student") {
-                        navigate("/app/student")
-                    }
-                    if (res.data.role === "teacher") {
-                        navigate("/app/teacher")
-                    }
-                    if (res.data.role === "admin") {
-                        navigate("/app/admin")
-                    }
-                })
-                .catch((err) => {
-                    ErrorToast(err.response.data.error || err, toast)
-                });
+            const body = { userId: Number(data?.userId), password: data?.password, userRole: data?.userRole }
+            const res = await FetchApi("http://localhost:8090/login", "POST", body)
+            console.log("login body",res);
+            
+            Toaster(res, toast)
+            CookieSetter(data?.userId, res.username, res.output, res.role)
+            if (res.role === "student") {
+                navigate("/app/student")
+            }
+            if (res.role === "teacher") {
+                navigate("/app/teacher")
+            }
+            if (res.role === "admin") {
+                navigate("/app/admin")
+            }
         } catch (error) {
             console.log(error);
+            ErrorToast(error,toast)
         } finally {
-            setData({
-                userId: "",
-                password: "",
-                userName: "",
-                userRole: ""
-            });
+            setData(initState);
             setValidInp(false)
         }
 
     };
     useEffect(() => {
         const isLoginValid = showLogin &&
-            data?.password !== null &&
-            data?.userId !== null &&
-            data?.userRole !== null &&
-            data?.userId > 0 &&
-            data?.userId <= 99999999 &&
-            data?.password?.length === 8 &&
-            data?.userRole?.toString() !== "";
+            data.password !== null &&
+            data.userId !== null &&
+            data.userRole !== null &&
+            data.userId > 0 &&
+            data.userId <= 99999999 &&
+            data.password.length === 8 &&
+            data.userRole.toString() !== "";
 
         const isRegisterValid = showRegister &&
-            data?.password !== null &&
-            data?.userName !== null &&
-            data?.userRole !== null &&
-            data?.userName?.length >= 2 &&
-            data?.password?.length === 8 &&
-            data?.userRole?.toString() !== "";
+            data.password !== null &&
+            data.userName !== null &&
+            data.userRole !== null &&
+            data.userName.length >= 2 &&
+            data.password.length === 8 &&
+            data.userRole.toString() !== "";
 
         setValidInp((showLogin && isLoginValid) || (showRegister && isRegisterValid));
     }, [data])

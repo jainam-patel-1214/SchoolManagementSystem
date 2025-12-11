@@ -10,7 +10,7 @@ import { FloatingInput, FloatingLabel, InputWrapper } from "../../../styled-comp
 import { StyledButton } from "../../../styled-components/styledButton"
 import { roleExtractor } from "../../../utils/RoleExtractor"
 
-export const StudentDelComponent = (props) => {
+export const StudentDelComponent = () => {
     const errorComp = useRef(null)
     const userrole = roleExtractor(window.location.pathname)
     const [grNo, setGrNo] = useState(null)

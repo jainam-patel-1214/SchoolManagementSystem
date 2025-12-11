@@ -11,13 +11,14 @@ import { ErrorToast, Toaster } from "../../utils/Toaster"
 import { GrNoOrSubIdValidation } from "../../utils/Validations"
 import { roleExtractor } from "../../utils/RoleExtractor"
 
-export const ReviewTab = (props) => {
+export const ReviewTab = () => {
     const errorComp = useRef(null)
     const userrole = roleExtractor(window.location.pathname)
-    const [data, setData] = useState({
-        grNo: null,
-        comment: null,
-    })
+    const initState = {
+        grNo: 0,
+        comment: "",
+    }
+    const [data, setData] = useState(initState)
     const dataChangeHandler = (key, value) => {
         setData(prevdata => ({
             ...prevdata,
@@ -52,10 +53,7 @@ export const ReviewTab = (props) => {
         } catch (err) {
             ErrorToast(err,toast)
         } finally {
-            setData({
-                grNo:null,
-                comment:null
-            })
+            setData(initState)
             e.target.reset();
         }
     }

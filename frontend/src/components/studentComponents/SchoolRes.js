@@ -66,7 +66,7 @@ export const ErrorSpan = styled.div`
 `
 
 
-export const SchoolResult = (props) => {
+export const SchoolResult = () => {
     const userrole = roleExtractor(window.location.pathname)
     const errorComp = useRef(null)
     const columnDef = [
@@ -99,12 +99,13 @@ export const SchoolResult = (props) => {
             accessorKey: 'grade',
         },
     ]
-    const [data, setData] = useState({
-        section: null,
-        grade: null,
+    const initState = {
+        section: "",
+        grade: 0,
         minMark: null,
         maxMark: null
-    })
+    }
+    const [data, setData] = useState(initState)
     const dataChangeHandler = (key, value) => {
         setData(prevdata => ({
             ...prevdata,
@@ -165,11 +166,7 @@ export const SchoolResult = (props) => {
         } catch (err) {
             ErrorToast(err, toast)
         } finally {
-            const nullifiedUserData = Object.keys(data).reduce((acc, key) => {
-                acc[key] = null;
-                return acc;
-            }, {});
-            setData(nullifiedUserData);
+            setData(initState);
             e.target.reset();
         }
     };

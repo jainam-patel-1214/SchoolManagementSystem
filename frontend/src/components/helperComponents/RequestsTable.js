@@ -6,10 +6,10 @@ import { useMemo, useState } from 'react'
 import { FaArrowUpZA,FaArrowUpAZ } from "react-icons/fa6";
 
 
-export const RequestsTableComponent = (props) => {
+export const RequestsTableComponent = ({data,columnDefinition,heading}) => {
 
-    const finalData = useMemo(()=>props?.data,[props?.data])
-    const finalColumnDef = useMemo(()=>props?.columnDefinition,[props?.columnDefinition])
+    const finalData = useMemo(()=>data,[data])
+    const finalColumnDef = useMemo(()=>columnDefinition,[columnDefinition])
     const [sorting,setSorting] = useState([])
 
     const tableInstance = useReactTable({
@@ -25,7 +25,7 @@ export const RequestsTableComponent = (props) => {
 
     return (
         <SearchOutputSection style={{ paddingBottom: "1.5rem" }}>
-            <h3 style={{ textAlign: "center" }}>{props.heading}</h3>
+            <h3 style={{ textAlign: "center" }}>{heading}</h3>
             <SubInfo style={{ width: "100%" }}>
                 <thead>
                     {tableInstance.getHeaderGroups().map((headElem, i) => {

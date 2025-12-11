@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom"
 import { toast, ToastContainer } from "react-toastify"
 import { FaAngleUp } from "react-icons/fa6";
 
-export const Navbar = (props) => {
+export const Navbar = () => {
     const navigate = useNavigate()
     const [uName, setuName] = useState('')
     const [urole, setRole] = useState('')

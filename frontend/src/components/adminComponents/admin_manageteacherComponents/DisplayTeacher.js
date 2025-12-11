@@ -12,7 +12,7 @@ import { ReactTableComponent } from "../../helperComponents/ResultTable";
 import { FetchApi } from "../../../utils/FetchApi";
 import { roleExtractor } from "../../../utils/RoleExtractor";
 
-export const DisplayTeacherPerformanceComponent = (props) => {
+export const DisplayTeacherPerformanceComponent = () => {
     const userrole = roleExtractor(window.location.pathname)
     const errorComp = useRef(null)
     const [tid, setTid] = useState(null)

@@ -11,15 +11,16 @@ import { ErrorToast, Toaster } from "../../../utils/Toaster"
 import { FetchApi } from "../../../utils/FetchApi"
 import { roleExtractor } from "../../../utils/RoleExtractor"
 
-export const AddMarkTab = (props) => {
+export const AddMarkTab = () => {
     const userrole = roleExtractor(window.location.pathname)
     const errorComp = useRef(null)
-    const [data, setData] = useState({
-        grNo: null,
-        subId: null,
+    const initState = {
+        grNo: 0,
+        subId: 0,
         theory: null,
         practical: null
-    })
+    }
+    const [data, setData] = useState(initState)
     const dataChangeHandler = (key, value) => {
         setData(prevdata => ({
             ...prevdata,
@@ -70,11 +71,7 @@ export const AddMarkTab = (props) => {
         } catch (err) {
             ErrorToast(err, toast)
         } finally {
-            const nullifiedUserData = Object.keys(data).reduce((acc, key) => {
-                acc[key] = null;
-                return acc;
-            }, {});
-            setData(nullifiedUserData);
+            setData(initState);
             e.target.reset();
         }
     };

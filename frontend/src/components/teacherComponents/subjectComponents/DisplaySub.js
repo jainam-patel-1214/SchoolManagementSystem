@@ -12,7 +12,7 @@ import { GradeValidation } from "../../../utils/Validations"
 import { roleExtractor } from "../../../utils/RoleExtractor"
 
 
-export const DisplaySubTabComp = (props) => {
+export const DisplaySubTabComp = () => {
     const errorComp = useRef(null)
     const userrole = roleExtractor(window.location.pathname)
     const [std, setStd] = useState(null)

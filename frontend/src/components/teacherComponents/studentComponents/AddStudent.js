@@ -12,15 +12,16 @@ import { RiBookShelfLine } from "react-icons/ri"
 import { StyledButton } from "../../../styled-components/styledButton"
 import { roleExtractor } from "../../../utils/RoleExtractor"
 
-export const StudentAddComponent = (props) => {
+export const StudentAddComponent = () => {
     const errorComp = useRef(null)
-    const [data, setData] = useState({
-        grNo: null,
-        std: null,
-        section: null,
-        name: null,
-        pwd: null
-    })
+    const initState = {
+        grNo: 0,
+        std: 0,
+        section: "",
+        name: "",
+        pwd: ""
+    }
+    const [data, setData] = useState(initState)
     const dataChangeHandler = (key, value) => {
         setData(prevdata => ({
             ...prevdata,
@@ -71,11 +72,7 @@ export const StudentAddComponent = (props) => {
         } catch (err) {
             ErrorToast(err, toast)
         } finally {
-            const nullifiedUserData = Object.keys(data).reduce((acc, key) => {
-                acc[key] = null;
-                return acc;
-            }, {});
-            setData(nullifiedUserData);
+            setData(initState);
             e.target.reset();
         }
     };

@@ -5,10 +5,10 @@ import { SearchOutputSection } from '../studentComponents/SchoolRes'
 import { useMemo } from 'react'
 
 
-export const ReactTableComponent = (props) => {
+export const ReactTableComponent = ({data,columnDefinition,heading}) => {
 
-    const finalData = useMemo(()=>props?.data,[props?.data])
-    const finalCOlumnDef = useMemo(()=>props?.columnDefinition,[])
+    const finalData = useMemo(()=>data,[data])
+    const finalCOlumnDef = useMemo(()=>columnDefinition,[columnDefinition])
 
     const tableInstance = useReactTable({
         columns: finalCOlumnDef,
@@ -18,7 +18,7 @@ export const ReactTableComponent = (props) => {
 
     return (
         <SearchOutputSection style={{ paddingBottom: "1.5rem" }}>
-            <h3 style={{ textAlign: "center" }}>{props.heading}</h3>
+            <h3 style={{ textAlign: "center" }}>{heading}</h3>
             <SubInfo style={{ width: "100%" }}>
                 <thead>
                     {tableInstance.getHeaderGroups().map((headElem, i) => {

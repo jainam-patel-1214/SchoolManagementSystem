@@ -7,7 +7,7 @@ import { FetchApi } from "../../utils/FetchApi"
 import { LabelValuePair } from "../helperComponents/LabelValuePair"
 import { ReactTableComponent } from "../helperComponents/ResultTable"
 import { roleExtractor } from "../../utils/RoleExtractor"
-export const TeacherHome = (props) => {
+export const TeacherHome = () => {
     const [displayData, setDisplayData] = useState({})
     const [displayReport, setDisplayReport] = useState({})
     const userrole = roleExtractor(window.location.pathname)

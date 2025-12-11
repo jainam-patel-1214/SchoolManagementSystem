@@ -11,7 +11,7 @@ import { ErrorToast, Toaster } from "../../utils/Toaster"
 import { FetchApi } from "../../utils/FetchApi"
 import { roleExtractor } from "../../utils/RoleExtractor"
 
-export const SubjectLimit = (props) => {
+export const SubjectLimit = () => {
     const errorComp = useRef(null)
     const [grade, setGrade] = useState(null)
     const [limit, setLimit] = useState(null)

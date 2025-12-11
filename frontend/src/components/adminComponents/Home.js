@@ -16,7 +16,7 @@ import { FloatingInput, FloatingLabel, InputWrapper } from "../../styled-compone
 import { TiSortAlphabetically } from "react-icons/ti"
 import { RiBookShelfLine } from "react-icons/ri"
 
-export const AdminHome = (props) => {
+export const AdminHome = () => {
     const [displayData, setDisplayData] = useState({})
 
     useEffect(() => {
@@ -128,18 +128,19 @@ const CloseBtn = styled.button`
 `
 
 
-export const AdminPendingReqTab = (props) => {
+export const AdminPendingReqTab = () => {
     const ErrorComponent = useRef(null)
-    const [data, setData] = useState({
-        id: null,
-        name: null,
-        password: null,
-        role: null,
+    const initState = {
+        id: 0,
+        name: "",
+        password: "",
+        role: "",
         pendingId: null,
-        subjectId: null,
-        std: null,
-        section: null
-    })
+        subjectId: 0,
+        std: 0,
+        section: ""
+    }
+    const [data, setData] = useState(initState)
     const dataChangeHandler = (key, value) => {
         setData(prevdata => ({
             ...prevdata,
@@ -147,13 +148,9 @@ export const AdminPendingReqTab = (props) => {
         }))
     }
     const emptyDataHandler = () => {
-        const nullifiedUserData = Object.keys(data).reduce((acc, key) => {
-            acc[key] = null;
-            return acc;
-        }, {});
         setstud(false)
         setTeacher(false)
-        setData(nullifiedUserData);
+        setData(initState);
     }
 
     const [isStudent, setstud] = useState(false)
@@ -214,10 +211,22 @@ export const AdminPendingReqTab = (props) => {
         e.preventDefault()
         let temp;
         if (isStudent) {
+            if ( data.pendingId===null||Number(data.pendingId)===0 || data.name===""||data.password === "" || ""===data.role|| 0===Number(data?.id)||Number(data.std)>12||Number(data.std)<=0 || data.section==="") {
+                ErrorToast("Fill the required data")
+                return
+            }
             temp = { "pendingId": Number(data?.pendingId), "uName": data?.name, "uPwd": data?.password, "uRole": data?.role, "Uid": Number(data?.id), "std": Number(data?.std), "section": data?.section }
         } else if (isTeacher) {
+            if ( data.pendingId===null||Number(data.pendingId)===0 || data.name===""||data.password === "" || ""===data.role|| 0===Number(data?.id)||Number(data.std)>12||Number(data.std)<=0 || data.section==="") {
+                ErrorToast("Fill the required data")
+                return
+            }
             temp = { "pendingId": Number(data?.pendingId), "uName": data?.name, "uPwd": data?.password, "uRole": data?.role, "Uid": Number(data?.id), "std": Number(data?.std), "section": data?.section, "subId": data?.subjectId }
         } else if (!isStudent && !isTeacher) {
+            if ( data.pendingId===null||Number(data.pendingId)===0 || data.name===""||data.password === "" || ""===data.role|| 0===Number(data?.id)) {
+                ErrorToast("Fill the required data")
+                return
+            }
             temp = { "pendingId": Number(data?.pendingId), "uName": data?.name, "uPwd": data?.password, "uRole": data?.role, "Uid": Number(data?.id) }
         }
         if (data?.role==="student" && (data?.section==="" || (!(data?.std>0) && !(data?.std<13)))) {
@@ -320,7 +329,7 @@ export const AdminPendingReqTab = (props) => {
         <>
             <Overlay style={overlayDisplayObj}></Overlay>
             <PendingReqSection>
-                <PopoupComponent componentStyle={popupDisplayObj} close={handleHide} isteach={isTeacher} isStud={isStudent} submitHandler={handleSubmitForm} errComp={ErrorComponent} data={data} newHandler={dataChangeHandler}></PopoupComponent>
+                <PopoupComponent componentStyle={popupDisplayObj} close={handleHide} isTeach={isTeacher} isStud={isStudent} submitHandler={handleSubmitForm} errComp={ErrorComponent} data={data} newHandler={dataChangeHandler}></PopoupComponent>
                 {displayData?.length > 0 ?
                     < RequestsTableComponent heading={"Pending user requests"} data={displayData} columnDefinition={columns} />
                     : <>There are no pending applications</>}
@@ -329,34 +338,43 @@ export const AdminPendingReqTab = (props) => {
     )
 }
 
-const PopoupComponent = (props) => {
+const PopoupComponent = ({
+    componentStyle,
+    close,
+    isTeach,
+    isStud,
+    submitHandler,
+    errComp,
+    data,
+    newHandler
+}) => {
     return (
-        <DetailsForm style={props.componentStyle}>
-            <SearchForm onSubmit={(e) => { props.submitHandler(e) }} style={{ width: "100%" }}>
+        <DetailsForm style={componentStyle}>
+            <SearchForm onSubmit={(e) => { submitHandler(e) }} style={{ width: "100%" }}>
                 <TeacherInputTabContainer>
                     <InputContainer style={{ width: "100%" }}>
                         <RiBookShelfLine style={{ fontSize: "xx-large" }} />
                         <InputWrapper>
-                            <FloatingInput type="text" maxLength={8} name="uid" value={props?.data?.id || ''} placeholder=" " onChange={(e) => { props?.newHandler("id", (e.target.value)) }} required />
-                            <FloatingLabel>Provide unique {props.isStud ? "student" : props.isteach ? "teacher" : "admin"} id:</FloatingLabel>
+                            <FloatingInput type="text" maxLength={8} name="uid" value={data.id || ''} placeholder=" " onChange={(e) => { newHandler("id", (e.target.value)) }} required />
+                            <FloatingLabel>Provide unique {isStud ? "student" : isTeach ? "teacher" : "admin"} id:</FloatingLabel>
                         </InputWrapper>
                     </InputContainer>
                 </TeacherInputTabContainer>
-                {props.isteach ? <TeacherInputTabContainer>
+                {isTeach ? <TeacherInputTabContainer>
                     <InputContainer style={{ width: "100%" }}>
                         <TiSortAlphabetically style={{ fontSize: "xx-large" }} />
                         <InputWrapper>
-                            <FloatingInput type="number" value={props?.data?.subjectId || ''} name="sub" placeholder=" " onChange={(e) => { props?.newHandler("subjectId", Number(e.target.value)) }} />
+                            <FloatingInput type="number" value={data.subjectId || ''} name="sub" placeholder=" " onChange={(e) => { newHandler("subjectId", Number(e.target.value)) }} />
                             <FloatingLabel>Provide sub id if teacher is assigned one:</FloatingLabel>
                         </InputWrapper>
                     </InputContainer>
                 </TeacherInputTabContainer> : <></>}
-                {props.isStud || props.isteach ? <Fragment>
+                {isStud || isTeach ? <Fragment>
                     <TeacherInputTabContainer>
                         <InputContainer style={{ width: "100%" }}>
                             <TiSortAlphabetically style={{ fontSize: "xx-large" }} />
                             <InputWrapper>
-                                <FloatingInput type="number" value={props?.data?.std || ''} name="std" placeholder=" " onChange={(e) => { props?.newHandler("std", Number(e.target.value)) }} />
+                                <FloatingInput type="number" value={data.std || ''} name="std" placeholder=" " onChange={(e) => { newHandler("std", Number(e.target.value)) }} />
                                 <FloatingLabel>Provide standard:</FloatingLabel>
                             </InputWrapper>
                         </InputContainer>
@@ -365,15 +383,15 @@ const PopoupComponent = (props) => {
                         <InputContainer style={{ width: "100%" }}>
                             <TiSortAlphabetically style={{ fontSize: "xx-large" }} />
                             <InputWrapper>
-                                <FloatingInput type="text" value={props?.data?.section || ''} name="section" placeholder=" " onChange={(e) => { props?.newHandler("section", (e.target.value)) }} />
+                                <FloatingInput type="text" value={data.section || ''} name="section" placeholder=" " onChange={(e) => { newHandler("section", (e.target.value)) }} />
                                 <FloatingLabel>Provide section:</FloatingLabel>
                             </InputWrapper>
                         </InputContainer>
                     </TeacherInputTabContainer>
                 </Fragment> : <></>}
                 <PendingBtnComp type="submit" variant={"accept"}>Submit</PendingBtnComp>
-                <ErrorSpan ref={props.errComp}></ErrorSpan>
-                <CloseBtn id="closeBtn" type="reset" onClick={(e) => { props?.close(e) }}>X</CloseBtn>
+                <ErrorSpan ref={errComp}></ErrorSpan>
+                <CloseBtn id="closeBtn" type="reset" onClick={(e) => { close(e) }}>X</CloseBtn>
             </SearchForm>
         </DetailsForm>
     )

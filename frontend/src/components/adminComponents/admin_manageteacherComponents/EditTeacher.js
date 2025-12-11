@@ -14,17 +14,18 @@ import { MdWindow } from "react-icons/md";
 import { StyledButton } from "../../../styled-components/styledButton";
 import { roleExtractor } from "../../../utils/RoleExtractor";
 
-export const TeacherEditComponent = (props) => {
+export const TeacherEditComponent = () => {
     const errorComp = useRef(null)
     const userrole = roleExtractor(window.location.pathname)
-    const [data, setData] = useState({
-        tid: null,
-        password: null,
-        subid: null,
-        tname: null,
-        tstd: null,
-        tsec: null
-    })
+    const initState = {
+        tid: 0,
+        password: "",
+        subid: 0,
+        tname: "",
+        tstd: 0,
+        tsec: ""
+    }
+    const [data, setData] = useState(initState)
     const [displayData, setDisplayData] = useState(null)
     const dataChangeHandler = (key, value) => {
         setData(prevdata => ({
@@ -83,11 +84,7 @@ export const TeacherEditComponent = (props) => {
         } catch (err) {
             ErrorToast(err, toast)
         } finally {
-            const nullifiedUserData = Object.keys(data).reduce((acc, key) => {
-                acc[key] = null;
-                return acc;
-            }, {});
-            setData(nullifiedUserData);
+            setData(initState);
             e.target.reset();
         }
     };

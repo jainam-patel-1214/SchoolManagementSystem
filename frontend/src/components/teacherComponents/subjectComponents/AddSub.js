@@ -13,15 +13,16 @@ import { LuBookA } from "react-icons/lu"
 import { StyledButton } from "../../../styled-components/styledButton"
 import { roleExtractor } from "../../../utils/RoleExtractor"
 
-export const SubAddTabComp = (props) => {
+export const SubAddTabComp = () => {
     const errorComp = useRef(null)
     const userrole = roleExtractor(window.location.pathname)
-    const [data, setData] = useState({
-        subid: null,
-        subname: null,
+    const initState = {
+        subid: 0,
+        subname: "",
         subcredit: null,
-        substd: null
-    })
+        substd: 0
+    }
+    const [data, setData] = useState(initState)
     const [displayData, setDisplayData] = useState(null)
     const dataChangeHandler = (key, value) => {
         setData(prevdata => ({
@@ -70,11 +71,7 @@ export const SubAddTabComp = (props) => {
         } catch (err) {
             ErrorToast(err, toast)
         } finally {
-            const nullifiedUserData = Object.keys(data).reduce((acc, key) => {
-                acc[key] = null;
-                return acc;
-            }, {});
-            setData(nullifiedUserData);
+            setData(initState);
             e.target.reset();
         }
     };

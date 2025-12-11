@@ -10,7 +10,7 @@ import { StyledButton } from "../../../styled-components/styledButton";
 import { useRef, useState } from "react";
 import { roleExtractor } from "../../../utils/RoleExtractor";
 
-export const SubDelTabComp = (props) => {
+export const SubDelTabComp = () => {
     const errorComp = useRef(null)
     const [subid,setSubId] = useState(null)
     const [displayData, setDisplayData] = useState(null)

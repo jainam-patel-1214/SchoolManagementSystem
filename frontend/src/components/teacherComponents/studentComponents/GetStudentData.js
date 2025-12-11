@@ -15,7 +15,7 @@ import { ReactTableComponent } from "../../helperComponents/ResultTable"
 import { FaFileDownload } from "react-icons/fa"
 import { roleExtractor } from "../../../utils/RoleExtractor"
 
-export const StudentDataComponent = (props) => {
+export const StudentDataComponent = () => {
     const errorComp = useRef(null)
     const performanceComponent = useRef(null)
     const [grNo, setGrNo] = useState(null)

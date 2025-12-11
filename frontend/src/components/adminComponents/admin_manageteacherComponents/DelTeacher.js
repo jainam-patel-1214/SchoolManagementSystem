@@ -11,7 +11,7 @@ import { FetchApi } from "../../../utils/FetchApi";
 import { ErrorToast, Toaster } from "../../../utils/Toaster";
 import { roleExtractor } from "../../../utils/RoleExtractor";
 
-export const TeacherDelComponent = (props) => {
+export const TeacherDelComponent = () => {
     const errorComp = useRef(null)
     const userrole = roleExtractor(window.location.pathname)
     const [tid, setTid] = useState(null)
