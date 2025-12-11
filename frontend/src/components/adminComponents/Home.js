@@ -1,6 +1,6 @@
 import styled from "styled-components"
 import { useState, useEffect, useRef, Fragment } from "react"
-import { Label, LabelValue, StudentHomeSection, StudentInfo, Value } from "../studentComponents/Home"
+import { LabelValue, StudentHomeSection, StudentInfo } from "../studentComponents/Home"
 import { ToastContainer, toast } from "react-toastify"
 import { ErrorSpan, SearchForm } from "../studentComponents/SchoolRes"
 import { StyledNavbar } from "../../styled-components/styledNav"
@@ -43,17 +43,17 @@ export const AdminHome = () => {
                             <div>
                                 <img src={imgpfp} alt="pfp" style={{ height: "100px", width: "100px", objectFit: "contain" }}></img>
                                 <LabelValue>
-                                    <Value style={{ margin: "1rem auto" }}><strong>{displayData.Name}</strong></Value>
+                                    <p style={{ margin: "1rem auto" }}><strong>{displayData.Name}</strong></p>
                                 </LabelValue>
                             </div>
                             <div>
                                 <LabelValue>
-                                    <Label><strong>Id:</strong></Label>
-                                    <Value>{displayData.Id}</Value>
+                                    <p><strong>Id:</strong></p>
+                                    <p>{displayData.Id}</p>
                                 </LabelValue>
                                 <LabelValue>
-                                    <Label><strong>Password:</strong></Label>
-                                    <Value>{displayData.Password}</Value>
+                                    <p><strong>Password:</strong></p>
+                                    <p>{displayData.Password}</p>
                                 </LabelValue>
                             </div>
                         </StyledNavbar>
@@ -139,13 +139,13 @@ export const AdminPendingReqTab = () => {
         }))
     }
     const emptyDataHandler = () => {
-        setstud(false)
-        setTeacher(false)
+        setIsStudent(false)
+        setIsTeacher(false)
         setData(initState);
     }
 
-    const [isStudent, setstud] = useState(false)
-    const [isTeacher, setTeacher] = useState(false)
+    const [isStudent, setIsStudent] = useState(false)
+    const [isTeacher, setIsTeacher] = useState(false)
     const [displayData, setDisplayData] = useState([])
     const [styleDisplay,setStyleDisplay] = useState(false)
     const userrole = roleExtractor(window.location.pathname)
@@ -156,8 +156,8 @@ export const AdminPendingReqTab = () => {
         let userPwd=v.pwd
         let userRole=v.roleReq
         let pend=v.pendingId
-        if (userRole === "student") setstud(true);
-        if (userRole === "teacher") setTeacher(true);
+        if (userRole === "student") setIsStudent(true);
+        if (userRole === "teacher") setIsTeacher(true);
         dataChangeHandler("pendingId", Number(pend))
         dataChangeHandler("name", userName)
         dataChangeHandler("password", userPwd)

@@ -14,7 +14,6 @@ export const FetchApi = async (url, methodtype, bodyObj) => {
 
     if (!resp.ok) {
         // console.log(new Error(data.error));
-        
         throw data.error
     }
 

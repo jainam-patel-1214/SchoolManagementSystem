@@ -86,7 +86,6 @@ const SignUpAndLoginForm = styled.form`
     `
 export const LoginRegisterForm = () => {
     const navigate = useNavigate()
-    const buttonRef = useRef(null)
     const initState = {
         userId: 0,
         password: "",
@@ -245,7 +244,7 @@ export const LoginRegisterForm = () => {
                             <option value="teacher">Teacher</option>
                             <option value="admin">Admin</option>
                         </SelectInRegister>
-                        <SignInBtn ref={buttonRef} type="submit">Login</SignInBtn>
+                        <SignInBtn type="submit">Login</SignInBtn>
                     </SignUpAndLoginForm>
                     <p>Or sign up using</p>
                     <h3 onClick={registerChangeHandler}>Sign Up</h3>
@@ -295,7 +294,7 @@ export const LoginRegisterForm = () => {
                             <option value="teacher">Teacher</option>
                             <option value="admin">Admin</option>
                         </SelectInRegister>
-                        <SignInBtn ref={buttonRef} type="submit">SignUp</SignInBtn>
+                        <SignInBtn type="submit">SignUp</SignInBtn>
                     </SignUpAndLoginForm>
                     <p>Or log in using</p>
                     <h3 onClick={loginChangeHandler}>Log In</h3>

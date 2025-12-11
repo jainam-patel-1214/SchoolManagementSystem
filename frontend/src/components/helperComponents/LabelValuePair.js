@@ -1,10 +1,10 @@
-import { Label, LabelValue, Value } from "../studentComponents/Home"
+import { LabelValue } from "../studentComponents/Home"
 
 export const LabelValuePair = ({label,value}) => {
     return (
         <LabelValue>
-            <Label><strong>{label}&nbsp;</strong></Label>
-            <Value>{value}</Value>
+            <p><strong>{label}&nbsp;</strong></p>
+            <p>{value}</p>
         </LabelValue>
     )
 }

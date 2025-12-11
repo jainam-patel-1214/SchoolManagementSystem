@@ -50,12 +50,6 @@ export const LabelValue = styled.div`
     flex-direction: row;
     width: 100%;
 `
-export const Label = styled.p`
-    /* width: 50%; */
-`
-export const Value = styled.p`
-    /* width: 50%; */
-`
 export const PerformanceWindow = styled.div`
     display: flex;
     margin:10px;

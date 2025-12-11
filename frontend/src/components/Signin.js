@@ -1,6 +1,5 @@
-import bgimg from "../assets/bg.jpg"
+import bgImg from "../assets/bg.jpg"
 import { LoginRegisterForm } from "./LoginRegisterform"
-// import '../styles/signin.css'
 import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import getCookie from "../utils/getCookie"
@@ -31,22 +30,22 @@ const SignInSections = styled.div`
 export const SignIn = () => {
     const navigate = useNavigate()
     useEffect(() => {
-        const x = getCookie("role")
-        if (x!==undefined && x!== null&&x!=="") {
-            SuccessToast(`You would be soon redirected to ${x}'s home page`,toast)
+        const tempRole = getCookie("role")
+        if (tempRole!==undefined && tempRole!== null&&tempRole!=="") {
+            SuccessToast(`You would be soon redirected to ${tempRole}'s home page`,toast)
         }
         
-        if (x === "student") {
+        if (tempRole === "student") {
             setTimeout(() => {
                 navigate("/app/student")
             }, 2000);
         }
-        if (x === "teacher") {
+        if (tempRole === "teacher") {
             setTimeout(() => {
                 navigate("/app/teacher")
             }, 2000);
         }
-        if (x === "admin") {
+        if (tempRole === "admin") {
             setTimeout(() => {
                 navigate("/app/admin")
             }, 2000);
@@ -57,7 +56,7 @@ export const SignIn = () => {
         <SignInPage>
             <ToastContainer />
             <SignInSections>
-                <img src={bgimg} alt="background" />
+                <img src={bgImg} alt="background" />
             </SignInSections>
             <SignInSections variant={"loginform"}>
                 < LoginRegisterForm />

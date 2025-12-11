@@ -10,7 +10,7 @@ import { FaAngleUp } from "react-icons/fa6";
 export const Navbar = () => {
     const navigate = useNavigate()
     const [uName, setuName] = useState('')
-    const [urole, setRole] = useState('')
+    const [role, setRole] = useState('')
     useEffect(() => {
         const name = getCookie("username")
         setuName(name)
@@ -50,11 +50,11 @@ export const Navbar = () => {
                     {uName !== "" ? <StyledNavbarTabs onClick={(e) => { signOutHandler(e) }} >
                         SignOut
                     </StyledNavbarTabs> : <></>}
-                    {urole === "student" ? <StyledNavbarTabs onClick={() => { handleNavigation("schoolResult") }}>
+                    {role === "student" ? <StyledNavbarTabs onClick={() => { handleNavigation("schoolResult") }}>
                         School result
                     </StyledNavbarTabs> : <></>}
                     
-                    {urole === "teacher"  || urole === "admin" ?
+                    {role === "teacher"  || role === "admin" ?
                         <StyledNavbarTabs>
                             Students <FaAngleUp style={{verticalAlign:"middle"}}/>
                             <StyledNavbarSubTabs>
@@ -68,7 +68,7 @@ export const Navbar = () => {
                             </StyledNavbarSubTabs>
                         </StyledNavbarTabs> : <></>
                     }
-                    {urole === "admin" ?
+                    {role === "admin" ?
                         <StyledNavbarTabs>
                             Teachers <FaAngleUp style={{verticalAlign:"middle"}}/>
                             <StyledNavbarSubTabs>
@@ -82,7 +82,7 @@ export const Navbar = () => {
                             </StyledNavbarSubTabs>
                         </StyledNavbarTabs> : <></>
                     }
-                    {urole === "teacher" || urole === "admin" ?
+                    {role === "teacher" || role === "admin" ?
                         <StyledNavbarTabs>
                             Subjects <FaAngleUp style={{verticalAlign:"middle"}}/>
                             <StyledNavbarSubTabs>
@@ -93,12 +93,12 @@ export const Navbar = () => {
                                 <NavbarTabs onClick={()=>{handleNavigation("editSubject")}}>Edit Subject</NavbarTabs>
                                 
                                 <NavbarTabs onClick={()=>{handleNavigation("deleteSubject")}}>Delete Subject</NavbarTabs>
-                                {urole==="admin"?<>
+                                {role==="admin"?<>
                                 <NavbarTabs onClick={()=>{handleNavigation("setSubjectLimit")}}>Subject Limit</NavbarTabs></>:<></>}
                             </StyledNavbarSubTabs>
                         </StyledNavbarTabs> : <></>
                     }
-                    {urole === "teacher" || urole === "admin" ?
+                    {role === "teacher" || role === "admin" ?
                         <StyledNavbarTabs>
                             Exams <FaAngleUp style={{verticalAlign:"middle"}}/>
                             <StyledNavbarSubTabs>
@@ -111,17 +111,17 @@ export const Navbar = () => {
 
                     <StyledNavbarTabs>
                         Profile <FaAngleUp style={{verticalAlign:"middle"}}/>
-                        {urole === "student" ? <StyledNavbarSubTabs>
+                        {role === "student" ? <StyledNavbarSubTabs>
                             <NavbarTabs onClick={() => { handleNavigation("/app/student") }}>Account</NavbarTabs>
                             
                             <NavbarTabs onClick={() => { handleNavigation("searchSubject") }}>Subjects</NavbarTabs>
                         </StyledNavbarSubTabs> : <></>}
-                        {urole === "teacher" ? <StyledNavbarSubTabs>
+                        {role === "teacher" ? <StyledNavbarSubTabs>
                             <NavbarTabs onClick={() => { handleNavigation(`/app/teacher`) }}>Account</NavbarTabs>
                             
                             <NavbarTabs onClick={()=>{handleNavigation("reviews")}}>Add Review</NavbarTabs>
                         </StyledNavbarSubTabs> : <></>}
-                        {urole === "admin" ? <StyledNavbarSubTabs>
+                        {role === "admin" ? <StyledNavbarSubTabs>
                             <NavbarTabs onClick={() => { handleNavigation(`/app/admin`) }}>Account</NavbarTabs>
                             
                             <NavbarTabs onClick={() => { handleNavigation(`pendingApplications`) }}>Pending req</NavbarTabs>
