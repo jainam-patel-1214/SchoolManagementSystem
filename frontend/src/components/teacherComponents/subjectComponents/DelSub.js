@@ -1,14 +1,14 @@
 import { toast, ToastContainer } from "react-toastify";
-import { FetchApi } from "../../../utils/FetchApi";
+import { fetchApi } from "../../../utils/fetchApi";
 import { ErrorToast, Toaster } from "../../../utils/Toaster";
-import { GrNoOrSubIdValidation } from "../../../utils/Validations";
+import { GrNoOrSubIdValidation } from "../../../utils/validations";
 import { ErrorSpan, SearchBoxSection, SearchForm, SearchOutputSection, SearchParamSection } from "../../studentComponents/SchoolRes";
 import { ButtonContainer, InputContainer, TeacherInputTabContainer } from "../StudentsTab";
 import { FaOrcid } from "react-icons/fa6";
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../../styled-components/InputComp";
 import { StyledButton } from "../../../styled-components/styledButton";
 import { useRef, useState } from "react";
-import { roleExtractor } from "../../../utils/RoleExtractor";
+import { roleExtractor } from "../../../utils/roleExtractor";
 
 export const SubDelTabComp = () => {
     const errorComp = useRef(null)
@@ -31,7 +31,7 @@ export const SubDelTabComp = () => {
         }
         try {
             let res;
-            res = await FetchApi(apiUrl,"DELETE",{ "subId": subid })
+            res = await fetchApi(apiUrl,"DELETE",{ "subId": subid })
             Toaster(res,toast)
             if (res.output) {
                 setDisplayData(res.output)

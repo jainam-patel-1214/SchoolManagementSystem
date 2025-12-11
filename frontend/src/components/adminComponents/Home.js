@@ -3,11 +3,11 @@ import { useState, useEffect, useRef, Fragment } from "react"
 import { LabelValue, StudentHomeSection, StudentInfo } from "../studentComponents/Home"
 import { ToastContainer, toast } from "react-toastify"
 import { ErrorSpan, SearchForm } from "../studentComponents/SchoolRes"
-import { StyledNavbar } from "../../styled-components/styledNav"
+import { StyledNavbar } from "../../styled-components/StyledNav"
 import imgpfp from '../../assets/pfp.webp'
 import { ErrorToast, SuccessToast, Toaster } from "../../utils/Toaster"
-import { FetchApi } from "../../utils/FetchApi"
-import { roleExtractor } from "../../utils/RoleExtractor"
+import { fetchApi } from "../../utils/fetchApi"
+import { roleExtractor } from "../../utils/roleExtractor"
 import { createColumnHelper } from "@tanstack/react-table"
 import { RequestsTableComponent } from "../helperComponents/RequestsTable"
 import { TeacherInputTabContainer } from "./TeachersTab"
@@ -15,6 +15,7 @@ import { InputContainer } from "../teacherComponents/StudentsTab"
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../styled-components/InputComp"
 import { TiSortAlphabetically } from "react-icons/ti"
 import { RiBookShelfLine } from "react-icons/ri"
+import { adminRequestFieldValidator } from "../../utils/acceptRequestValidator"
 
 export const AdminHome = () => {
     const [displayData, setDisplayData] = useState({})
@@ -23,7 +24,7 @@ export const AdminHome = () => {
         const role = roleExtractor(window.location.pathname)
         const fetchData = async () => {
             try {
-                const res = await FetchApi(`http://localhost:8090/${role}/data`, 'GET', {})
+                const res = await fetchApi(`http://localhost:8090/${role}/data`, 'GET', {})
                 setDisplayData(res.output);
             } catch (err) {
                 ErrorToast(err, toast)
@@ -174,7 +175,7 @@ export const AdminPendingReqTab = () => {
         let pend= v.pendingId
         try {
             const temp = { "pendingId": Number(pend), "uName": userName, "uPwd": userPwd, "uRole": userRole }
-            const res = await FetchApi(`http://localhost:8090/${userrole}/rejectRequest`, 'DELETE', temp)
+            const res = await fetchApi(`http://localhost:8090/${userrole}/rejectRequest`, 'DELETE', temp)
             if (res.output) {
                 SuccessToast("Rejected !!",toast)
                 emptyDataHandler()
@@ -201,31 +202,23 @@ export const AdminPendingReqTab = () => {
     const handleSubmitForm = async (e) => {
         e.preventDefault()
         let temp;
+        if(Number(data?.pendingId)===0||data?.name===""||data?.password === "" || data?.role===""){
+            ErrorToast("some error occured please try again.")
+            return
+        }
         if (isStudent) {
-            if ( data.pendingId===null||Number(data.pendingId)===0 || data.name===""||data.password === "" || ""===data.role|| 0===Number(data?.id)||Number(data.std)>12||Number(data.std)<=0 || data.section==="") {
-                ErrorToast("Fill the required data")
-                return
-            }
-            temp = { "pendingId": Number(data?.pendingId), "uName": data?.name, "uPwd": data?.password, "uRole": data?.role, "Uid": Number(data?.id), "std": Number(data?.std), "section": data?.section }
+            temp = { "pendingId": Number(data.pendingId), "uName": data.name, "uPwd": data.password, "uRole": data.role, "Uid": Number(data.id), "std": Number(data.std), "section": data.section }
+            adminRequestFieldValidator(temp,toast)
         } else if (isTeacher) {
-            if ( data.pendingId===null||Number(data.pendingId)===0 || data.name===""||data.password === "" || ""===data.role|| 0===Number(data?.id)||Number(data.std)>12||Number(data.std)<=0 || data.section==="") {
-                ErrorToast("Fill the required data")
-                return
-            }
-            temp = { "pendingId": Number(data?.pendingId), "uName": data?.name, "uPwd": data?.password, "uRole": data?.role, "Uid": Number(data?.id), "std": Number(data?.std), "section": data?.section, "subId": data?.subjectId }
+            temp = { "pendingId": Number(data.pendingId), "uName": data.name, "uPwd": data.password, "uRole": data.role, "Uid": Number(data.id), "std": Number(data.std), "section": data.section, "subId": data.subjectId }
+            adminRequestFieldValidator(temp,toast)
         } else if (!isStudent && !isTeacher) {
-            if ( data.pendingId===null||Number(data.pendingId)===0 || data.name===""||data.password === "" || ""===data.role|| 0===Number(data?.id)) {
-                ErrorToast("Fill the required data")
-                return
-            }
-            temp = { "pendingId": Number(data?.pendingId), "uName": data?.name, "uPwd": data?.password, "uRole": data?.role, "Uid": Number(data?.id) }
+            temp = { "pendingId": Number(data.pendingId), "uName": data.name, "uPwd": data.password, "uRole": data.role, "Uid": Number(data.id) }
+            adminRequestFieldValidator(temp,toast)
         }
-        if (data?.role==="student" && (data?.section==="" || (!(data?.std>0) && !(data?.std<13)))) {
-            ErrorToast("provide section and std for student",toast)
-            return   
-        }
+        
         try {
-            const res = await FetchApi(`http://localhost:8090/${userrole}/acceptRequest`, 'POST', temp)
+            const res = await fetchApi(`http://localhost:8090/${userrole}/acceptRequest`, 'POST', temp)
             Toaster(res, toast)
         } catch (error) {
             ErrorToast(error, toast);
@@ -239,7 +232,7 @@ export const AdminPendingReqTab = () => {
     }
     const fetchPendingApps = async () => {
         try {
-            const res = await FetchApi(`http://localhost:8090/${userrole}/pendingRequest`, 'GET', {})
+            const res = await fetchApi(`http://localhost:8090/${userrole}/pendingRequest`, 'GET', {})
             if (typeof (res.output) === "string") {
                 SuccessToast(res.output, toast)
             } else {
@@ -280,10 +273,6 @@ export const AdminPendingReqTab = () => {
                 const v = row.original;
                 return (
                     <PendingBtnComp
-                        userName={v.userName}
-                        userPwd={v.pwd}
-                        userRole={v.roleReq}
-                        pend={v.pendingId}
                         type="button"
                         variant={"accept"}
                         onClick={(e) => handleAccept(e,v)}
@@ -301,10 +290,6 @@ export const AdminPendingReqTab = () => {
                 const v = row.original;
                 return (
                     <PendingBtnComp
-                        userName={v.userName}
-                        userPwd={v.pwd}
-                        userRole={v.roleReq}
-                        pend={v.pendingId}
                         type="button"
                         variant={"reject"}
                         onClick={(e) => handleReject(e,v)}

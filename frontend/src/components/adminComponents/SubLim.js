@@ -8,8 +8,8 @@ import { RiBookShelfLine } from "react-icons/ri"
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../styled-components/InputComp"
 import { GiBookPile } from "react-icons/gi";
 import { ErrorToast, Toaster } from "../../utils/Toaster"
-import { FetchApi } from "../../utils/FetchApi"
-import { roleExtractor } from "../../utils/RoleExtractor"
+import { fetchApi } from "../../utils/fetchApi"
+import { roleExtractor } from "../../utils/roleExtractor"
 
 export const SubjectLimit = () => {
     const errorComp = useRef(null)
@@ -33,7 +33,7 @@ export const SubjectLimit = () => {
         try {
             const role = roleExtractor(window.location.pathname)
             const temp = { "std": grade, "limit": limit }
-            const res = await FetchApi(`http://localhost:8090/${role}/setSubLimit`, 'POST', temp)
+            const res = await fetchApi(`http://localhost:8090/${role}/setSubLimit`, 'POST', temp)
             Toaster(res,toast)
         } catch (error) {
             ErrorToast(error,toast)

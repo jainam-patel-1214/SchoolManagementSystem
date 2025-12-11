@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
-import { GradeValidation, GrNoOrSubIdValidation, PasswordValidation, StringValidator, TeacherAdminIdValid } from "../../../utils/Validations";
-import { FetchApi } from "../../../utils/FetchApi";
+import { GradeValidation, GrNoOrSubIdValidation, PasswordValidation, StringValidator, TeacherAdminIdValid } from "../../../utils/validations";
+import { fetchApi } from "../../../utils/fetchApi";
 import { toast, ToastContainer } from "react-toastify";
 import { ErrorToast, Toaster } from "../../../utils/Toaster";
 import { ErrorSpan, SearchBoxSection, SearchForm, SearchOutputSection, SearchParamSection } from "../../studentComponents/SchoolRes";
@@ -12,7 +12,7 @@ import { FaAddressCard, FaKey } from "react-icons/fa6";
 import { RiBookShelfLine, RiContactsBook2Fill } from "react-icons/ri";
 import { MdWindow } from "react-icons/md";
 import { StyledButton } from "../../../styled-components/styledButton";
-import { roleExtractor } from "../../../utils/RoleExtractor";
+import { roleExtractor } from "../../../utils/roleExtractor";
 
 export const TeacherEditComponent = () => {
     const errorComp = useRef(null)
@@ -75,7 +75,7 @@ export const TeacherEditComponent = () => {
                     bodyObj[key] = value
                 }
             }
-            res = await FetchApi(apiUrl, "PUT", bodyObj)
+            res = await fetchApi(apiUrl, "PUT", bodyObj)
             Toaster(res, toast)
             if (res.output) {
                 setDisplayData(res.output)

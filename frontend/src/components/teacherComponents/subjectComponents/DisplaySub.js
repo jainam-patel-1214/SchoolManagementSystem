@@ -1,5 +1,5 @@
 import { useRef, useState } from "react"
-import { FetchApi } from "../../../utils/FetchApi"
+import { fetchApi } from "../../../utils/fetchApi"
 import { ErrorToast, Toaster } from "../../../utils/Toaster"
 import { toast, ToastContainer } from "react-toastify"
 import { ErrorSpan, SearchBoxSection, SearchForm, SearchOutputSection, SearchParamSection } from "../../studentComponents/SchoolRes"
@@ -8,8 +8,8 @@ import { RiBookShelfLine } from "react-icons/ri"
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../../styled-components/InputComp"
 import { StyledButton } from "../../../styled-components/styledButton"
 import { ReactTableComponent } from "../../helperComponents/ResultTable"
-import { GradeValidation } from "../../../utils/Validations"
-import { roleExtractor } from "../../../utils/RoleExtractor"
+import { GradeValidation } from "../../../utils/validations"
+import { roleExtractor } from "../../../utils/roleExtractor"
 
 
 export const DisplaySubTabComp = () => {
@@ -64,7 +64,7 @@ export const DisplaySubTabComp = () => {
         try {
             let res;
                 setIsLoading(true)
-                res = await FetchApi(apiUrl+"?"+new URLSearchParams({ "std": std }),"GET",{})
+                res = await fetchApi(apiUrl+"?"+new URLSearchParams({ "std": std }),"GET",{})
                 Toaster(res,toast)
                 if (res.output) {
                     setDisplayData(res.output)

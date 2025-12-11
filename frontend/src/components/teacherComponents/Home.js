@@ -3,10 +3,10 @@ import { PerformanceWindow, StudentHomeSection } from "../studentComponents/Home
 import { ToastContainer, toast } from "react-toastify"
 import { ProfileComponent, ProfileTabs, TableHeader } from "../../styled-components/TableComponents"
 import { ErrorToast } from "../../utils/Toaster"
-import { FetchApi } from "../../utils/FetchApi"
+import { fetchApi } from "../../utils/fetchApi"
 import { LabelValuePair } from "../helperComponents/LabelValuePair"
 import { ReactTableComponent } from "../helperComponents/ResultTable"
-import { roleExtractor } from "../../utils/RoleExtractor"
+import { roleExtractor } from "../../utils/roleExtractor"
 export const TeacherHome = () => {
     const [displayData, setDisplayData] = useState({})
     const [displayReport, setDisplayReport] = useState({})
@@ -17,8 +17,8 @@ export const TeacherHome = () => {
         const load = async () => {
             try {
                 const [dataRes, reportRes] = await Promise.all([
-                    FetchApi(`${baseApi}/data`, 'GET', {}),
-                    FetchApi(`${baseApi}/displayPerformance`, 'GET', {})
+                    fetchApi(`${baseApi}/data`, 'GET', {}),
+                    fetchApi(`${baseApi}/displayPerformance`, 'GET', {})
                 ])
                 setDisplayData(dataRes.output)
                 setDisplayReport(reportRes.output)

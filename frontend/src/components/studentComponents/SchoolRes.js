@@ -7,11 +7,11 @@ import { FloatingInput, FloatingLabel, InputWrapper } from "../../styled-compone
 import { TiSortAlphabetically } from "react-icons/ti"
 import { RiBookShelfLine } from "react-icons/ri"
 import { PiLineSegmentsBold } from "react-icons/pi"
-import { FetchApi } from "../../utils/FetchApi"
+import { fetchApi } from "../../utils/fetchApi"
 import { ErrorToast, Toaster } from "../../utils/Toaster"
-import { GradeValidation, MarkValidation, StringValidator } from "../../utils/Validations"
+import { GradeValidation, MarkValidation, StringValidator } from "../../utils/validations"
 import { ReactTableComponent } from "../helperComponents/ResultTable"
-import { roleExtractor } from "../../utils/RoleExtractor"
+import { roleExtractor } from "../../utils/roleExtractor"
 
 export const SearchBoxSection = styled.div`
     display: flex;
@@ -156,7 +156,7 @@ export const SchoolResult = () => {
                     queryParams[elem] = params[elem]
                 }
             }
-            const res = await FetchApi(apiUrl + "?" + new URLSearchParams(queryParams), "GET", {})
+            const res = await fetchApi(apiUrl + "?" + new URLSearchParams(queryParams), "GET", {})
             Toaster(res, toast)
             if (res.output) {
                 setDisplayData(res.output);

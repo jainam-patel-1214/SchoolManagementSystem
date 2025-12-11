@@ -1,4 +1,4 @@
-import { FetchApi } from "./FetchApi";
+import { fetchApi } from "./fetchApi";
 import getCookie from "./getCookie"
 
 async function delCookie(...cname) {
@@ -9,7 +9,7 @@ async function delCookie(...cname) {
             const tokenVal = getCookie(c)
             const obj = { token: tokenVal }
             try {
-                const response = await FetchApi("http://localhost:8090/deleteCookieFromDB","DELETE",obj)
+                const response = await fetchApi("http://localhost:8090/deleteCookieFromDB","DELETE",obj)
                 document.cookie = `${c}=; expires=Thu, 01-Jan-70 00:00:01 GMT;`
                 if (!response.output) {
                     const errText = await response.text();

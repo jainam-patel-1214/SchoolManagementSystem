@@ -8,7 +8,7 @@ import { GradeCalculator } from "../../utils/gradeCalculator";
 import { FaFileDownload } from "react-icons/fa";
 import { DownloadBtn } from "../../styled-components/styledButton";
 import { SearchOutputSection } from "./SchoolRes";
-import { FetchApi } from "../../utils/FetchApi";
+import { fetchApi } from "../../utils/fetchApi";
 import { ErrorToast } from "../../utils/Toaster";
 import { ReactTableComponent } from "../helperComponents/ResultTable";
 import { LabelValuePair } from "../helperComponents/LabelValuePair";
@@ -110,8 +110,8 @@ export const StudentHomePage = () => {
 
                 setuName(name)
                 const [report, data] = await Promise.all([
-                    FetchApi(`${baseUrl}/report`, "GET", {}),
-                    FetchApi(`${baseUrl}/data`, "GET", {})
+                    fetchApi(`${baseUrl}/report`, "GET", {}),
+                    fetchApi(`${baseUrl}/data`, "GET", {})
                 ]);
                 setDisplayReport(report.output)
                 setDisplayData(data.output)

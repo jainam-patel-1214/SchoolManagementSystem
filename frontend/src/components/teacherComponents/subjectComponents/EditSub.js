@@ -1,6 +1,6 @@
 import { useRef, useState } from "react"
-import { GradeValidation, GrNoOrSubIdValidation } from "../../../utils/Validations"
-import { FetchApi } from "../../../utils/FetchApi"
+import { GradeValidation, GrNoOrSubIdValidation } from "../../../utils/validations"
+import { fetchApi } from "../../../utils/fetchApi"
 import { ErrorToast, Toaster } from "../../../utils/Toaster"
 import { toast, ToastContainer } from "react-toastify"
 import { ErrorSpan, SearchBoxSection, SearchForm, SearchOutputSection, SearchParamSection } from "../../studentComponents/SchoolRes"
@@ -11,7 +11,7 @@ import { RiBookShelfLine } from "react-icons/ri"
 import { IoIosRibbon } from "react-icons/io"
 import { LuBookA } from "react-icons/lu"
 import { StyledButton } from "../../../styled-components/styledButton"
-import { roleExtractor } from "../../../utils/RoleExtractor"
+import { roleExtractor } from "../../../utils/roleExtractor"
 
 export const SubEditTabComp = () => {
     const errorComp = useRef(null)
@@ -61,7 +61,7 @@ export const SubEditTabComp = () => {
                     bodyObj[key] = value
                 }
             }
-            res = await FetchApi(apiUrl, "PUT", bodyObj)
+            res = await fetchApi(apiUrl, "PUT", bodyObj)
             Toaster(res, toast)
 
             if (res.output) {

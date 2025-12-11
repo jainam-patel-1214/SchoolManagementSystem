@@ -6,10 +6,10 @@ import { ButtonContainer, InputContainer } from "../../teacherComponents/Student
 import { FaIdCardAlt } from "react-icons/fa";
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../../styled-components/InputComp";
 import { StyledButton } from "../../../styled-components/styledButton";
-import { TeacherAdminIdValid } from "../../../utils/Validations";
-import { FetchApi } from "../../../utils/FetchApi";
+import { TeacherAdminIdValid } from "../../../utils/validations";
+import { fetchApi } from "../../../utils/fetchApi";
 import { ErrorToast, Toaster } from "../../../utils/Toaster";
-import { roleExtractor } from "../../../utils/RoleExtractor";
+import { roleExtractor } from "../../../utils/roleExtractor";
 
 export const TeacherDelComponent = () => {
     const errorComp = useRef(null)
@@ -31,7 +31,7 @@ export const TeacherDelComponent = () => {
         }
         try {
             let res;
-            res = await FetchApi(apiUrl,"DELETE",{ "teacherId": tid })
+            res = await fetchApi(apiUrl,"DELETE",{ "teacherId": tid })
             Toaster(res,toast)
             if (res.output) {
                 setDisplayData(res.output)

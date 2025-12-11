@@ -15,7 +15,10 @@ export const PasswordValidation = (c)=>{
 
 export const StringValidator = (d)=>{
     const regex = /^[A-Za-z ]*$/;
-    if (!(regex.test(d)) && d !== undefined && d !== null && d !== "") return false
+    if (d==="") {
+        return false
+    }
+    if (!(regex.test(d)) && d !== undefined && d !== null) return false
     else return true
 }
 

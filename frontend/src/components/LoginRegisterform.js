@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { ErrorToast, SuccessToast, Toaster } from "../utils/Toaster";
 import { CookieSetter } from "../utils/setCookie";
-import { FetchApi } from "../utils/FetchApi";
+import { fetchApi } from "../utils/fetchApi";
 const SelectInRegister = styled.select`
   border: 1px solid #b9b9b9;
   padding: 5px;
@@ -130,7 +130,7 @@ export const LoginRegisterForm = () => {
         }
         try {
             const body = { yourName: data?.userName, password: data?.password, roleReq: data?.userRole }
-            const res = await FetchApi("http://localhost:8090/register", "POST", body)
+            const res = await fetchApi("http://localhost:8090/register", "POST", body)
             Toaster(res, toast)
         } catch (error) {
             ErrorToast(error, toast)
@@ -154,7 +154,7 @@ export const LoginRegisterForm = () => {
         }
         try {
             const body = { userId: Number(data?.userId), password: data?.password, userRole: data?.userRole }
-            const res = await FetchApi("http://localhost:8090/login", "POST", body)
+            const res = await fetchApi("http://localhost:8090/login", "POST", body)
             console.log("login body",res);
             
             Toaster(res, toast)

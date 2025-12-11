@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState } from "react"
-import { NavbarTabs, StyledNavbar, StyledNavbarSubTabs, StyledNavbarTabs } from "../styled-components/styledNav"
+import { NavbarTabs, StyledNavbar, StyledNavbarSubTabs, StyledNavbarTabs } from "../styled-components/StyledNav"
 import getCookie from "../utils/getCookie"
 import { Outlet } from "react-router-dom"
 import delCookie from "../utils/delCookie"

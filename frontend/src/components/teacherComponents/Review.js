@@ -6,10 +6,10 @@ import { InputContainer, TeacherInputTabContainer } from "./StudentsTab"
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../styled-components/InputComp"
 import { MdRateReview } from "react-icons/md"
 import { FaCircleUser } from "react-icons/fa6"
-import { FetchApi } from "../../utils/FetchApi"
+import { fetchApi } from "../../utils/fetchApi"
 import { ErrorToast, Toaster } from "../../utils/Toaster"
-import { GrNoOrSubIdValidation } from "../../utils/Validations"
-import { roleExtractor } from "../../utils/RoleExtractor"
+import { GrNoOrSubIdValidation } from "../../utils/validations"
+import { roleExtractor } from "../../utils/roleExtractor"
 
 export const ReviewTab = () => {
     const errorComp = useRef(null)
@@ -48,7 +48,7 @@ export const ReviewTab = () => {
         }
         try {
             const apiUrl = `http://localhost:8090/${userrole}/addReview`;
-            const res = await FetchApi(apiUrl,"POST",{ "grNo": data?.grNo, "comment": data?.comment })
+            const res = await fetchApi(apiUrl,"POST",{ "grNo": data?.grNo, "comment": data?.comment })
             Toaster(res,toast)
         } catch (err) {
             ErrorToast(err,toast)

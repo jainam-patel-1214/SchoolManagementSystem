@@ -1,6 +1,6 @@
 import { useRef, useState } from "react"
-import { GrNoOrSubIdValidation } from "../../../utils/Validations"
-import { FetchApi } from "../../../utils/FetchApi"
+import { GrNoOrSubIdValidation } from "../../../utils/validations"
+import { fetchApi } from "../../../utils/fetchApi"
 import { ErrorToast, Toaster } from "../../../utils/Toaster"
 import { toast, ToastContainer } from "react-toastify"
 import { ErrorSpan, SearchBoxSection, SearchForm, SearchOutputSection, SearchParamSection } from "../../studentComponents/SchoolRes"
@@ -8,7 +8,7 @@ import { ButtonContainer, InputContainer, TeacherInputTabContainer } from "../St
 import { FaCircleUser } from "react-icons/fa6"
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../../styled-components/InputComp"
 import { StyledButton } from "../../../styled-components/styledButton"
-import { roleExtractor } from "../../../utils/RoleExtractor"
+import { roleExtractor } from "../../../utils/roleExtractor"
 
 export const StudentDelComponent = () => {
     const errorComp = useRef(null)
@@ -34,7 +34,7 @@ export const StudentDelComponent = () => {
         }
         try {
             let res;
-            res = await FetchApi(apiUrl,"DELETE",{ "grNo": grNo })
+            res = await fetchApi(apiUrl,"DELETE",{ "grNo": grNo })
             Toaster(res,toast)
             if (res.output) {
                 setDisplayData(res.output)

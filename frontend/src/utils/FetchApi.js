@@ -1,4 +1,4 @@
-export const FetchApi = async (url, methodtype, bodyObj) => {
+export const fetchApi = async (url, methodtype, bodyObj) => {
     const fetchParams = {
         method: methodtype,
         credentials: 'include'

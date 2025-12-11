@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from "react"
 import { GradeCalculator } from "../../../utils/gradeCalculator"
-import { GrNoOrSubIdValidation } from "../../../utils/Validations"
-import { FetchApi } from "../../../utils/FetchApi"
+import { GrNoOrSubIdValidation } from "../../../utils/validations"
+import { fetchApi } from "../../../utils/fetchApi"
 import { toast, ToastContainer } from "react-toastify"
 import { ErrorToast, Toaster } from "../../../utils/Toaster"
 import { ErrorSpan, SearchBoxSection, SearchForm, SearchOutputSection, SearchParamSection } from "../../studentComponents/SchoolRes"
@@ -13,7 +13,7 @@ import { LabelValuePair } from "../../helperComponents/LabelValuePair"
 import { PerformanceWindow, StudentInfo, StudentInfoSegment } from "../../studentComponents/Home"
 import { ReactTableComponent } from "../../helperComponents/ResultTable"
 import { FaFileDownload } from "react-icons/fa"
-import { roleExtractor } from "../../../utils/RoleExtractor"
+import { roleExtractor } from "../../../utils/roleExtractor"
 
 export const StudentDataComponent = () => {
     const errorComp = useRef(null)
@@ -46,7 +46,7 @@ export const StudentDataComponent = () => {
         }
         try {
             let res;
-            res = await FetchApi(apiUrl + "?" + new URLSearchParams({ "studId": grNo }), "GET", {})
+            res = await fetchApi(apiUrl + "?" + new URLSearchParams({ "studId": grNo }), "GET", {})
             Toaster(res, toast)
             if (res.output) {
                 setDisplayData(res.output)

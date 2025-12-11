@@ -6,10 +6,10 @@ import { FaCircleUser, FaOrcid } from "react-icons/fa6"
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../../styled-components/InputComp"
 import { PiExamFill, PiExamLight } from "react-icons/pi"
 import { StyledButton } from "../../../styled-components/styledButton"
-import { GrNoOrSubIdValidation, PracticalMarksValidation, TheoryMarksValidation } from "../../../utils/Validations"
-import { FetchApi } from "../../../utils/FetchApi"
+import { GrNoOrSubIdValidation, PracticalMarksValidation, TheoryMarksValidation } from "../../../utils/validations"
+import { fetchApi } from "../../../utils/fetchApi"
 import { ErrorToast, Toaster } from "../../../utils/Toaster"
-import { roleExtractor } from "../../../utils/RoleExtractor"
+import { roleExtractor } from "../../../utils/roleExtractor"
 
 export const EditMarkTab = () => {
     const userrole = roleExtractor(window.location.pathname)
@@ -59,7 +59,7 @@ export const EditMarkTab = () => {
                     bodyObj[key] = value
                 }
             }
-            res = await FetchApi(apiUrl, "PUT", bodyObj)
+            res = await fetchApi(apiUrl, "PUT", bodyObj)
             Toaster(res, toast)
             if (res.output) {
                 setDisplayData(res.output)

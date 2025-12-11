@@ -1,6 +1,6 @@
 import { toast, ToastContainer } from "react-toastify";
 import { ErrorToast, Toaster } from "../../../utils/Toaster";
-import { TeacherAdminIdValid } from "../../../utils/Validations";
+import { TeacherAdminIdValid } from "../../../utils/validations";
 import { useRef, useState } from "react";
 import { ErrorSpan, SearchBoxSection, SearchForm, SearchParamSection } from "../../studentComponents/SchoolRes";
 import { TeacherInputTabContainer } from "../TeachersTab";
@@ -9,8 +9,8 @@ import { GiTeacher } from "react-icons/gi";
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../../styled-components/InputComp";
 import { StyledButton } from "../../../styled-components/styledButton";
 import { ReactTableComponent } from "../../helperComponents/ResultTable";
-import { FetchApi } from "../../../utils/FetchApi";
-import { roleExtractor } from "../../../utils/RoleExtractor";
+import { fetchApi } from "../../../utils/fetchApi";
+import { roleExtractor } from "../../../utils/roleExtractor";
 
 export const DisplayTeacherPerformanceComponent = () => {
     const userrole = roleExtractor(window.location.pathname)
@@ -33,7 +33,7 @@ export const DisplayTeacherPerformanceComponent = () => {
         }
         try {
             let res;
-            res = await FetchApi(apiUrl, "GET", {})
+            res = await fetchApi(apiUrl, "GET", {})
             Toaster(res, toast)
             if (res.output) {
                 setDisplayData(res.output)
