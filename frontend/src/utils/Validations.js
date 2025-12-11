@@ -4,7 +4,7 @@ export const GradeValidation = (a)=>{
 }
 
 export const GrNoOrSubIdValidation = (b)=>{
-    if ((b < 0 || b > 99999999) && b !== undefined && b !== null) return false
+    if ((b <= 0 || b > 99999999) && b !== undefined && b !== null) return false
     else return true
 }
 
@@ -15,9 +15,6 @@ export const PasswordValidation = (c)=>{
 
 export const StringValidator = (d)=>{
     const regex = /^[A-Za-z ]*$/;
-    if (d==="") {
-        return false
-    }
     if (!(regex.test(d)) && d !== undefined && d !== null) return false
     else return true
 }
@@ -36,7 +33,11 @@ export const PracticalMarksValidation = (g)=>{
     else return true
 }
 
-export const TeacherAdminIdValid = (h)=>{
-    if ((h?.length < 1 || h?.length > 8) && h !== null && h !== undefined) return false
+export const TeacherAdminIdValid = (b)=>{
+    if ((b <= 0 || b > 99999999) && b !== undefined && b !== null) return false
     else return true
+}
+export const isNotEmptyPair = (value)=>{
+    if(value !== null && value !== undefined && value!==0 && value!=="")return true
+    else return false
 }

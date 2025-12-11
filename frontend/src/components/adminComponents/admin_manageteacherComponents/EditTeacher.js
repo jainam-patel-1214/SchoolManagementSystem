@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { GradeValidation, GrNoOrSubIdValidation, PasswordValidation, StringValidator, TeacherAdminIdValid } from "../../../utils/validations";
+import { GradeValidation, GrNoOrSubIdValidation, isNotEmptyPair, PasswordValidation, StringValidator, TeacherAdminIdValid } from "../../../utils/validations";
 import { fetchApi } from "../../../utils/fetchApi";
 import { toast, ToastContainer } from "react-toastify";
 import { ErrorToast, Toaster } from "../../../utils/Toaster";
@@ -18,12 +18,12 @@ export const TeacherEditComponent = () => {
     const errorComp = useRef(null)
     const userrole = roleExtractor(window.location.pathname)
     const initState = {
-        tid: 0,
-        password: "",
-        subid: 0,
-        tname: "",
-        tstd: 0,
-        tsec: ""
+        teacherId: 0,
+        tPwd: "",
+        subId: 0,
+        tName: "",
+        stdAllocated: 0,
+        sectionAllocated: ""
     }
     const [data, setData] = useState(initState)
     const [displayData, setDisplayData] = useState(null)
@@ -33,7 +33,7 @@ export const TeacherEditComponent = () => {
             [key]: value
         }))
     }
-    const submitHandler = async (e, apiUrl, dataObj) => {
+    const submitHandler = async (e, apiUrl) => {
         e.preventDefault()
         
         const errobj = {
@@ -44,12 +44,12 @@ export const TeacherEditComponent = () => {
             "name": { "condition": false, "message": "invalid name" },
             "pwd": { "condition": false, "message": "invalid password. it shall be of 8 digits" }
         }
-        if (!TeacherAdminIdValid(dataObj?.teacherId)) errobj.tid.condition = true
-        if (!(GrNoOrSubIdValidation(dataObj?.subId))) errobj.subid.condition = true
-        if (!PasswordValidation(dataObj?.tPwd)) errobj.pwd.condition = true
-        if (!StringValidator(dataObj?.tName)) errobj.name.condition = true
-        if (!GradeValidation(dataObj?.stdAllocated)) errobj.std.condition = true
-        if (!StringValidator(dataObj?.sectionAllocated)) errobj.section.condition = true
+        if (!TeacherAdminIdValid(data?.teacherId)) errobj.tid.condition = true
+        if (data.subId!==0&&!(GrNoOrSubIdValidation(data.subId))) errobj.subid.condition = true
+        if (data.tPwd!==""&&!PasswordValidation(data.tPwd)) errobj.pwd.condition = true
+        if (data.tName!==""&&!StringValidator(data.tName)) errobj.name.condition = true
+        if (data.stdAllocated!==0&&!GradeValidation(data.stdAllocated)) errobj.std.condition = true
+        if (data.sectionAllocated!==""&&!StringValidator(data.sectionAllocated)) errobj.section.condition = true
         let errstr = ""
         let anyErr = false
         for (const val of Object.values(errobj)) {
@@ -70,8 +70,8 @@ export const TeacherEditComponent = () => {
         try {
             let res;
             let bodyObj = {}
-            for (const [key, value] of Object.entries(dataObj)) {
-                if (value !== null && value !== undefined) {
+            for (const [key, value] of Object.entries(data)) {
+                if (isNotEmptyPair(value)) {
                     bodyObj[key] = value
                 }
             }
@@ -94,12 +94,12 @@ export const TeacherEditComponent = () => {
             <SearchBoxSection>
                 < ToastContainer />
                 <SearchParamSection>
-                    <SearchForm onSubmit={(e) => { submitHandler(e, `http://localhost:8090/${userrole}/editTeacher`, { "subId": data.subid, "tPwd": data.password, "tName": data.tname, "stdAllocated": data.tstd, "sectionAllocated": data.tsec, "teacherId": data.tid }) }}>
+                    <SearchForm onSubmit={(e) => { submitHandler(e, `http://localhost:8090/${userrole}/editTeacher`)}}>
                         <TeacherInputTabContainer>
                             <InputContainer>
                                 <FaIdCardAlt style={{ fontSize: "xx-large" }} />
                                 <InputWrapper>
-                                    <FloatingInput type="text" name="tid" value={data.tid || ''} required placeholder=" " maxLength={8} onChange={(e) => { dataChangeHandler("tid",e.target.value) }} />
+                                    <FloatingInput type="number" name="tid" value={data.teacherId || ''} required placeholder=" " maxLength={8} onChange={(e) => { dataChangeHandler("teacherId",Number(e.target.value)) }} />
                                     <FloatingLabel>Provide Id for teacher you wish to update data:</FloatingLabel>
                                 </InputWrapper>
                             </InputContainer>
@@ -109,14 +109,14 @@ export const TeacherEditComponent = () => {
                             <InputContainer style={{ width: "50%" }}>
                                 <FaAddressCard style={{ fontSize: "xx-large" }} />
                                 <InputWrapper>
-                                    <FloatingInput type="text" name="tname" value={data.tname || ''} placeholder=" " maxLength={55} onChange={(e) => { dataChangeHandler("tname",e.target.value) }} />
+                                    <FloatingInput type="text" name="tname" value={data.tName || ''} placeholder=" " maxLength={55} onChange={(e) => { dataChangeHandler("tName",e.target.value) }} />
                                     <FloatingLabel>Provide new name:</FloatingLabel>
                                 </InputWrapper>
                             </InputContainer>
                             <InputContainer style={{ width: "50%" }}>
                                 <FaKey style={{ fontSize: "xx-large" }} />
                                 <InputWrapper>
-                                    <FloatingInput type="text" maxLength={8} value={data.password || ''} name="pwd" placeholder=" " onChange={(e) => { dataChangeHandler("password",e.target.value) }} />
+                                    <FloatingInput type="text" maxLength={8} value={data.tPwd || ''} name="pwd" placeholder=" " onChange={(e) => { dataChangeHandler("tPwd",e.target.value) }} />
                                     <FloatingLabel>Provide new password here:</FloatingLabel>
                                 </InputWrapper>
                             </InputContainer>
@@ -125,7 +125,7 @@ export const TeacherEditComponent = () => {
                             <InputContainer>
                                 <RiContactsBook2Fill style={{ fontSize: "xx-large" }} />
                                 <InputWrapper>
-                                    <FloatingInput type="number" name="subname" value={data.subid || ''} placeholder=" " maxLength={55} onChange={(e) => { dataChangeHandler("subid",Number(e.target.value)) }} />
+                                    <FloatingInput type="number" name="subname" value={data.subId || ''} placeholder=" " maxLength={55} onChange={(e) => { dataChangeHandler("subId",Number(e.target.value)) }} />
                                     <FloatingLabel>Provide new subject assigned:</FloatingLabel>
                                 </InputWrapper>
                             </InputContainer>
@@ -134,14 +134,14 @@ export const TeacherEditComponent = () => {
                             <InputContainer style={{ width: "50%" }}>
                                 <RiBookShelfLine style={{ fontSize: "xx-large" }} />
                                 <InputWrapper>
-                                    <FloatingInput type="number" name="std" value={data.tstd || ''} placeholder=" " onChange={(e) => { dataChangeHandler("tstd",Number(e.target.value)) }} />
+                                    <FloatingInput type="number" name="std" value={data.stdAllocated || ''} placeholder=" " onChange={(e) => { dataChangeHandler("stdAllocated",Number(e.target.value)) }} />
                                     <FloatingLabel>Provide new standard assigned:</FloatingLabel>
                                 </InputWrapper>
                             </InputContainer>
                             <InputContainer style={{ width: "50%" }}>
                                 <MdWindow style={{ fontSize: "xx-large" }} />
                                 <InputWrapper>
-                                    <FloatingInput type="text" name="section" value={data.tsec || ''} placeholder=" " onChange={(e) => { dataChangeHandler("tsec",e.target.value) }} />
+                                    <FloatingInput type="text" name="section" value={data.sectionAllocated || ''} placeholder=" " onChange={(e) => { dataChangeHandler("sectionAllocated",e.target.value) }} />
                                     <FloatingLabel>Provide new section assigned:</FloatingLabel>
                                 </InputWrapper>
                             </InputContainer>

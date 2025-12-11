@@ -14,7 +14,7 @@ import { roleExtractor } from "../../../utils/roleExtractor";
 export const TeacherDelComponent = () => {
     const errorComp = useRef(null)
     const userrole = roleExtractor(window.location.pathname)
-    const [tid, setTid] = useState(null)
+    const [tid, setTid] = useState(0)
     const [displayData, setDisplayData] = useState(null)
     
     const submitHandler = async (e, apiUrl) => {
@@ -55,7 +55,7 @@ export const TeacherDelComponent = () => {
                             <InputContainer>
                                 <FaIdCardAlt style={{ fontSize: "xx-large" }} />
                                 <InputWrapper>
-                                    <FloatingInput type="text" name="tid" value={tid || ''} required placeholder=" " onChange={(e) => { setTid(e.target.value) }} />
+                                    <FloatingInput type="number" name="tid" value={tid || ''} required placeholder=" " onChange={(e) => { setTid(Number(e.target.value)) }} />
                                     <FloatingLabel>Provide id of teacher you wish to delete:</FloatingLabel>
                                 </InputWrapper>
                             </InputContainer>
