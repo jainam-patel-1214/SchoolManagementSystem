@@ -439,16 +439,20 @@ func RejectRequest(ctx *gin.Context) {
 			return
 		}
 		var amount int
-		if err = db.QueryRow(fmt.Sprintf("SELECT COUNT(username) FROM pendingApplications WHERE username='%s' AND user_pwd='%s' AND role_requested = '%s' AND id='%d'", body.UserName, body.UserPwd, body.UserRole, body.PendingId)).Scan(&amount); err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error while rejecting"})
+		if err = db.QueryRow("SELECT COUNT(username) FROM pendingApplications WHERE username = ? AND user_pwd = ? AND role_requested = ? AND id = ?",
+			body.UserName,
+			body.UserPwd,
+			body.UserRole,
+			body.PendingId).Scan(&amount); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "rejection unsuccessful"})
 			return
 		}
 		if amount <= 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "no such pending request exists"})
 			return
 		}
-		if _, err = db.Exec(fmt.Sprintf("DELETE FROM pendingApplications WHERE username='%s' AND user_pwd='%s' AND role_requested = '%s' AND id='%d'", body.UserName, body.UserPwd, body.UserRole, body.PendingId)); err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error while rejecting"})
+		if _, err = db.Exec("DELETE FROM pendingApplications WHERE username = ? AND user_pwd = ? AND role_requested = ? AND id = ?", body.UserName, body.UserPwd, body.UserRole, body.PendingId); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "rejection unsuccessful"})
 			return
 		}
 		ctx.JSON(http.StatusOK, gin.H{"output": "rejected successfully"})
