@@ -46,11 +46,11 @@ export const CreateTeacherComponent = () => {
             "pwd": { "condition": false, "message": "invalid password. it shall be of 8 digits" }
         }
         if (!TeacherAdminIdValid(dataObj?.teacherId)) errobj.tid.condition = true
-        if (!(GrNoOrSubIdValidation(dataObj?.subId))) errobj.subid.condition = true
+        if (dataObj.subId!==0&&!(GrNoOrSubIdValidation(dataObj?.subId))) errobj.subid.condition = true
         if (!PasswordValidation(dataObj?.tPwd)) errobj.pwd.condition = true
         if (!StringValidator(dataObj?.tName)) errobj.name.condition = true
-        if (!GradeValidation(dataObj?.stdAllocated)) errobj.std.condition = true
-        if (!StringValidator(dataObj?.sectionAllocated)) errobj.section.condition = true
+        if (dataObj.stdAllocated!==0&&!GradeValidation(dataObj?.stdAllocated)) errobj.std.condition = true
+        if (dataObj.sectionAllocated!==""&&!StringValidator(dataObj?.sectionAllocated)) errobj.section.condition = true
         let errstr = ""
         let anyErr = false
         for (const val of Object.values(errobj)) {
@@ -97,7 +97,7 @@ export const CreateTeacherComponent = () => {
             <SearchBoxSection>
                 < ToastContainer />
                 <SearchParamSection>
-                    <SearchForm onSubmit={(e) => { submitHandler(e, `http://localhost:8090/${userrole}/addTeacher`, {"role":"teacher", "subId": data.subid, "tPwd": data.password, "tName": data.tname, "stdAllocated": data.tstd, "sectionAllocated": data.tsec, "teacherId": data.tid }) }}>
+                    <SearchForm onSubmit={(e) => { submitHandler(e, `http://localhost:8090/${userrole}/addTeacher`, {"role":"teacher", "subId": Number(data.subid), "tPwd": data.password, "tName": data.tname, "stdAllocated": Number(data.tstd), "sectionAllocated": data.tsec, "teacherId": Number(data.tid) }) }}>
                         <TeacherInputTabContainer>
                             <InputContainer>
                                 <FaIdCardAlt style={{ fontSize: "xx-large" }} />
