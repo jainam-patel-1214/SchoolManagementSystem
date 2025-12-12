@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { roleExtractor } from "../../utils/roleExtractor"
 import { fetchApi } from "../../utils/fetchApi"
-import { ErrorToast, SuccessToast, Toaster } from "../../utils/Toaster"
+import { ErrorToast, SuccessToast, Toaster } from "../../utils/toaster"
 import { createColumnHelper } from "@tanstack/react-table"
 import { PopoupComponent } from "./AcceptPopup"
 import { RequestsTableComponent } from "../helperComponents/RequestsTable"
@@ -19,7 +19,8 @@ const Overlay = styled.div`
     backdrop-filter: blur(6px);
     background: rgba(255, 255, 255, 0.28);
     display: none;
-    z-index: 9;    
+    z-index: 9;   
+    display : ${(props)=>props.styleDisplay ? "block" : "none"};
 `
 
 export const AdminPendingReqTab = () => {
@@ -98,13 +99,6 @@ export const AdminPendingReqTab = () => {
         emptyDataHandler()
         setStyleDisplay(false)
         document.querySelector("body").style.overflow = "auto"
-    }
-
-    const overlayDisplayObj = {
-        display: styleDisplay ? "block" : "none"
-    }
-    const popupDisplayObj = {
-        display: styleDisplay ? "flex" : "none"
     }
 
     const handleSubmitForm = async (e) => {
@@ -215,9 +209,9 @@ export const AdminPendingReqTab = () => {
 
     return (
         <>
-            <Overlay style={overlayDisplayObj}></Overlay>
+            <Overlay styleDisplay={styleDisplay}></Overlay>
             <SearchForm>
-                <PopoupComponent componentStyle={popupDisplayObj} close={handleHide} isTeacher={isTeacher} isStudent={isStudent} submitHandler={handleSubmitForm} data={data} newHandler={dataChangeHandler}></PopoupComponent>
+                <PopoupComponent styleDisplay={styleDisplay} close={handleHide} isTeacher={isTeacher} isStudent={isStudent} submitHandler={handleSubmitForm} data={data} newHandler={dataChangeHandler}></PopoupComponent>
                 {displayData?.length > 0 ?
                     < RequestsTableComponent heading={"Pending user requests"} data={displayData} columnDefinition={columns} />
                     : <>There are no pending applications</>}

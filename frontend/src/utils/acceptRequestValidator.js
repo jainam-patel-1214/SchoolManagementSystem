@@ -1,4 +1,4 @@
-import { ErrorToast } from "./Toaster"
+import { ErrorToast } from "./toaster"
 import { GradeValidation, GrNoOrSubIdValidation, StringValidator } from "./validations";
 
 export const adminRequestFieldValidator = (data) => {

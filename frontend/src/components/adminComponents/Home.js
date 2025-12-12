@@ -4,7 +4,7 @@ import { LabelValue, StudentHomeSection, StudentInfo } from "../studentComponent
 import { ToastContainer } from "react-toastify"
 import { StyledNavbar } from "../../styled-components/StyledNav"
 import imgpfp from '../../assets/pfp.webp'
-import { ErrorToast } from "../../utils/Toaster"
+import { ErrorToast } from "../../utils/toaster"
 import { fetchApi } from "../../utils/fetchApi"
 import { roleExtractor } from "../../utils/roleExtractor"
 

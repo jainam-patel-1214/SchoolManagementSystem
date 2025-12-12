@@ -21,6 +21,7 @@ const DetailsForm = styled.div`
     background: white;
     border-radius: 12px;
     box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    display : ${(props)=>props.styleDisplay ? "flex" : "none"};
     z-index: 10;
 `
 const CloseBtn = styled.button`
@@ -35,7 +36,7 @@ const CloseBtn = styled.button`
     }
 `
 export const PopoupComponent = ({
-    componentStyle,
+    styleDisplay,
     close,
     isTeacher,
     isStudent,
@@ -44,7 +45,7 @@ export const PopoupComponent = ({
     newHandler
 }) => {
     return (
-        <DetailsForm style={componentStyle}>
+        <DetailsForm styleDisplay={styleDisplay}>
             <SearchForm onSubmit={(e) => { submitHandler(e) }} style={{ width: "100%" }}>
                 <InputContainerComponent width={"100%"} icon={RiBookShelfLine} type={"text"} name={"uid"} value={data.id} placeholder={" "} handler={newHandler} objKey={"id"} labelText={`Provide unique ${isStudent ? "student" : isTeacher ? "teacher" : "admin"} id:`}/>
                 {isTeacher ?
