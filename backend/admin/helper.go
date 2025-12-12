@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"unicode"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 type DisplayConditions struct {
@@ -1155,4 +1158,30 @@ func gradeCalculator(n int) string {
 		return "DD"
 	}
 	return "FF"
+}
+
+func FetchSecretKey() string {
+	rootPath, _ := os.Getwd()
+	possiblePaths := []string{
+		filepath.Join(rootPath, ".env"),
+		filepath.Join(rootPath, "..", ".env"),
+	}
+
+	loaded := false
+	for _, path := range possiblePaths {
+		if err := godotenv.Load(path); err == nil {
+			loaded = true
+			break
+		}
+	}
+
+	if !loaded {
+		log.Fatal("Warning: .env not found in any known path")
+	}
+
+	secretK := os.Getenv("SECRETKEY")
+	if secretK == "" {
+		log.Fatal("SECRETKEY not found in environment variables to check params")
+	}
+	return secretK
 }
