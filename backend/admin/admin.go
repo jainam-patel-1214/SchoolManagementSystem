@@ -57,7 +57,7 @@ func CreatePendingReq(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "role your requested doesnot exist"})
 		return
 	}
-	if PendingDb.SecretKey == "$2a$15$NXTb8AxndfnaA82JWAxr2.apFmJkU.S1ROK10HmFBf69KxSCtW7S" {
+	if PendingDb.SecretKey == FetchSecretKey() {
 		switch PendingDb.RoleRequested {
 		case "student":
 			id := Random8DigitInt()
@@ -209,6 +209,23 @@ func AcceptPendingReq(ctx *gin.Context) {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": "standard needs a section to be provided"})
 				return
 			}
+			if body.SubId != 0 && (body.SubId > 0 || body.SubId < 99999999) {
+				var amt int
+				if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", body.SubId).Scan(&amt); err != nil && err != sql.ErrNoRows {
+					ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+					return
+				}
+				if amt <= 0 {
+					ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject donot exist you want to assign"})
+					return
+				}
+				return
+			} else if body.SubId == 0 {
+
+			} else {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject id"})
+				return
+			}
 			if body.Section != "" {
 				if !HasOnlyAlphabets(body.Section) {
 					ctx.JSON(http.StatusBadRequest, gin.H{"error": "section only has letters"})
@@ -221,22 +238,6 @@ func AcceptPendingReq(ctx *gin.Context) {
 				if body.Std < 1 || body.Std > 12 {
 					ctx.JSON(http.StatusBadRequest, gin.H{"error": "standar shall be between 1 and 12"})
 					return
-				}
-				if body.SubId != 0 && (body.SubId > 0 || body.SubId < 99999999) {
-					var amt int
-					if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", body.SubId).Scan(&amt); err != nil && err != sql.ErrNoRows {
-						ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-						return
-					}
-					if amt <= 0 {
-						ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject donot exist you want to assign"})
-						return
-					}
-					return
-				} else if body.SubId == 0 {
-
-				} else {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject id"})
 				}
 			}
 
