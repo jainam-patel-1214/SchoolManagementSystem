@@ -1,4 +1,5 @@
-export const Toaster = (res,toast) => {
+import { toast } from "react-toastify";
+export const Toaster = (res) => {
     if (res.output) {
         toast.success(typeof(res.output)==='string'? res.output:"Success!!", {
             position: "top-right",
@@ -26,7 +27,7 @@ export const Toaster = (res,toast) => {
     }
 }
 
-export const SuccessToast = (str,toast) => {
+export const SuccessToast = (str) => {
     toast.success(str || "Success!!", {
         position: "top-right",
         autoClose: 2000,
@@ -38,7 +39,7 @@ export const SuccessToast = (str,toast) => {
         theme: "light",
     });
 }
-export const ErrorToast = (str,toast) => {
+export const ErrorToast = (str) => {
     toast.error(str || "Something went wrong", {
         position: "top-right",
         autoClose: 2000,

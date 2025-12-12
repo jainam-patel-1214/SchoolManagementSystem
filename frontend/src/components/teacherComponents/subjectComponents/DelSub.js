@@ -1,12 +1,12 @@
 import { toast, ToastContainer } from "react-toastify";
 import { fetchApi } from "../../../utils/fetchApi";
-import { ErrorToast, Toaster } from "../../../utils/Toaster";
+import { ErrorToast, Toaster } from "../../../utils/toaster";
 import { GrNoOrSubIdValidation } from "../../../utils/validations";
 import { ErrorSpan, SearchBoxSection, SearchForm, SearchOutputSection, SearchParamSection } from "../../studentComponents/SchoolRes";
 import { ButtonContainer, InputContainer, TeacherInputTabContainer } from "../StudentsTab";
 import { FaOrcid } from "react-icons/fa6";
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../../styled-components/InputComp";
-import { StyledButton } from "../../../styled-components/styledButton";
+import { StyledButton } from "../../../styled-components/StyledButton";
 import { useRef, useState } from "react";
 import { roleExtractor } from "../../../utils/roleExtractor";
 

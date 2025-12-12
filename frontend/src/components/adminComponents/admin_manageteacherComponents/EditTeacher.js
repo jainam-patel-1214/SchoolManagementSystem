@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { GradeValidation, GrNoOrSubIdValidation, isNotEmptyPair, PasswordValidation, StringValidator, TeacherAdminIdValid } from "../../../utils/validations";
 import { fetchApi } from "../../../utils/fetchApi";
 import { toast, ToastContainer } from "react-toastify";
-import { ErrorToast, Toaster } from "../../../utils/Toaster";
+import { ErrorToast, Toaster } from "../../../utils/toaster";
 import { ErrorSpan, SearchBoxSection, SearchForm, SearchOutputSection, SearchParamSection } from "../../studentComponents/SchoolRes";
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../../styled-components/InputComp";
 import { TeacherInputTabContainer } from "../TeachersTab";
@@ -11,7 +11,7 @@ import { FaIdCardAlt } from "react-icons/fa";
 import { FaAddressCard, FaKey } from "react-icons/fa6";
 import { RiBookShelfLine, RiContactsBook2Fill } from "react-icons/ri";
 import { MdWindow } from "react-icons/md";
-import { StyledButton } from "../../../styled-components/styledButton";
+import { StyledButton } from "../../../styled-components/StyledButton";
 import { roleExtractor } from "../../../utils/roleExtractor";
 
 export const TeacherEditComponent = () => {

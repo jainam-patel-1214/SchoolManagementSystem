@@ -5,9 +5,9 @@ import { ButtonContainer, InputContainer, TeacherInputTabContainer } from "../St
 import { FaCircleUser, FaOrcid } from "react-icons/fa6"
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../../styled-components/InputComp"
 import { PiExamFill, PiExamLight } from "react-icons/pi"
-import { StyledButton } from "../../../styled-components/styledButton"
+import { StyledButton } from "../../../styled-components/StyledButton"
 import { GrNoOrSubIdValidation, PracticalMarksValidation, TheoryMarksValidation } from "../../../utils/validations"
-import { ErrorToast, Toaster } from "../../../utils/Toaster"
+import { ErrorToast, Toaster } from "../../../utils/toaster"
 import { fetchApi } from "../../../utils/fetchApi"
 import { roleExtractor } from "../../../utils/roleExtractor"
 
@@ -17,8 +17,8 @@ export const AddMarkTab = () => {
     const initState = {
         grNo: 0,
         subId: 0,
-        theory: null,
-        practical: null
+        theoryMarks: null,
+        practicalMarks: null
     }
     const [data, setData] = useState(initState)
     const dataChangeHandler = (key, value) => {
@@ -28,13 +28,13 @@ export const AddMarkTab = () => {
         }))
     }
     const [displayData, setDisplayData] = useState(null)
-    const submitHandler = async (e, apiUrl, dataObj) => {
+    const submitHandler = async (e, apiUrl) => {
         e.preventDefault()
         const errobj = { "grno": { "condition": false, "message": "invalid gr no" }, "subid": { "condition": false, "message": "invalid sub id" }, "theory": { "condition": false, "message": "theory marks range shall be from 0 to 80" }, "practical": { "condition": false, "message": "practical marks range shall be from 0 to 20" } }
-        if (!TheoryMarksValidation(dataObj?.theoryMarks)) errobj.theory.condition = true
-        if (!(PracticalMarksValidation(dataObj?.practicalMarks))) errobj.practical.condition = true
-        if (!GrNoOrSubIdValidation(dataObj?.grNo)) errobj.grno.condition = true
-        if (!GrNoOrSubIdValidation(dataObj?.subId)) errobj.subid.condition = true
+        if (!TheoryMarksValidation(data.theoryMarks)) errobj.theory.condition = true
+        if (!(PracticalMarksValidation(data.practicalMarks))) errobj.practical.condition = true
+        if (!GrNoOrSubIdValidation(data.grNo)) errobj.grno.condition = true
+        if (!GrNoOrSubIdValidation(data.subId)) errobj.subid.condition = true
 
         let errstr = ""
         let anyErr = false
@@ -56,8 +56,7 @@ export const AddMarkTab = () => {
         try {
             let res;
             let bodyObj = {}
-            for (const [key, value] of Object.entries(dataObj)) {
-                console.log(key, value);
+            for (const [key, value] of Object.entries(data)) {
                 if (value !== null && value !== undefined) {
                     bodyObj[key] = value
                 }
@@ -81,7 +80,7 @@ export const AddMarkTab = () => {
             <SearchBoxSection>
                 < ToastContainer />
                 <SearchParamSection>
-                    <SearchForm onSubmit={(e) => { submitHandler(e, `http://localhost:8090/${userrole}/enterMarks`, { "grNo": data.grNo, "subId": data.subId, "theoryMarks": data.theory, "practicalMarks": data.practical }) }}>
+                    <SearchForm onSubmit={(e) => { submitHandler(e, `http://localhost:8090/${userrole}/enterMarks`) }}>
                         <TeacherInputTabContainer>
                             <InputContainer style={{ width: "50%" }}>
                                 <FaCircleUser style={{ fontSize: "xx-large" }} />
@@ -103,14 +102,14 @@ export const AddMarkTab = () => {
                             <InputContainer style={{ width: "50%" }}>
                                 <PiExamFill style={{ fontSize: "xx-large" }} />
                                 <InputWrapper>
-                                    <FloatingInput type="number" value={data.theory || ""} name="tm" required placeholder=" " onChange={(e) => { dataChangeHandler("theory", Number(e.target.value)) }} />
+                                    <FloatingInput type="number" value={data.theoryMarks || ""} name="tm" required placeholder=" " onChange={(e) => { dataChangeHandler("theoryMarks", Number(e.target.value)) }} />
                                     <FloatingLabel>Provide theoritical marks:</FloatingLabel>
                                 </InputWrapper>
                             </InputContainer>
                             <InputContainer style={{ width: "50%" }}>
                                 <PiExamLight style={{ fontSize: "xx-large" }} />
                                 <InputWrapper>
-                                    <FloatingInput type="number" value={data.practical || ""} name="pm" required placeholder=" " onChange={(e) => { dataChangeHandler("practical", Number(e.target.value)) }} />
+                                    <FloatingInput type="number" value={data.practicalMarks || ""} name="pm" required placeholder=" " onChange={(e) => { dataChangeHandler("practicalMarks", Number(e.target.value)) }} />
                                     <FloatingLabel>Provide practical marks:</FloatingLabel>
                                 </InputWrapper>
                             </InputContainer>

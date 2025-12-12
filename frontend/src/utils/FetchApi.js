@@ -13,7 +13,7 @@ export const fetchApi = async (url, methodtype, bodyObj) => {
     // console.log(data);
 
     if (!resp.ok) {
-        // console.log(new Error(data.error));
+        console.log(new Error(data.error));
         throw data.error
     }
 

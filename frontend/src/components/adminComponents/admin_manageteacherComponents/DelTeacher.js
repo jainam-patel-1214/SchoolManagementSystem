@@ -5,10 +5,10 @@ import { TeacherInputTabContainer } from "../TeachersTab";
 import { ButtonContainer, InputContainer } from "../../teacherComponents/StudentsTab";
 import { FaIdCardAlt } from "react-icons/fa";
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../../styled-components/InputComp";
-import { StyledButton } from "../../../styled-components/styledButton";
+import { StyledButton } from "../../../styled-components/StyledButton";
 import { TeacherAdminIdValid } from "../../../utils/validations";
 import { fetchApi } from "../../../utils/fetchApi";
-import { ErrorToast, Toaster } from "../../../utils/Toaster";
+import { ErrorToast, Toaster } from "../../../utils/toaster";
 import { roleExtractor } from "../../../utils/roleExtractor";
 
 export const TeacherDelComponent = () => {

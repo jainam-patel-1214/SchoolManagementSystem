@@ -5,7 +5,7 @@ import styled, { keyframes } from "styled-components";
 import { SignInBtn } from "../styled-components/LoginSigninButton";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import { ErrorToast, SuccessToast, Toaster } from "../utils/Toaster";
+import { ErrorToast, Toaster } from "../utils/toaster";
 import { CookieSetter } from "../utils/setCookie";
 import { fetchApi } from "../utils/fetchApi";
 const SelectInRegister = styled.select`

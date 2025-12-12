@@ -1,7 +1,7 @@
 import { useRef, useState } from "react"
 import { GradeValidation, GrNoOrSubIdValidation, PasswordValidation, StringValidator } from "../../../utils/validations"
 import { fetchApi } from "../../../utils/fetchApi"
-import { ErrorToast, Toaster } from "../../../utils/Toaster"
+import { ErrorToast, Toaster } from "../../../utils/toaster"
 import { toast, ToastContainer } from "react-toastify"
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../../styled-components/InputComp"
 import { FaAddressCard, FaCircleUser, FaKey } from "react-icons/fa6"
@@ -9,7 +9,7 @@ import { ButtonContainer, InputContainer, TeacherInputTabContainer } from "../St
 import { ErrorSpan, SearchBoxSection, SearchForm, SearchOutputSection, SearchParamSection } from "../../studentComponents/SchoolRes"
 import { MdWindow } from "react-icons/md"
 import { RiBookShelfLine } from "react-icons/ri"
-import { StyledButton } from "../../../styled-components/styledButton"
+import { StyledButton } from "../../../styled-components/StyledButton"
 import { roleExtractor } from "../../../utils/roleExtractor"
 
 export const StudentAddComponent = () => {

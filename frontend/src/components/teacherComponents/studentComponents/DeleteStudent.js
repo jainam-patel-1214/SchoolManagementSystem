@@ -1,13 +1,13 @@
 import { useRef, useState } from "react"
 import { GrNoOrSubIdValidation } from "../../../utils/validations"
 import { fetchApi } from "../../../utils/fetchApi"
-import { ErrorToast, Toaster } from "../../../utils/Toaster"
+import { ErrorToast, Toaster } from "../../../utils/toaster"
 import { toast, ToastContainer } from "react-toastify"
 import { ErrorSpan, SearchBoxSection, SearchForm, SearchOutputSection, SearchParamSection } from "../../studentComponents/SchoolRes"
 import { ButtonContainer, InputContainer, TeacherInputTabContainer } from "../StudentsTab"
 import { FaCircleUser } from "react-icons/fa6"
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../../styled-components/InputComp"
-import { StyledButton } from "../../../styled-components/styledButton"
+import { StyledButton } from "../../../styled-components/StyledButton"
 import { roleExtractor } from "../../../utils/roleExtractor"
 
 export const StudentDelComponent = () => {

@@ -5,10 +5,10 @@ import { ButtonContainer, InputContainer, TeacherInputTabContainer } from "../St
 import { FaCircleUser, FaOrcid } from "react-icons/fa6"
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../../styled-components/InputComp"
 import { PiExamFill, PiExamLight } from "react-icons/pi"
-import { StyledButton } from "../../../styled-components/styledButton"
+import { StyledButton } from "../../../styled-components/StyledButton"
 import { GrNoOrSubIdValidation, PracticalMarksValidation, TheoryMarksValidation } from "../../../utils/validations"
 import { fetchApi } from "../../../utils/fetchApi"
-import { ErrorToast, Toaster } from "../../../utils/Toaster"
+import { ErrorToast, Toaster } from "../../../utils/toaster"
 import { roleExtractor } from "../../../utils/roleExtractor"
 
 export const EditMarkTab = () => {
@@ -18,8 +18,8 @@ export const EditMarkTab = () => {
     const initState = {
         grNo: 0,
         subId: 0,
-        theory: null,
-        practical: null
+        theoryMarks: null,
+        practicalMarks: null
     }
     const [data, setData] = useState(initState)
     const dataChangeHandler = (key, value) => {
@@ -28,13 +28,13 @@ export const EditMarkTab = () => {
             [key]: value
         }))
     }
-    const sumbitHandler = async (e, apiUrl, dataObj) => {
+    const sumbitHandler = async (e, apiUrl) => {
         e.preventDefault()
         const errobj = { "grno": { "condition": false, "message": "invalid gr no" }, "subid": { "condition": false, "message": "invalid sub id" }, "theory": { "condition": false, "message": "theory marks range shall be from 0 to 80" }, "practical": { "condition": false, "message": "practical marks range shall be from 0 to 20" } }
-        if (!TheoryMarksValidation(dataObj?.theoryMarks)) errobj.theory.condition = true
-        if (!(PracticalMarksValidation(dataObj?.practicalMarks))) errobj.practical.condition = true
-        if (!GrNoOrSubIdValidation(dataObj?.grNo)) errobj.grno.condition = true
-        if (!GrNoOrSubIdValidation(dataObj?.subId)) errobj.subid.condition = true
+        if (!TheoryMarksValidation(data.theoryMarks)) errobj.theory.condition = true
+        if (!(PracticalMarksValidation(data.practicalMarks))) errobj.practical.condition = true
+        if (!GrNoOrSubIdValidation(data.grNo)) errobj.grno.condition = true
+        if (!GrNoOrSubIdValidation(data.subId)) errobj.subid.condition = true
         let errstr = ""
         let anyErr = false
         for (const val of Object.values(errobj)) {
@@ -54,7 +54,7 @@ export const EditMarkTab = () => {
         try {
             let res;
             let bodyObj = {}
-            for (const [key, value] of Object.entries(dataObj)) {
+            for (const [key, value] of Object.entries(data)) {
                 if (value !== null && value !== undefined) {
                     bodyObj[key] = value
                 }

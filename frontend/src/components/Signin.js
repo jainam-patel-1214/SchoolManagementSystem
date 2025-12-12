@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import getCookie from "../utils/getCookie"
 import { ToastContainer, toast } from "react-toastify"
-import { SuccessToast } from "../utils/Toaster"
+import { SuccessToast } from "../utils/toaster"
 import styled from "styled-components"
 const SignInSections = styled.div`
         width: 50%;
