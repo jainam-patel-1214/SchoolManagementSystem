@@ -20,8 +20,8 @@ import {
   InputWrapper,
 } from "../../styled-components/InputComp";
 import { GiBookPile } from "react-icons/gi";
-import { ErrorToast, Toaster } from "../../utils/toaster";
-import { fetchApi } from "../../utils/fetchApi";
+import { ErrorToast, Toaster } from "../../utils/toasterCode";
+import { fetchApi } from "../../utils/fetchApiCode";
 import { roleExtractor } from "../../utils/roleExtractor";
 
 export const SubjectLimit = () => {

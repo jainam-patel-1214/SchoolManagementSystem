@@ -1,6 +1,6 @@
 import { toast, ToastContainer } from "react-toastify";
-import { fetchApi } from "../../../utils/fetchApi";
-import { ErrorToast, Toaster } from "../../../utils/toaster";
+import { fetchApi } from "../../../utils/fetchApiCode";
+import { ErrorToast, Toaster } from "../../../utils/toasterCode";
 import { GrNoOrSubIdValidation } from "../../../utils/validations";
 import { ErrorSpan, SearchBoxSection, SearchForm, SearchOutputSection, SearchParamSection } from "../../studentComponents/SchoolRes";
 import { ButtonContainer, InputContainer, TeacherInputTabContainer } from "../StudentsTab";

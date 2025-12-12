@@ -7,8 +7,8 @@ import { FaIdCardAlt } from "react-icons/fa";
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../../styled-components/InputComp";
 import { StyledButton } from "../../../styled-components/StyledButton";
 import { TeacherAdminIdValid } from "../../../utils/validations";
-import { fetchApi } from "../../../utils/fetchApi";
-import { ErrorToast, Toaster } from "../../../utils/toaster";
+import { fetchApi } from "../../../utils/fetchApiCode";
+import { ErrorToast, Toaster } from "../../../utils/toasterCode";
 import { roleExtractor } from "../../../utils/roleExtractor";
 
 export const TeacherDelComponent = () => {

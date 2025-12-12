@@ -1,4 +1,4 @@
-import { fetchApi } from "./fetchApi";
+import { fetchApi } from "./fetchApiCode";
 import getCookie from "./getCookie"
 
 async function delCookie(...cname) {

@@ -4,9 +4,9 @@ import { LabelValue, StudentHomeSection, StudentInfo } from "../studentComponent
 import { ToastContainer } from "react-toastify"
 import { StyledNavbar } from "../../styled-components/StyledNav"
 import imgpfp from '../../assets/pfp.webp'
-import { ErrorToast } from "../../utils/toaster"
-import { fetchApi } from "../../utils/fetchApi"
+import { ErrorToast } from "../../utils/toasterCode"
 import { roleExtractor } from "../../utils/roleExtractor"
+import { fetchApi } from "../../utils/fetchApiCode"
 
 export const PendingBtnComp = styled.button`
     background-color: lightgreen;

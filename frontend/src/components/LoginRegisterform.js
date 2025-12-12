@@ -5,9 +5,10 @@ import styled, { keyframes } from "styled-components";
 import { SignInBtn } from "../styled-components/LoginSigninButton";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import { ErrorToast, Toaster } from "../utils/toaster";
+import { ErrorToast, Toaster } from "../utils/toasterCode";
 import { CookieSetter } from "../utils/setCookie";
-import { fetchApi } from "../utils/fetchApi";
+import { fetchApi } from "../utils/fetchApiCode";
+
 const SelectInRegister = styled.select`
   border: 1px solid #b9b9b9;
   padding: 5px;

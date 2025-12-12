@@ -10,7 +10,7 @@ import { PendingBtnComp } from "./Home"
 import { InputContainerComponent } from "../helperComponents/InputContainer"
 
 
-const DetailsForm = styled.div`
+const DetailsSection = styled.div`
     display: none;
     position: fixed;
     top: 50%;
@@ -45,7 +45,7 @@ export const PopoupComponent = ({
     newHandler
 }) => {
     return (
-        <DetailsForm styleDisplay={styleDisplay}>
+        <DetailsSection styleDisplay={styleDisplay}>
             <SearchForm onSubmit={(e) => { submitHandler(e) }} style={{ width: "100%" }}>
                 <InputContainerComponent width={"100%"} icon={RiBookShelfLine} type={"text"} name={"uid"} value={data.id} placeholder={" "} handler={newHandler} objKey={"id"} labelText={`Provide unique ${isStudent ? "student" : isTeacher ? "teacher" : "admin"} id:`}/>
                 {isTeacher ?
@@ -58,6 +58,6 @@ export const PopoupComponent = ({
                 <PendingBtnComp type="submit" variant={"accept"}>Submit</PendingBtnComp>
                 <CloseBtn id="closeBtn" type="reset" onClick={(e) => { close(e) }}>X</CloseBtn>
             </SearchForm>
-        </DetailsForm>
+        </DetailsSection>
     )
 }

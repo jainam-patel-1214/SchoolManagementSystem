@@ -1,5 +1,5 @@
 import { toast, ToastContainer } from "react-toastify";
-import { ErrorToast, Toaster } from "../../../utils/toaster";
+import { ErrorToast, Toaster } from "../../../utils/toasterCode";
 import { TeacherAdminIdValid } from "../../../utils/validations";
 import { useRef, useState } from "react";
 import { ErrorSpan, SearchBoxSection, SearchForm, SearchParamSection } from "../../studentComponents/SchoolRes";
@@ -9,7 +9,7 @@ import { GiTeacher } from "react-icons/gi";
 import { FloatingInput, FloatingLabel, InputWrapper } from "../../../styled-components/InputComp";
 import { StyledButton } from "../../../styled-components/StyledButton";
 import { ReactTableComponent } from "../../helperComponents/ResultTable";
-import { fetchApi } from "../../../utils/fetchApi";
+import { fetchApi } from "../../../utils/fetchApiCode";
 import { roleExtractor } from "../../../utils/roleExtractor";
 
 export const DisplayTeacherPerformanceComponent = () => {

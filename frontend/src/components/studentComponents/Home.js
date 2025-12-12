@@ -8,8 +8,8 @@ import { GradeCalculator } from "../../utils/gradeCalculator";
 import { FaFileDownload } from "react-icons/fa";
 import { DownloadBtn } from "../../styled-components/StyledButton";
 import { SearchOutputSection } from "./SchoolRes";
-import { fetchApi } from "../../utils/fetchApi";
-import { ErrorToast } from "../../utils/toaster";
+import { fetchApi } from "../../utils/fetchApiCode";
+import { ErrorToast } from "../../utils/toasterCode";
 import { ReactTableComponent } from "../helperComponents/ResultTable";
 import { LabelValuePair } from "../helperComponents/LabelValuePair";
 

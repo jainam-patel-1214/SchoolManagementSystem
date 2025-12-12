@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react"
+import { Fragment, useEffect, useState } from "react"
 import { roleExtractor } from "../../utils/roleExtractor"
-import { fetchApi } from "../../utils/fetchApi"
-import { ErrorToast, SuccessToast, Toaster } from "../../utils/toaster"
+import { fetchApi } from "../../utils/fetchApiCode"
+import { ErrorToast, SuccessToast, Toaster } from "../../utils/toasterCode"
 import { createColumnHelper } from "@tanstack/react-table"
 import { PopoupComponent } from "./AcceptPopup"
 import { RequestsTableComponent } from "../helperComponents/RequestsTable"
@@ -210,12 +210,12 @@ export const AdminPendingReqTab = () => {
     return (
         <>
             <Overlay styleDisplay={styleDisplay}></Overlay>
-            <SearchForm>
+            <div style={{padding: "1rem"}}>
                 <PopoupComponent styleDisplay={styleDisplay} close={handleHide} isTeacher={isTeacher} isStudent={isStudent} submitHandler={handleSubmitForm} data={data} newHandler={dataChangeHandler}></PopoupComponent>
                 {displayData?.length > 0 ?
                     < RequestsTableComponent heading={"Pending user requests"} data={displayData} columnDefinition={columns} />
                     : <>There are no pending applications</>}
-            </SearchForm>
+            </div>
         </>
     )
 }

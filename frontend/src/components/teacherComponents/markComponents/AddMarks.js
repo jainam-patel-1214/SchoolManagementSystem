@@ -7,8 +7,8 @@ import { FloatingInput, FloatingLabel, InputWrapper } from "../../../styled-comp
 import { PiExamFill, PiExamLight } from "react-icons/pi"
 import { StyledButton } from "../../../styled-components/StyledButton"
 import { GrNoOrSubIdValidation, PracticalMarksValidation, TheoryMarksValidation } from "../../../utils/validations"
-import { ErrorToast, Toaster } from "../../../utils/toaster"
-import { fetchApi } from "../../../utils/fetchApi"
+import { ErrorToast, Toaster } from "../../../utils/toasterCode"
+import { fetchApi } from "../../../utils/fetchApiCode"
 import { roleExtractor } from "../../../utils/roleExtractor"
 
 export const AddMarkTab = () => {
