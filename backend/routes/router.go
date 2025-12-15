@@ -48,6 +48,9 @@ func InitializeRouter() *gin.Engine {
 			teach.DELETE("/delSubject", teacher.DelSub)
 
 			teach.POST("/addReview", teacher.AddReviews)
+
+			teach.GET("/allStudents", admin.DisplayAllStudents)
+			teach.GET("/allSubjects", admin.DisplayAllSubjects)
 		}
 	}
 	{
@@ -79,6 +82,9 @@ func InitializeRouter() *gin.Engine {
 			admn.PUT("/updateMarks", admin.EditMarks)
 
 			admn.POST("/setSubLimit", admin.SetSubLimit)
+
+			admn.GET("/allStudents", admin.DisplayAllStudents)
+			admn.GET("/allSubjects", admin.DisplayAllSubjects)
 		}
 	}
 	return r

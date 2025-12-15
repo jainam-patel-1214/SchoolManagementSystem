@@ -1124,6 +1124,108 @@ func SelfData(ctx *gin.Context) {
 	}
 }
 
+func DisplayAllStudents(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "teacher" && role != "admin") {
+		fmt.Println("no token found")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+		return
+	} else {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "CANNOT CONNECT TO DB"})
+			return
+		}
+		defer db.Close()
+		type StudentList struct {
+			GrNo     int    `json:"grNo"`
+			Password string `json:"password"`
+			Name     int    `json:"studentName"`
+			Grade    int    `json:"grade"`
+			Section  string `json:"section"`
+		}
+		var StudentsData []StudentList
+		res, err := db.Query("SELECT grNo,sPwd,studName,std,section FROM students")
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		defer res.Close()
+
+		for res.Next() {
+			var student StudentList
+
+			err := res.Scan(
+				&student.GrNo,
+				&student.Password,
+				&student.Name,
+				&student.Grade,
+				&student.Section,
+			)
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			StudentsData = append(StudentsData, student)
+		}
+		if len(StudentsData) > 0 {
+			ctx.JSON(http.StatusOK, gin.H{"output": StudentsData})
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": "no students found"})
+		}
+	}
+}
+
+func DisplayAllSubjects(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "teacher" && role != "admin") {
+		fmt.Println("no token found")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+		return
+	} else {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "CANNOT CONNECT TO DB"})
+			return
+		}
+		defer db.Close()
+		type SubjectList struct {
+			SubId    int    `json:"subjectId"`
+			SubName  string `json:"subjectName"`
+			LevelStd int    `json:"level"`
+			Credits  int    `json:"credits"`
+		}
+		var SubjectsData []SubjectList
+		res, err := db.Query("SELECT subId,subName,levelStd,credits FROM subjects")
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		defer res.Close()
+
+		for res.Next() {
+			var subject SubjectList
+
+			err := res.Scan(
+				&subject.SubId,
+				&subject.SubName,
+				&subject.LevelStd,
+				&subject.Credits,
+			)
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			SubjectsData = append(SubjectsData, subject)
+		}
+		if len(SubjectsData) > 0 {
+			ctx.JSON(http.StatusOK, gin.H{"output": SubjectsData})
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": "no subjects found"})
+		}
+	}
+}
+
 func gradeCalculator(n int) string {
 	if n > 90 {
 		return "AA"
