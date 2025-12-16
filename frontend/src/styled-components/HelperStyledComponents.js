@@ -12,6 +12,12 @@ export const AllComponentsContainer = styled.div`
   }
   scrollbar-width: 0;
 `;
+export const DisplayViewFormatContainer = styled.div`
+  display: block;
+  width: fit-content;
+  float: right;
+  margin-right: 3%;
+`;
 export const InfoBoxContainer = styled.div`
   display: flex;
   flex-direction: row;
@@ -43,7 +49,9 @@ export const ContentContainers = styled.div`
     props.elements === "single" ? "row" : "column"};
   justify-content: ${(props) =>
     props.usage === "ingrid" ? "flex-start" : "space-evenly"};
-  align-items: ${(props) => (props.usage === "ingrid" ? "center" : "center")};
+  /* align-items: ${(props) =>
+    props.usage === "ingrid" ? "center" : "flex-start"}; */
+  align-items: center;
 `;
 export const UnderlineComponent = styled.div`
   background-color: #914dffff;

@@ -4,8 +4,9 @@ import {
   ContentContainers,
 } from "../../styled-components/HelperStyledComponents";
 import { roleExtractor } from "../../utils/roleExtractor";
+import { useNavigate } from "react-router-dom";
 
-const IndexComp = styled.div`
+export const IndexComp = styled.div`
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -18,7 +19,7 @@ const IndexComp = styled.div`
   font-size: 14px;
   font-weight: 600;
 `;
-const HeaderData = styled.div`
+export const HeaderData = styled.div`
   display: flex;
   width: 80%;
   flex-direction: column;
@@ -36,16 +37,16 @@ const HeaderData = styled.div`
     color: grey;
   }
 `;
-const GridItemBox = styled.div`
+export const GridItemBox = styled.div`
   display: flex;
-  height: 180px;
+  height: fit-content;
   padding: 10px;
   flex-direction: column;
   background-color: white;
   border-radius: 10px;
   border: 1px solid #b5b5b5af;
 `;
-const GridLayers = styled.div`
+export const GridLayers = styled.div`
   display: flex;
   flex-direction: row;
   margin-top: 10px;
@@ -62,6 +63,7 @@ export const GridItemComponent = ({
   section,
   delete: deleteHandler,
 }) => {
+  const navigate = useNavigate();
   const userrole = roleExtractor(window.location.pathname);
   return (
     <GridItemBox>
@@ -110,6 +112,8 @@ export const GridItemComponent = ({
             border={"1px solid #b5b5b5af"}
             textcol={"green"}
             hovercol={"#dcfff487"}
+            type="button"
+            onClick={() => navigate(`/app/teacher/editStudent/${grNo}`)}
           >
             Edit
           </ButtonElement>

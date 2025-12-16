@@ -40,7 +40,10 @@ function ProjectRouter() {
 
         <Route path="displayStudent" element={<StudentDataComponent />}></Route>
         <Route path="addStudent" element={<StudentAddComponent />}></Route>
-        <Route path="editStudent" element={<StudentEditComponent />}></Route>
+        <Route path="editStudent" element={<StudentEditComponent />}>
+          <Route index element={<StudentEditComponent />} />
+          <Route path=":id" element={<StudentEditComponent />}></Route>
+        </Route>
         <Route path="deleteStudent" element={<StudentDelComponent />}></Route>
 
         <Route path="displaySubject" element={<DisplaySubTabComp />}></Route>

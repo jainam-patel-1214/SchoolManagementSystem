@@ -16,7 +16,7 @@ export const PendingBtnComp = styled.button`
   border: 1px double lightgreen;
   &:hover {
     background-color: ${(props) =>
-      props.variant === "accept" ? "#15d200ff" : "#ff4f4fff"};
+      props.variant === "accept" ? "#15d2008f" : "#ff18187a"};
     cursor: pointer;
   }
   background-color: ${(props) =>

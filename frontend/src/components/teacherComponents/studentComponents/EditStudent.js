@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   GradeValidation,
   GrNoOrSubIdValidation,
@@ -7,22 +7,10 @@ import {
 } from "../../../utils/validations";
 import { fetchApi } from "../../../utils/fetchApiCode";
 import { toast, ToastContainer } from "react-toastify";
-import { ErrorToast, Toaster } from "../../../utils/toasterCode";
-import {
-  SearchBoxSection,
-  SearchForm,
-  SearchOutputSection,
-  SearchParamSection,
-} from "../../studentComponents/SchoolResult";
-import {
-  ButtonContainer,
-  InputContainer,
-  TeacherInputTabContainer,
-} from "../StudentsTab";
+import { ErrorToast, SuccessToast, Toaster } from "../../../utils/toasterCode";
 import { FaAddressCard, FaCircleUser, FaKey } from "react-icons/fa6";
 import { MdWindow } from "react-icons/md";
 import { RiBookShelfLine } from "react-icons/ri";
-import { StyledButton } from "../../../styled-components/StyledButton";
 import { roleExtractor } from "../../../utils/roleExtractor";
 import { InputContainerComponent } from "../../helperComponents/InputContainer";
 import {
@@ -34,19 +22,12 @@ import {
   PageHeading,
   UnderlineComponent,
 } from "../../../styled-components/HelperStyledComponents";
-import {
-  FloatingInput,
-  FloatingLabel,
-  InputWrapper,
-} from "../../../styled-components/InputComp";
 import { LineBreak } from "../../../styled-components/LineBreak";
-import { GridItemComponent } from "../../helperComponents/GridItem";
-import { useNavigate } from "react-router-dom";
+import { GridLayers } from "../../helperComponents/GridItem";
+import { useNavigate, useParams } from "react-router-dom";
 
 export const StudentEditComponent = () => {
-  const [grNo, setGrNo] = useState(0);
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
   const userrole = roleExtractor(window.location.pathname);
   const initState = {
     grNo: "",
@@ -56,47 +37,54 @@ export const StudentEditComponent = () => {
     password: "",
   };
   const [data, setData] = useState(initState);
+  const [isValid, setIsValid] = useState(false);
   const dataChangeHandler = (key, value) => {
+    if (key === "grNo") {
+      setIsValid(false);
+    }
     setData((prevdata) => ({
       ...prevdata,
       [key]: value,
     }));
   };
-  const [displayData, setDisplayData] = useState(null);
-  const fetchData = async () => {
-    try {
-      setIsLoading(true);
-      const res = await fetchApi(
-        `http://localhost:8090/teacher/allStudents`,
+  const { id } = useParams();
+  useEffect(() => {
+    if (!id) return;
+
+    const checkStudent = async () => {
+      const isValidRes = await fetchApi(
+        `http://localhost:8090/${userrole}/isValidStudent/${id}`,
         "GET",
         {}
       );
-      if (res.output) {
-        setDisplayData(res.output);
-        return;
+      if (isValidRes.output) {
+        dataChangeHandler("grNo", id);
+        setIsValid(true);
+      } else {
+        ErrorToast("Student does not exist, try again!");
+        setIsValid(false);
       }
-    } catch (err) {
-      ErrorToast(err, toast);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  const deleteStudentHandler = async (apiUrl, grNo) => {
+    };
+    checkStudent();
+  }, []);
+  const searchStudent = async () => {
     try {
-      if (!GrNoOrSubIdValidation(grNo)) {
-        ErrorToast("invalid gr no");
-        return;
+      const isValidRes = await fetchApi(
+        `http://localhost:8090/${userrole}/isValidStudent/${data.grNo}`,
+        "GET",
+        {}
+      );
+      if (isValidRes.output) {
+        SuccessToast("Student Exists you wish to edit, go on!!");
+        setIsValid(true);
       }
-      let res;
-      res = await fetchApi(apiUrl, "DELETE", { grNo: grNo });
-      Toaster(res, toast);
-      if (res.output) {
-        fetchData();
-      }
-    } catch (err) {
-      ErrorToast(err, toast);
+    } catch (error) {
+      ErrorToast("Student doesnot exists you wish to edit, try again!!");
+      setIsValid(false);
+      console.log("no student found");
     }
   };
+
   const sumbitHandler = async (e, apiUrl) => {
     e.preventDefault();
     const errobj = {
@@ -153,19 +141,23 @@ export const StudentEditComponent = () => {
       }
       res = await fetchApi(apiUrl, "PUT", bodyObj);
       Toaster(res, toast);
-      if (res.output) {
-        setDisplayData(res.output);
-        return;
-      }
     } catch (err) {
       ErrorToast(err, toast);
     } finally {
-      setData(initState);
-      e.target.reset();
+      setInitialData();
+      setIsValid(false);
+      navigate("/app/teacher/editStudent");
     }
   };
+
+  const setInitialData = () => {
+    setData(initState);
+    setIsValid(false);
+  };
+
   return (
     <AllComponentsContainer>
+      <ToastContainer />
       <HeadingComponent position={"top"}>
         <PageHeading>
           Edit student
@@ -175,146 +167,137 @@ export const StudentEditComponent = () => {
       <HeadingComponent position={"bottom"}>
         <p className="subHeading">
           Update the student's details here |{" "}
-          <a onClick={() => navigate()}> Go back to veiw student list</a>
+          <a href="/app/teacher/displayStudent" style={{ color: "#008cffff" }}>
+            {" "}
+            Go back to veiw student list
+          </a>
         </p>
       </HeadingComponent>
 
       <ContentContainers elements={"single"} usage={"nongrid"}>
-        <InputContainer>
-          <FaCircleUser style={{ fontSize: "xx-large" }} />
-          <InputWrapper>
-            <FloatingInput
-              type="text"
-              value={grNo || ""}
-              name="grNo"
-              required
-              placeholder=" "
-              onChange={(e) => setGrNo(Number(e.target.value))}
-            />
-            <FloatingLabel>Filter students by Gr NO or name:</FloatingLabel>
-          </InputWrapper>
-        </InputContainer>
+        <InputContainerComponent
+          value={data.grNo}
+          objKey={"grNo"}
+          width={"100%"}
+          handler={dataChangeHandler}
+          name={"grNo"}
+          isRequired={true}
+          icon={FaCircleUser}
+          labelText={"Provide Gr NO for student you wish to update data:"}
+        ></InputContainerComponent>
         <ButtonElement
           bgcol={"default"}
           border={"default"}
           textcol={"default"}
           hovercol={"default"}
+          onClick={() => searchStudent()}
         >
           Search
         </ButtonElement>
       </ContentContainers>
 
       <LineBreak />
-
-      <ContentContainers elements={"single"} usage={"nongrid"}>
-        {isLoading ? (
-          <div>Fetching all students</div>
-        ) : (
-          <GridContainer>
-            {displayData?.map((value, i) => (
-              <GridItemComponent
-                key={i}
-                index={i}
-                grNo={value.grNo}
-                password={value.password}
-                name={value.studentName}
-                grade={value.grade}
-                section={value.section}
-                delete={deleteStudentHandler}
-              ></GridItemComponent>
-            ))}
-          </GridContainer>
-        )}
-      </ContentContainers>
+      {isValid ? (
+        <div>
+          <HeadingComponent position={"top"}>
+            <PageHeading>Only fill the fields you wish to update:</PageHeading>
+          </HeadingComponent>
+          <ContentContainers
+            elements={"multiple"}
+            style={{ marginTop: "1rem" }}
+          >
+            <GridContainer>
+              <InputContainerComponent
+                value={data.password}
+                objKey={"password"}
+                width={"auto"}
+                handler={dataChangeHandler}
+                name={"password"}
+                icon={FaKey}
+                labelText={"Provide new password:"}
+              ></InputContainerComponent>
+              <InputContainerComponent
+                value={data.name}
+                objKey={"name"}
+                width={"auto"}
+                handler={dataChangeHandler}
+                name={"name"}
+                icon={FaAddressCard}
+                labelText={"Provide new name:"}
+              ></InputContainerComponent>
+              <InputContainerComponent
+                value={data.section}
+                objKey={"section"}
+                width={"auto"}
+                handler={dataChangeHandler}
+                name={"section"}
+                icon={MdWindow}
+                labelText={"Provide new section:"}
+              ></InputContainerComponent>
+              <InputContainerComponent
+                value={data.std}
+                objKey={"std"}
+                width={"auto"}
+                handler={dataChangeHandler}
+                name={"std"}
+                icon={RiBookShelfLine}
+                labelText={"Provide new std:"}
+              ></InputContainerComponent>
+            </GridContainer>
+          </ContentContainers>
+          <ContentContainers
+            elements={"multiple"}
+            style={{ marginTop: "1rem" }}
+          >
+            <GridLayers style={{ width: "100%" }}>
+              <ButtonElement
+                style={{ width: "50%" }}
+                bgcol={"default"}
+                border={"default"}
+                textcol={"default"}
+                hovercol={"default"}
+                type="submit"
+                onClick={(e) =>
+                  sumbitHandler(
+                    e,
+                    `http://localhost:8090/${userrole}/updateStud`
+                  )
+                }
+              >
+                Update Student
+              </ButtonElement>
+              <GridLayers style={{ width: "48%", margin: "0" }}>
+                <ButtonElement
+                  style={{ width: "48%" }}
+                  bgcol={"transparent"}
+                  border={"1px solid #b5b5b5af"}
+                  textcol={"green"}
+                  hovercol={"#dcfff487"}
+                  onClick={() => {
+                    setInitialData();
+                    navigate("/app/teacher/editStudent");
+                  }}
+                >
+                  Cancel
+                </ButtonElement>
+                <ButtonElement
+                  style={{ width: "48%" }}
+                  bgcol={"transparent"}
+                  border={"1px solid #b5b5b5af"}
+                  textcol={"red"}
+                  hovercol={"#ffd3d3af"}
+                  type="reset"
+                  onClick={() => setInitialData()}
+                >
+                  Reset
+                </ButtonElement>
+              </GridLayers>
+            </GridLayers>
+          </ContentContainers>
+        </div>
+      ) : (
+        <></>
+      )}
     </AllComponentsContainer>
-    // <div>
-    //   <PageHeading>Edit a student:</PageHeading>
-    //   <SearchBoxSection>
-    //     <ToastContainer />
-    //     <SearchParamSection>
-    //       <SearchForm
-    //         onSubmit={(e) =>
-    //           sumbitHandler(e, `http://localhost:8090/${userrole}/updateStud`)
-    //         }
-    //       >
-    //         <TeacherInputTabContainer>
-    //           <InputContainerComponent
-    //             value={data.grNo}
-    //             objKey={"grNo"}
-    //             width={"100%"}
-    //             handler={dataChangeHandler}
-    //             name={"grno"}
-    //             icon={FaCircleUser}
-    //             isRequired={true}
-    //             labelText={"Provide Gr NO for student you wish to update data:"}
-    //           ></InputContainerComponent>
-    //         </TeacherInputTabContainer>
-    //         <div
-    //           style={{
-    //             display: "flex",
-    //             justifyContent: "center",
-    //             alignItems: "center",
-    //           }}
-    //         >
-    //           <h3>Only fill the fields you wish to update data:</h3>
-    //         </div>
-    //         <TeacherInputTabContainer>
-    //           <InputContainerComponent
-    //             value={data.password}
-    //             objKey={"password"}
-    //             width={"50%"}
-    //             handler={dataChangeHandler}
-    //             name={"password"}
-    //             icon={FaKey}
-    //             labelText={"Provide new password:"}
-    //           ></InputContainerComponent>
-    //           <InputContainerComponent
-    //             value={data.name}
-    //             objKey={"name"}
-    //             width={"50%"}
-    //             handler={dataChangeHandler}
-    //             name={"name"}
-    //             icon={FaAddressCard}
-    //             labelText={"Provide new name:"}
-    //           ></InputContainerComponent>
-    //         </TeacherInputTabContainer>
-    //         <TeacherInputTabContainer>
-    //           <InputContainerComponent
-    //             value={data.section}
-    //             objKey={"section"}
-    //             width={"50%"}
-    //             handler={dataChangeHandler}
-    //             name={"section"}
-    //             icon={MdWindow}
-    //             labelText={"Provide new section:"}
-    //           ></InputContainerComponent>
-    //           <InputContainerComponent
-    //             value={data.std}
-    //             objKey={"std"}
-    //             width={"50%"}
-    //             handler={dataChangeHandler}
-    //             name={"std"}
-    //             icon={RiBookShelfLine}
-    //             labelText={"Provide new std:"}
-    //           ></InputContainerComponent>
-    //         </TeacherInputTabContainer>
-    //         <ButtonContainer>
-    //           <StyledButton type="submit">Submit</StyledButton>
-    //         </ButtonContainer>
-    //       </SearchForm>
-    //     </SearchParamSection>
-    //   </SearchBoxSection>
-    //   {displayData !== undefined && displayData !== null ? (
-    //     <SearchOutputSection>
-    //       {typeof displayData === "string" ? (
-    //         <div style={{ padding: "10px" }}>{displayData}</div>
-    //       ) : (
-    //         <></>
-    //       )}
-    //     </SearchOutputSection>
-    //   ) : (
-    //     <></>
-    //   )}
-    // </div>
   );
 };
