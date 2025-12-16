@@ -1140,7 +1140,7 @@ func DisplayAllStudents(ctx *gin.Context) {
 		type StudentList struct {
 			GrNo     int    `json:"grNo"`
 			Password string `json:"password"`
-			Name     int    `json:"studentName"`
+			Name     string `json:"studentName"`
 			Grade    int    `json:"grade"`
 			Section  string `json:"section"`
 		}
