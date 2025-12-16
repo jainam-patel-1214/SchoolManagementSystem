@@ -1,16 +1,34 @@
-import { FloatingInput, FloatingLabel, InputWrapper } from "../../styled-components/InputComp"
-import { InputContainer, TeacherInputTabContainer } from "../teacherComponents/StudentsTab"
+import {
+  FloatingInput,
+  FloatingLabel,
+  InputWrapper,
+} from "../../styled-components/InputComp";
+import { InputContainer } from "../teacherComponents/StudentsTab";
 
-export const InputContainerComponent = ({width,icon:Icon,type,name,value,placeholder,handler,objKey,labelText}) => {
-    return (
-        <TeacherInputTabContainer>
-            <InputContainer style={{ width: width }}>
-                <Icon style={{ fontSize: "xx-large" }} />
-                <InputWrapper>
-                    {type==="number"?<FloatingInput type={type} name={name} value={value || ''} placeholder={placeholder} onChange={(e) => { handler(objKey,Number(e.target.value)) }} required />:<FloatingInput type={type} name={name} value={value || ''} placeholder={placeholder} onChange={(e) => handler(objKey,e.target.value) } required />}
-                    <FloatingLabel>{labelText}</FloatingLabel>
-                </InputWrapper>
-            </InputContainer>
-        </TeacherInputTabContainer>
-    )
-}
+export const InputContainerComponent = ({
+  width,
+  icon: Icon,
+  name,
+  value,
+  handler,
+  objKey,
+  labelText,
+  isRequired = false,
+}) => {
+  return (
+    <InputContainer style={{ width: width }}>
+      {Icon && <Icon style={{ fontSize: "xx-large" }} />}
+      <InputWrapper>
+        <FloatingInput
+          type="text"
+          name={name}
+          value={value || ""}
+          placeholder=" "
+          onChange={(e) => handler(objKey, e.target.value)}
+          required={isRequired}
+        />
+        <FloatingLabel>{labelText}</FloatingLabel>
+      </InputWrapper>
+    </InputContainer>
+  );
+};

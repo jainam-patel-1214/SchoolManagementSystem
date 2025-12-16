@@ -2,94 +2,68 @@ import { useState } from "react";
 import {
   GradeValidation,
   GrNoOrSubIdValidation,
-  PasswordValidation,
-  StringValidator,
 } from "../../../utils/validations";
 import { fetchApi } from "../../../utils/fetchApiCode";
 import { ErrorToast, Toaster } from "../../../utils/toasterCode";
 import { toast, ToastContainer } from "react-toastify";
-import { FaAddressCard, FaCircleUser, FaKey } from "react-icons/fa6";
-import { ButtonContainer, TeacherInputTabContainer } from "../StudentsTab";
 import {
   SearchBoxSection,
   SearchForm,
   SearchOutputSection,
   SearchParamSection,
 } from "../../studentComponents/SchoolResult";
-import { MdWindow } from "react-icons/md";
+import { ButtonContainer, TeacherInputTabContainer } from "../StudentsTab";
+import { FaOrcid } from "react-icons/fa6";
 import { RiBookShelfLine } from "react-icons/ri";
+import { IoIosRibbon } from "react-icons/io";
+import { LuBookA } from "react-icons/lu";
 import { StyledButton } from "../../../styled-components/StyledButton";
 import { roleExtractor } from "../../../utils/roleExtractor";
 import { InputContainerComponent } from "../../helperComponents/InputContainer";
 import { PageHeading } from "../../../styled-components/HelperStyledComponents";
 
-export const StudentAddComponent = () => {
+export const SubAddTabComp = () => {
+  const userrole = roleExtractor(window.location.pathname);
   const initState = {
-    grNo: "",
-    std: "",
-    section: "",
-    name: "",
-    password: "",
+    subjectId: "",
+    subjectName: "",
+    subjectCredit: null,
+    subjectStd: "",
   };
   const [data, setData] = useState(initState);
+  const [displayData, setDisplayData] = useState(null);
   const dataChangeHandler = (key, value) => {
     setData((prevdata) => ({
       ...prevdata,
       [key]: value,
     }));
   };
-  const [displayData, setDisplayData] = useState(null);
 
-  const sumbitHandler = async (e, apiUrl) => {
+  const submitHandler = async (e, apiUrl) => {
     e.preventDefault();
-    const errobj = {
-      grno: { condition: false, message: "invalid gr no" },
-      password: {
-        condition: false,
-        message: "passwords are needed to be 8 digits",
-      },
-      std: { condition: false, message: "standard shall have range of 1 - 12" },
-      name: { condition: false, message: "invalid name" },
-      section: { condition: false, message: "invalid section" },
-    };
-    if (!PasswordValidation(data.password)) {
-      ErrorToast(errobj.password.message);
+    if (!GradeValidation(Number(data.subjectStd))) {
+      ErrorToast("invalid grade. Allowed range is 1 - 12");
       return;
     }
-    if (!GrNoOrSubIdValidation(data.grNo)) {
-      ErrorToast(errobj.grno.message);
+    if (!GrNoOrSubIdValidation(Number(data.subjectId))) {
+      ErrorToast("invalid sub id");
       return;
     }
-    if (!GradeValidation(data.std)) {
-      ErrorToast(errobj.std.message);
-      return;
-    }
-    if (!StringValidator(data.name)) {
-      ErrorToast(errobj.name.message);
-      return;
-    }
-    if (!StringValidator(data.section)) {
-      ErrorToast(errobj.section.message);
+    if (Number(data.subjectCredit) < 0) {
+      ErrorToast("credits cannot be less than 0");
       return;
     }
     try {
       let res;
       let bodyObj = {};
       const payload = {
-        grNo: Number(data.grNo),
-        userRole: "student",
-        studName: data.name,
-        studPwd: data.password,
-        section: data.section,
-        std: Number(data.std),
+        subId: Number(data.subjectId),
+        subName: data.subjectName,
+        credits: Number(data.subjectCredit),
+        levelStd: Number(data.subjectStd),
       };
       for (const [key, value] of Object.entries(payload)) {
-        if (
-          value !== null &&
-          value !== undefined &&
-          value !== NaN &&
-          value !== 0
-        ) {
+        if (value !== null && value !== undefined && value !== NaN) {
           bodyObj[key] = value;
         }
       }
@@ -106,28 +80,28 @@ export const StudentAddComponent = () => {
       e.target.reset();
     }
   };
-  const userrole = roleExtractor(window.location.pathname);
+
   return (
     <div>
-      <PageHeading>Create new student:</PageHeading>
+      <PageHeading>Create new Subject:</PageHeading>
       <SearchBoxSection>
         <ToastContainer />
         <SearchParamSection>
           <SearchForm
             onSubmit={(e) =>
-              sumbitHandler(e, `http://localhost:8090/${userrole}/createStud`)
+              submitHandler(e, `http://localhost:8090/${userrole}/createSub`)
             }
           >
             <TeacherInputTabContainer>
               <InputContainerComponent
-                value={data.grNo}
-                objKey={"grNo"}
+                value={data.subjectId}
+                objKey={"subjectId"}
                 width={"100%"}
                 handler={dataChangeHandler}
-                name={"grno"}
-                icon={FaCircleUser}
+                name={"subid"}
+                icon={FaOrcid}
                 isRequired={true}
-                labelText={"Enter Gr No for new student:"}
+                labelText={"Provide SubId for new subject:"}
               ></InputContainerComponent>
             </TeacherInputTabContainer>
             <div
@@ -137,50 +111,38 @@ export const StudentAddComponent = () => {
                 alignItems: "center",
               }}
             >
-              <h3>Fill further details for the student below:</h3>
+              <h3>Fill further mendatory details below:</h3>
             </div>
             <TeacherInputTabContainer>
               <InputContainerComponent
-                value={data.password}
-                objKey={"password"}
-                width={"50%"}
+                value={data.subjectName}
+                objKey={"subjectName"}
+                width={"33.3%"}
                 handler={dataChangeHandler}
-                name={"password"}
-                icon={FaKey}
+                name={"subname"}
+                icon={LuBookA}
                 isRequired={true}
-                labelText={"Enter Password for new student:"}
+                labelText={"Provide subject name:"}
               ></InputContainerComponent>
               <InputContainerComponent
-                value={data.name}
-                objKey={"name"}
-                width={"50%"}
+                value={data.subjectCredit}
+                objKey={"subjectCredit"}
+                width={"33.3%"}
                 handler={dataChangeHandler}
-                name={"name"}
-                icon={FaAddressCard}
+                name={"credits"}
+                icon={IoIosRibbon}
                 isRequired={true}
-                labelText={"Enter name for new student:"}
-              ></InputContainerComponent>
-            </TeacherInputTabContainer>
-            <TeacherInputTabContainer>
-              <InputContainerComponent
-                value={data.section}
-                objKey={"section"}
-                width={"50%"}
-                handler={dataChangeHandler}
-                name={"section"}
-                icon={MdWindow}
-                isRequired={true}
-                labelText={"Enter section for new student:"}
+                labelText={"Provide subject credit:"}
               ></InputContainerComponent>
               <InputContainerComponent
-                value={data.std}
-                objKey={"std"}
-                width={"50%"}
+                value={data.subjectStd}
+                objKey={"subjectStd"}
+                width={"33.3%"}
                 handler={dataChangeHandler}
-                name={"std"}
+                name={"subLevel"}
                 icon={RiBookShelfLine}
                 isRequired={true}
-                labelText={"Enter standard for new student:"}
+                labelText={"Provide subject's grade:"}
               ></InputContainerComponent>
             </TeacherInputTabContainer>
             <ButtonContainer>

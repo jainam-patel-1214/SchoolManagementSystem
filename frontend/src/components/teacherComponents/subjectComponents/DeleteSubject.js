@@ -1,8 +1,7 @@
-import { useState } from "react";
-import { GrNoOrSubIdValidation } from "../../../utils/validations";
+import { toast, ToastContainer } from "react-toastify";
 import { fetchApi } from "../../../utils/fetchApiCode";
 import { ErrorToast, Toaster } from "../../../utils/toasterCode";
-import { toast, ToastContainer } from "react-toastify";
+import { GrNoOrSubIdValidation } from "../../../utils/validations";
 import {
   SearchBoxSection,
   SearchForm,
@@ -14,30 +13,30 @@ import {
   InputContainer,
   TeacherInputTabContainer,
 } from "../StudentsTab";
-import { FaCircleUser } from "react-icons/fa6";
+import { FaOrcid } from "react-icons/fa6";
 import {
   FloatingInput,
   FloatingLabel,
   InputWrapper,
 } from "../../../styled-components/InputComp";
 import { StyledButton } from "../../../styled-components/StyledButton";
+import { useState } from "react";
 import { roleExtractor } from "../../../utils/roleExtractor";
 import { PageHeading } from "../../../styled-components/HelperStyledComponents";
 
-export const StudentDelComponent = () => {
-  const userrole = roleExtractor(window.location.pathname);
-  const [grNo, setGrNo] = useState(0);
+export const SubDelTabComp = () => {
+  const [subId, setSubId] = useState(0);
   const [displayData, setDisplayData] = useState(null);
-
-  const sumbitHandler = async (e, apiUrl) => {
+  const userrole = roleExtractor(window.location.pathname);
+  const submitHandler = async (e, apiUrl) => {
     e.preventDefault();
-    if (!GrNoOrSubIdValidation(grNo)) {
-      ErrorToast("invalid gr no");
+    if (!GrNoOrSubIdValidation(subId)) {
+      ErrorToast("invalid sub id");
       return;
     }
     try {
       let res;
-      res = await fetchApi(apiUrl, "DELETE", { grNo: grNo });
+      res = await fetchApi(apiUrl, "DELETE", { subId: subId });
       Toaster(res, toast);
       if (res.output) {
         setDisplayData(res.output);
@@ -46,36 +45,36 @@ export const StudentDelComponent = () => {
     } catch (err) {
       ErrorToast(err, toast);
     } finally {
-      setGrNo(null);
+      setSubId(null);
       e.target.reset();
     }
   };
-
   return (
     <div>
-      <PageHeading>Delete a student:</PageHeading>
+      <PageHeading>Delete a subject:</PageHeading>
       <SearchBoxSection>
         <ToastContainer />
         <SearchParamSection>
           <SearchForm
             onSubmit={(e) =>
-              sumbitHandler(e, `http://localhost:8090/${userrole}/delStudent`)
+              submitHandler(e, `http://localhost:8090/${userrole}/delSubject`)
             }
           >
             <TeacherInputTabContainer>
               <InputContainer>
-                <FaCircleUser style={{ fontSize: "xx-large" }} />
+                <FaOrcid style={{ fontSize: "xx-large" }} />
                 <InputWrapper>
                   <FloatingInput
                     type="number"
-                    value={grNo || ""}
-                    name="grNo"
-                    required
+                    name="subId"
+                    value={subId || ""}
                     placeholder=" "
-                    onChange={(e) => setGrNo(Number(e.target.value))}
+                    onChange={(e) => {
+                      setSubId(Number(e.target.value));
+                    }}
                   />
                   <FloatingLabel>
-                    Enter Gr No of student you wish to delete:
+                    Provide subId of subject you wish to delete:
                   </FloatingLabel>
                 </InputWrapper>
               </InputContainer>
@@ -88,9 +87,8 @@ export const StudentDelComponent = () => {
       </SearchBoxSection>
       {displayData !== undefined && displayData !== null ? (
         <SearchOutputSection>
-          {typeof displayData === "string" &&
-          (displayData !== undefined || displayData !== null) ? (
-            <div>{displayData}</div>
+          {typeof displayData === "string" ? (
+            <div style={{ padding: "10px" }}>{displayData}</div>
           ) : (
             <></>
           )}

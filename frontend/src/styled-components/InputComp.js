@@ -1,13 +1,14 @@
 import styled from "styled-components";
 
 export const InputWrapper = styled.div`
+  display: block;
   position: relative;
   margin: 20px 0;
   width: 95%;
 `;
 
 export const FloatingInput = styled.input`
-  width: 100%;
+  width: inherit;
   padding: 12px 10px;
   font-size: 16px;
   border: 1px solid gray;
@@ -36,7 +37,7 @@ export const FloatingLabel = styled.label`
   position: absolute;
   left: 10px;
   top: 13px;
-  width: 100%;
+  /* width: 100%; */
   color: #777;
   font-size: 13px;
   pointer-events: none;

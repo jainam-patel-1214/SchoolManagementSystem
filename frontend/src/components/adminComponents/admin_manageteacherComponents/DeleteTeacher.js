@@ -1,44 +1,43 @@
-import { toast, ToastContainer } from "react-toastify";
-import { ErrorToast, Toaster } from "../../../utils/toasterCode";
-import { TeacherAdminIdValid } from "../../../utils/validations";
 import { useState } from "react";
 import {
   SearchBoxSection,
   SearchForm,
+  SearchOutputSection,
   SearchParamSection,
 } from "../../studentComponents/SchoolResult";
+import { toast, ToastContainer } from "react-toastify";
 import { TeacherInputTabContainer } from "../TeachersTab";
 import {
   ButtonContainer,
   InputContainer,
 } from "../../teacherComponents/StudentsTab";
-import { GiTeacher } from "react-icons/gi";
+import { FaIdCardAlt } from "react-icons/fa";
 import {
   FloatingInput,
   FloatingLabel,
   InputWrapper,
 } from "../../../styled-components/InputComp";
 import { StyledButton } from "../../../styled-components/StyledButton";
-import { ReactTableComponent } from "../../helperComponents/ResultTable";
+import { TeacherAdminIdValid } from "../../../utils/validations";
 import { fetchApi } from "../../../utils/fetchApiCode";
+import { ErrorToast, Toaster } from "../../../utils/toasterCode";
 import { roleExtractor } from "../../../utils/roleExtractor";
 import { PageHeading } from "../../../styled-components/HelperStyledComponents";
 
-export const DisplayTeacherPerformanceComponent = () => {
+export const TeacherDelComponent = () => {
   const userrole = roleExtractor(window.location.pathname);
   const [teacherId, setTeacherId] = useState(0);
   const [displayData, setDisplayData] = useState(null);
 
   const submitHandler = async (e, apiUrl) => {
     e.preventDefault();
-
     if (!TeacherAdminIdValid(teacherId)) {
       ErrorToast("invalid teacher id");
       return;
     }
     try {
       let res;
-      res = await fetchApi(apiUrl, "GET", {});
+      res = await fetchApi(apiUrl, "DELETE", { teacherId: teacherId });
       Toaster(res, toast);
       if (res.output) {
         setDisplayData(res.output);
@@ -52,62 +51,33 @@ export const DisplayTeacherPerformanceComponent = () => {
     }
   };
 
-  const columnDef = [
-    {
-      header: "Teacher Id",
-      accessorKey: "Tid",
-    },
-    {
-      header: "Teacher Name",
-      accessorKey: "TName",
-    },
-    {
-      header: "Standard Allocated",
-      accessorKey: "StdAllocated",
-    },
-    {
-      header: "Subject Allocated",
-      accessorKey: "SubName",
-    },
-    {
-      header: "Total Practical Marks",
-      accessorKey: "TotalPracticalMarks",
-    },
-    {
-      header: "Total Theory Marks",
-      accessorKey: "TotalTheoryMarks",
-    },
-  ];
   return (
     <div>
-      <PageHeading>Edit a teacher:</PageHeading>
+      <PageHeading>Delete a teacher:</PageHeading>
       <SearchBoxSection>
         <ToastContainer />
         <SearchParamSection>
           <SearchForm
             onSubmit={(e) => {
-              submitHandler(
-                e,
-                `http://localhost:8090/${userrole}/displayTeacherPerformance/${teacherId}`
-              );
+              submitHandler(e, `http://localhost:8090/${userrole}/delTeacher`);
             }}
           >
             <TeacherInputTabContainer>
               <InputContainer>
-                <GiTeacher style={{ fontSize: "xx-large" }} />
+                <FaIdCardAlt style={{ fontSize: "xx-large" }} />
                 <InputWrapper>
                   <FloatingInput
-                    type="text"
+                    type="number"
+                    name="teacherId"
                     value={teacherId || ""}
-                    name="teacherid"
+                    required
                     placeholder=" "
-                    maxLength={8}
                     onChange={(e) => {
                       setTeacherId(Number(e.target.value));
                     }}
                   />
                   <FloatingLabel>
-                    Provide id of teacher you wish to look performance:
+                    Provide id of teacher you wish to delete:
                   </FloatingLabel>
                 </InputWrapper>
               </InputContainer>
@@ -118,17 +88,16 @@ export const DisplayTeacherPerformanceComponent = () => {
           </SearchForm>
         </SearchParamSection>
       </SearchBoxSection>
-      {typeof displayData !== "string" &&
-      displayData?.length > 0 &&
-      displayData !== undefined &&
-      displayData !== null ? (
-        <ReactTableComponent
-          data={displayData}
-          columnDefinition={columnDef}
-          heading={"Performance among teacher's peers"}
-        />
+      {displayData !== null && displayData !== undefined ? (
+        <SearchOutputSection>
+          {typeof displayData === "string" ? (
+            <div style={{ padding: "10px" }}>{displayData}</div>
+          ) : (
+            <></>
+          )}
+        </SearchOutputSection>
       ) : (
-        <>{displayData}</>
+        <></>
       )}
     </div>
   );

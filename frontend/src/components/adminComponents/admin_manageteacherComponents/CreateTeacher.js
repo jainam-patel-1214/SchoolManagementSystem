@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
   GradeValidation,
   GrNoOrSubIdValidation,
@@ -11,38 +11,30 @@ import { fetchApi } from "../../../utils/fetchApiCode";
 import { toast, ToastContainer } from "react-toastify";
 import { ErrorToast, Toaster } from "../../../utils/toasterCode";
 import {
-  ErrorSpan,
   SearchBoxSection,
   SearchForm,
   SearchOutputSection,
   SearchParamSection,
-} from "../../studentComponents/SchoolRes";
-import {
-  FloatingInput,
-  FloatingLabel,
-  InputWrapper,
-} from "../../../styled-components/InputComp";
+} from "../../studentComponents/SchoolResult";
 import { TeacherInputTabContainer } from "../TeachersTab";
-import {
-  ButtonContainer,
-  InputContainer,
-} from "../../teacherComponents/StudentsTab";
+import { ButtonContainer } from "../../teacherComponents/StudentsTab";
 import { FaIdCardAlt } from "react-icons/fa";
 import { FaAddressCard, FaKey } from "react-icons/fa6";
 import { RiBookShelfLine, RiContactsBook2Fill } from "react-icons/ri";
 import { MdWindow } from "react-icons/md";
 import { StyledButton } from "../../../styled-components/StyledButton";
 import { roleExtractor } from "../../../utils/roleExtractor";
+import { InputContainerComponent } from "../../helperComponents/InputContainer";
+import { PageHeading } from "../../../styled-components/HelperStyledComponents";
 
 export const CreateTeacherComponent = () => {
-  const errorComp = useRef(null);
   const userrole = roleExtractor(window.location.pathname);
   const initState = {
-    teacherId: 0,
-    tPwd: "",
-    subId: 0,
-    tName: "",
-    stdAllocated: 0,
+    teacherId: "",
+    teacherPassword: "",
+    subjectId: "",
+    teacherName: "",
+    standardAllocated: "",
     sectionAllocated: "",
   };
   const [data, setData] = useState(initState);
@@ -70,38 +62,55 @@ export const CreateTeacherComponent = () => {
         message: "invalid password. it shall be of 8 digits",
       },
     };
-    if (!TeacherAdminIdValid(data.teacherId)) errobj.tid.condition = true;
-    if (data.subId !== 0 && !GrNoOrSubIdValidation(data.subId))
-      errobj.subid.condition = true;
-    if (data.tPwd === "" || !PasswordValidation(data.tPwd))
-      errobj.pwd.condition = true;
-    if (data.tName === "" || !StringValidator(data.tName))
-      errobj.name.condition = true;
-    if (data.stdAllocated !== 0 && !GradeValidation(data.stdAllocated))
-      errobj.std.condition = true;
-    if (data.sectionAllocated !== "" && !StringValidator(data.sectionAllocated))
-      errobj.section.condition = true;
-    let errstr = "";
-    let anyErr = false;
-    for (const val of Object.values(errobj)) {
-      if (val?.condition) {
-        errstr += `\n${val?.message}`;
-        anyErr = true;
-      }
+    const payload = {
+      teacherId: Number(data.teacherId),
+      tPwd: data.teacherPassword,
+      subId: Number(data.subjectId),
+      tName: data.teacherName,
+      stdAllocated: Number(data.standardAllocated),
+      sectionAllocated: data.sectionAllocated,
+    };
+    if (!TeacherAdminIdValid(payload.teacherId)) {
+      ErrorToast(errobj.tid.message);
+      return;
     }
 
-    if (anyErr) {
-      errorComp.current.innerText = errstr;
-      errorComp.current.style.display = "block";
+    if (payload.subId !== 0 && !GrNoOrSubIdValidation(payload.subId)) {
+      ErrorToast(errobj.subid.message);
       return;
-    } else {
-      errorComp.current.innerText = "";
-      errorComp.current.style.display = "none";
+    }
+
+    if (payload.tPwd === "" || !PasswordValidation(payload.tPwd)) {
+      ErrorToast(errobj.pwd.message);
+      return;
+    }
+
+    if (payload.tName === "" || !StringValidator(payload.tName)) {
+      ErrorToast(errobj.name.message);
+      return;
+    }
+
+    if (payload.stdAllocated !== 0 && !GradeValidation(payload.stdAllocated)) {
+      ErrorToast(errobj.std.message);
+      return;
+    }
+
+    if (
+      payload.sectionAllocated !== "" &&
+      !StringValidator(payload.sectionAllocated)
+    ) {
+      ErrorToast(errobj.section.message);
+      return;
     }
     try {
       let res;
       let bodyObj = {};
-      for (const [key, value] of Object.entries(data)) {
+      const numberKeys = ["stdAllocated", "subId", "teacherId"];
+      for (const [key, value] of Object.entries(payload)) {
+        if (isNaN(value) && numberKeys.includes(key)) {
+          ErrorToast(`${key}'s value must be a number`);
+          return;
+        }
         if (isNotEmptyPair(value)) {
           bodyObj[key] = value;
         }
@@ -109,7 +118,6 @@ export const CreateTeacherComponent = () => {
       bodyObj["role"] = "teacher";
       res = await fetchApi(apiUrl, "POST", bodyObj);
       Toaster(res, toast);
-
       if (res.output) {
         setDisplayData(res.output);
         return;
@@ -124,6 +132,7 @@ export const CreateTeacherComponent = () => {
 
   return (
     <div>
+      <PageHeading>Create new teacher:</PageHeading>
       <SearchBoxSection>
         <ToastContainer />
         <SearchParamSection>
@@ -133,25 +142,16 @@ export const CreateTeacherComponent = () => {
             }}
           >
             <TeacherInputTabContainer>
-              <InputContainer>
-                <FaIdCardAlt style={{ fontSize: "xx-large" }} />
-                <InputWrapper>
-                  <FloatingInput
-                    type="number"
-                    value={data.teacherId || ""}
-                    name="tid"
-                    required
-                    placeholder=" "
-                    maxLength={8}
-                    onChange={(e) => {
-                      dataChangeHandler("teacherId", Number(e.target.value));
-                    }}
-                  />
-                  <FloatingLabel>
-                    Provide Id for new teacher to be created:
-                  </FloatingLabel>
-                </InputWrapper>
-              </InputContainer>
+              <InputContainerComponent
+                icon={FaIdCardAlt}
+                labelText={"Provide Id for new teacher to be created:"}
+                width={"100%"}
+                handler={dataChangeHandler}
+                value={data.teacherId}
+                name={"tid"}
+                objKey={"teacherId"}
+                isRequired={true}
+              ></InputContainerComponent>
             </TeacherInputTabContainer>
             <div
               style={{
@@ -163,94 +163,58 @@ export const CreateTeacherComponent = () => {
               <h3>Provide further details of teacher:</h3>
             </div>
             <TeacherInputTabContainer>
-              <InputContainer style={{ width: "50%" }}>
-                <FaAddressCard style={{ fontSize: "xx-large" }} />
-                <InputWrapper>
-                  <FloatingInput
-                    type="text"
-                    required
-                    value={data.tName || ""}
-                    name="tname"
-                    placeholder=" "
-                    maxLength={55}
-                    onChange={(e) => {
-                      dataChangeHandler("tName", e.target.value);
-                    }}
-                  />
-                  <FloatingLabel>Provide teacher's name:</FloatingLabel>
-                </InputWrapper>
-              </InputContainer>
-              <InputContainer style={{ width: "50%" }}>
-                <FaKey style={{ fontSize: "xx-large" }} />
-                <InputWrapper>
-                  <FloatingInput
-                    type="text"
-                    required
-                    maxLength={8}
-                    value={data.tPwd || ""}
-                    name="pwd"
-                    placeholder=" "
-                    onChange={(e) => {
-                      dataChangeHandler("tPwd", e.target.value);
-                    }}
-                  />
-                  <FloatingLabel>Provide a password:</FloatingLabel>
-                </InputWrapper>
-              </InputContainer>
+              <InputContainerComponent
+                icon={FaAddressCard}
+                labelText={"Provide teacher's name:"}
+                width={"50%"}
+                isRequired={true}
+                handler={dataChangeHandler}
+                value={data.teacherName}
+                name={"tname"}
+                objKey={"teacherName"}
+              ></InputContainerComponent>
+              <InputContainerComponent
+                icon={RiContactsBook2Fill}
+                labelText={"Provide subject to be assigned:"}
+                width={"50%"}
+                handler={dataChangeHandler}
+                value={data.subjectId}
+                name={"subname"}
+                objKey={"subjectId"}
+              ></InputContainerComponent>
             </TeacherInputTabContainer>
             <TeacherInputTabContainer>
-              <InputContainer>
-                <RiContactsBook2Fill style={{ fontSize: "xx-large" }} />
-                <InputWrapper>
-                  <FloatingInput
-                    type="number"
-                    name="subname"
-                    value={data.subId || ""}
-                    placeholder=" "
-                    maxLength={55}
-                    onChange={(e) => {
-                      dataChangeHandler("subId", Number(e.target.value));
-                    }}
-                  />
-                  <FloatingLabel>Provide subject to be assigned:</FloatingLabel>
-                </InputWrapper>
-              </InputContainer>
+              <InputContainerComponent
+                icon={FaKey}
+                labelText={"Provide password for teacher:"}
+                width={"100%"}
+                isRequired={true}
+                handler={dataChangeHandler}
+                value={data.teacherPassword}
+                name={"password"}
+                objKey={"teacherPassword"}
+              ></InputContainerComponent>
             </TeacherInputTabContainer>
             <TeacherInputTabContainer>
-              <InputContainer style={{ width: "50%" }}>
-                <RiBookShelfLine style={{ fontSize: "xx-large" }} />
-                <InputWrapper>
-                  <FloatingInput
-                    type="number"
-                    name="std"
-                    value={data.stdAllocated || ""}
-                    placeholder=" "
-                    onChange={(e) => {
-                      dataChangeHandler("stdAllocated", Number(e.target.value));
-                    }}
-                  />
-                  <FloatingLabel>
-                    Provide standard to be assigned:
-                  </FloatingLabel>
-                </InputWrapper>
-              </InputContainer>
-              <InputContainer style={{ width: "50%" }}>
-                <MdWindow style={{ fontSize: "xx-large" }} />
-                <InputWrapper>
-                  <FloatingInput
-                    type="text"
-                    name="section"
-                    value={data.sectionAllocated || ""}
-                    placeholder=" "
-                    onChange={(e) => {
-                      dataChangeHandler("sectionAllocated", e.target.value);
-                    }}
-                  />
-                  <FloatingLabel>Provide section to be assigned:</FloatingLabel>
-                </InputWrapper>
-              </InputContainer>
+              <InputContainerComponent
+                width={"50%"}
+                value={data.standardAllocated}
+                name={"std"}
+                handler={dataChangeHandler}
+                objKey={"standardAllocated"}
+                icon={RiBookShelfLine}
+                labelText={"Provide standard to be assigned:"}
+              ></InputContainerComponent>
+              <InputContainerComponent
+                width={"50%"}
+                value={data.sectionAllocated}
+                name={"section"}
+                handler={dataChangeHandler}
+                objKey={"sectionAllocated"}
+                icon={MdWindow}
+                labelText={"Provide section to be assigned:"}
+              ></InputContainerComponent>
             </TeacherInputTabContainer>
-            <ErrorSpan id="minmaxerror" ref={errorComp}></ErrorSpan>
             <ButtonContainer>
               <StyledButton type="submit">Submit</StyledButton>
             </ButtonContainer>
