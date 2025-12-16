@@ -34,6 +34,7 @@ func InitializeRouter() *gin.Engine {
 			teach.GET("/displayPerformance", teacher.Performance)
 
 			teach.GET("/studentreport", teacher.Report)
+			teach.GET("/isValidStudent/:grNo", teacher.IsValidStudent)
 			teach.GET("/displayStud", admin.ListStudents)
 			teach.POST("/createStud", teacher.AddStudent)
 			teach.PUT("/updateStud", teacher.EditStud)

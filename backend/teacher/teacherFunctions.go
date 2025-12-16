@@ -44,6 +44,35 @@ func HasOnlyAlphabets(s string) bool {
 	return true
 }
 
+func IsValidStudent(ctx *gin.Context) {
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer db.Close()
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "teacher" && role != "admin") {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		return
+	} else {
+		studId, _ := strconv.Atoi(ctx.Param("grNo"))
+		var amount int
+		err = db.QueryRow("SELECT COUNT(grNo) FROM students WHERE grNo = ?", studId).Scan(&amount)
+		if err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if amount <= 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "student not exist"})
+			return
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": "valid student"})
+			return
+		}
+	}
+}
+
 func AddStudent(ctx *gin.Context) {
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
