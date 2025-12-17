@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { fetchApi } from "../../../utils/fetchApiCode";
 import { ErrorToast, Toaster } from "../../../utils/toasterCode";
 import { toast, ToastContainer } from "react-toastify";
@@ -20,130 +20,245 @@ import {
 } from "../../../styled-components/InputComp";
 import { StyledButton } from "../../../styled-components/StyledButton";
 import { ReactTableComponent } from "../../helperComponents/ResultTable";
-import { GradeValidation } from "../../../utils/validations";
+import {
+  GradeValidation,
+  GrNoOrSubIdValidation,
+} from "../../../utils/validations";
 import { roleExtractor } from "../../../utils/roleExtractor";
-import { PageHeading } from "../../../styled-components/HelperStyledComponents";
+import {
+  AllComponentsContainer,
+  ButtonElement,
+  ContentContainers,
+  DisplayViewFormatContainer,
+  GridContainer,
+  HeadingComponent,
+  PageHeading,
+  UnderlineComponent,
+} from "../../../styled-components/HelperStyledComponents";
+import { FaCircleUser } from "react-icons/fa6";
+import { LineBreak } from "../../../styled-components/LineBreak";
+import { DataContainer } from "../studentComponents/GetStudentData";
+import { MdTableRows, MdWindow } from "react-icons/md";
+import { GeneralTableComponent } from "../../helperComponents/GeneralTable";
+import { GridItemComponent } from "../../helperComponents/GridItem";
+import { useNavigate } from "react-router-dom";
+import { createColumnHelper } from "@tanstack/react-table";
 
 export const DisplaySubTabComp = () => {
   const userrole = roleExtractor(window.location.pathname);
-  const [std, setStd] = useState(null);
-  const [displayData, setDisplayData] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const SuperScriptText = (num) => {
-    switch (num) {
-      case 1:
-        return "st";
-      case 2:
-        return "nd";
-      case 3:
-        return "rd";
-      default:
-        return "th";
-    }
-  };
-  const subjectColumnDef = [
-    {
-      header: "Subject Id",
-      accessorKey: "subjectId",
-    },
-    {
-      header: "Name",
-      accessorKey: "subjectName",
-    },
-    {
-      header: "Standard",
-      accessorKey: "level",
-    },
-    {
-      header: "Credits",
-      accessorKey: "credits",
-    },
-  ];
-  const submitHandler = async (e, apiUrl) => {
-    e.preventDefault();
-    if (!GradeValidation(std)) {
-      ErrorToast("invalid grade. Allowed range is 1 - 12");
-      return;
-    }
+  const [filterData, setFilterData] = useState(null);
+  const [searchKey, setSearchKey] = useState("");
+  const [originalData, setOriginalData] = useState(null);
+  const [isTable, setIsTable] = useState(false);
+  // const SuperScriptText = (num) => {
+  //   switch (num) {
+  //     case 1:
+  //       return "st";
+  //     case 2:
+  //       return "nd";
+  //     case 3:
+  //       return "rd";
+  //     default:
+  //       return "th";
+  //   }
+  // };
+  const fetchData = async () => {
     try {
-      let res;
       setIsLoading(true);
-      res = await fetchApi(
-        apiUrl + "?" + new URLSearchParams({ std: std }),
+      const res = await fetchApi(
+        `http://localhost:8090/teacher/allSubjects`,
         "GET",
         {}
       );
-      Toaster(res, toast);
       if (res.output) {
-        setDisplayData(res.output);
+        setOriginalData(res.output);
+        setFilterData(res.output);
         return;
       }
     } catch (err) {
       ErrorToast(err, toast);
     } finally {
       setIsLoading(false);
-      setStd(null);
-      e.target.reset();
     }
   };
-
-  return (
-    <div>
-      <PageHeading>Display Subjects:</PageHeading>
-      <SearchBoxSection>
-        <ToastContainer />
-        <SearchParamSection>
-          <SearchForm
-            onSubmit={(e) => {
-              submitHandler(e, `http://localhost:8090/${userrole}/displaySub`);
-            }}
+  const deleteSubjectHandler = async (apiUrl, subjectId) => {
+    try {
+      if (!GrNoOrSubIdValidation(subjectId)) {
+        ErrorToast("invalid gr no");
+        return;
+      }
+      let res;
+      res = await fetchApi(apiUrl, "DELETE", { subId: subjectId });
+      Toaster(res, toast);
+      if (res.output) {
+        fetchData();
+      }
+    } catch (err) {
+      ErrorToast(err, toast);
+    }
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
+  const navigate = useNavigate();
+  const columnHelper = createColumnHelper();
+  const columns = [
+    columnHelper.accessor("subjectId", {
+      header: "Subject ID",
+      cell: (info) => info.getValue(),
+      enableSorting: false,
+    }),
+    columnHelper.accessor("subjectName", {
+      header: "Name",
+      cell: (info) => info.getValue(),
+      enableSorting: true,
+    }),
+    columnHelper.accessor("level", {
+      header: "Grade",
+      cell: (info) => info.getValue(),
+      enableSorting: false,
+    }),
+    columnHelper.accessor("credits", {
+      header: "Credits",
+      cell: (info) => info.getValue(),
+      enableSorting: false,
+    }),
+    columnHelper.display({
+      id: "accept",
+      header: "",
+      cell: ({ row }) => {
+        const v = row.original;
+        return (
+          <ButtonElement
+            style={{ width: "100%" }}
+            bgcol={"transparent"}
+            border={"1px solid #b5b5b5af"}
+            textcol={"green"}
+            hovercol={"#dcfff487"}
+            onClick={() => navigate(`/app/teacher/editSubject/${v.subjectId}`)}
           >
-            <TeacherInputTabContainer>
-              <InputContainer>
-                <RiBookShelfLine style={{ fontSize: "xx-large" }} />
-                <InputWrapper>
-                  <FloatingInput
-                    type="number"
-                    name="substd"
-                    value={std || ""}
-                    placeholder=" "
-                    onChange={(e) => {
-                      setStd(Number(e.target.value));
-                    }}
-                  />
-                  <FloatingLabel>
-                    Provide standard to search associated subjects :
-                  </FloatingLabel>
-                </InputWrapper>
-              </InputContainer>
-            </TeacherInputTabContainer>
-            <ButtonContainer>
-              <StyledButton type="submit">Submit</StyledButton>
-            </ButtonContainer>
-          </SearchForm>
-        </SearchParamSection>
-      </SearchBoxSection>
-      {isLoading || displayData.length === 0 ? (
-        <>Fetching Data</>
-      ) : (
-        <>
-          {typeof displayData !== "string" && displayData?.length > 0 ? (
-            <ReactTableComponent
-              data={displayData}
-              columnDefinition={subjectColumnDef}
-              heading={
-                <>
-                  List of subject in {displayData[0].level}{" "}
-                  <sup>{SuperScriptText(Number(displayData[0].level))}</sup>{" "}
-                  standard
-                </>
-              }
-            ></ReactTableComponent>
+            Edit
+          </ButtonElement>
+        );
+      },
+    }),
+
+    columnHelper.display({
+      id: "reject",
+      header: "",
+      cell: ({ row }) => {
+        const v = row.original;
+        return (
+          <ButtonElement
+            style={{ width: "100%" }}
+            bgcol={"transparent"}
+            border={"1px solid #b5b5b5af"}
+            textcol={"red"}
+            hovercol={"#ffd3d3af"}
+            onClick={() =>
+              deleteSubjectHandler(
+                `http://localhost:8090/${userrole}/delSubject`,
+                Number(v.subjectId)
+              )
+            }
+          >
+            Delete
+          </ButtonElement>
+        );
+      },
+    }),
+  ];
+  return (
+    <AllComponentsContainer>
+      <ToastContainer />
+      <HeadingComponent position={"top"}>
+        <PageHeading>
+          Display subjects
+          <UnderlineComponent />
+        </PageHeading>
+      </HeadingComponent>
+      <HeadingComponent position={"bottom"}>
+        <p className="subHeading">
+          List of all the subjects within the school |{" "}
+          <a href="/app/teacher/addSubject" style={{ color: "#00c200" }}>
+            {" "}
+            Create a new subject here
+          </a>
+        </p>
+      </HeadingComponent>
+
+      <ContentContainers elements={"single"} usage={"nongrid"}>
+        <InputContainer>
+          <RiBookShelfLine style={{ fontSize: "xx-large" }} />
+          <InputWrapper>
+            <FloatingInput
+              type="text"
+              value={searchKey || ""}
+              name="searchQuery"
+              required
+              placeholder=" "
+              onChange={(e) => setSearchKey(e.target.value)}
+            />
+            <FloatingLabel>
+              Filter subjects by Subject ID or name:
+            </FloatingLabel>
+          </InputWrapper>
+        </InputContainer>
+        <ButtonElement
+          bgcol={"default"}
+          border={"default"}
+          textcol={"default"}
+          hovercol={"default"}
+        >
+          Search
+        </ButtonElement>
+      </ContentContainers>
+
+      <LineBreak />
+      <DataContainer>
+        <DisplayViewFormatContainer>
+          <MdTableRows
+            style={{ backgroundColor: isTable ? "#878787ac" : "#ddddddac" }}
+            onClick={() => setIsTable(true)}
+          />
+          <MdWindow
+            style={{ backgroundColor: !isTable ? "#878787ac" : "#ddddddac" }}
+            onClick={() => setIsTable(false)}
+          />
+        </DisplayViewFormatContainer>
+        <ContentContainers
+          elements={"single"}
+          usage={"nongrid"}
+          style={{ padding: isTable ? "0" : "15px" }}
+        >
+          {isLoading ? (
+            <div>Fetching all subjects</div>
+          ) : isTable ? (
+            <GeneralTableComponent
+              data={filterData}
+              columnDefinition={columns}
+            ></GeneralTableComponent>
           ) : (
-            <></>
+            <GridContainer>
+              {filterData?.map((value, i) => (
+                <GridItemComponent
+                  key={i}
+                  index={i}
+                  objectId={value.subjectId}
+                  password={""}
+                  name={value.subjectName}
+                  grade={value.level}
+                  section={""}
+                  credits={value.credits}
+                  isStudent={false}
+                  delete={deleteSubjectHandler}
+                ></GridItemComponent>
+              ))}
+            </GridContainer>
           )}
-        </>
-      )}
-    </div>
+        </ContentContainers>
+      </DataContainer>
+    </AllComponentsContainer>
   );
 };

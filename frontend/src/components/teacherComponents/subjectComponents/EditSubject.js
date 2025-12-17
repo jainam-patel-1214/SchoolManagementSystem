@@ -1,28 +1,32 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   GradeValidation,
   GrNoOrSubIdValidation,
 } from "../../../utils/validations";
 import { fetchApi } from "../../../utils/fetchApiCode";
-import { ErrorToast, Toaster } from "../../../utils/toasterCode";
+import { ErrorToast, SuccessToast, Toaster } from "../../../utils/toasterCode";
 import { toast, ToastContainer } from "react-toastify";
-import {
-  SearchBoxSection,
-  SearchForm,
-  SearchOutputSection,
-  SearchParamSection,
-} from "../../studentComponents/SchoolResult";
-import { ButtonContainer, TeacherInputTabContainer } from "../StudentsTab";
 import { FaOrcid } from "react-icons/fa6";
 import { RiBookShelfLine } from "react-icons/ri";
 import { IoIosRibbon } from "react-icons/io";
 import { LuBookA } from "react-icons/lu";
-import { StyledButton } from "../../../styled-components/StyledButton";
 import { roleExtractor } from "../../../utils/roleExtractor";
 import { InputContainerComponent } from "../../helperComponents/InputContainer";
 import { PageHeading } from "../../../styled-components/HelperStyledComponents";
+import {
+  AllComponentsContainer,
+  ButtonElement,
+  ContentContainers,
+  GridContainer,
+  HeadingComponent,
+  UnderlineComponent,
+} from "../../../styled-components/HelperStyledComponents";
+import { LineBreak } from "../../../styled-components/LineBreak";
+import { GridLayers } from "../../helperComponents/GridItem";
+import { useNavigate, useParams } from "react-router-dom";
 
 export const SubEditTabComp = () => {
+  const navigate = useNavigate();
   const initState = {
     subjectId: "",
     subjectName: "",
@@ -30,13 +34,51 @@ export const SubEditTabComp = () => {
     subjectStd: "",
   };
   const [data, setData] = useState(initState);
-  const [displayData, setDisplayData] = useState(null);
+  const [isValid, setIsValid] = useState(false);
   const userrole = roleExtractor(window.location.pathname);
   const dataChangeHandler = (key, value) => {
     setData((prevdata) => ({
       ...prevdata,
       [key]: value,
     }));
+  };
+
+  const { id } = useParams();
+  useEffect(() => {
+    if (!id) return;
+
+    const checkSubject = async () => {
+      const isValidRes = await fetchApi(
+        `http://localhost:8090/${userrole}/isValidSubject/${id}`,
+        "GET",
+        {}
+      );
+      if (isValidRes.output) {
+        dataChangeHandler("grNo", id);
+        setIsValid(true);
+      } else {
+        ErrorToast("Student does not exist, try again!");
+        setIsValid(false);
+      }
+    };
+    checkSubject();
+  }, []);
+  const searchSubject = async () => {
+    try {
+      const isValidRes = await fetchApi(
+        `http://localhost:8090/${userrole}/isValidSubject/${data.subjectId}`,
+        "GET",
+        {}
+      );
+      if (isValidRes.output) {
+        SuccessToast("Subject Exists you wish to edit, go on!!");
+        setIsValid(true);
+      }
+    } catch (error) {
+      ErrorToast("Subject doesnot exists you wish to edit, try again!!");
+      setIsValid(false);
+      console.log("no sub found");
+    }
   };
 
   const submitHandler = async (e, apiUrl) => {
@@ -69,66 +111,163 @@ export const SubEditTabComp = () => {
       }
       res = await fetchApi(apiUrl, "PUT", bodyObj);
       Toaster(res, toast);
-
-      if (res.output) {
-        setDisplayData(res.output);
-        return;
-      }
     } catch (err) {
       ErrorToast(err, toast);
     } finally {
-      setData(initState);
-      e.target.reset();
+      setInitialData();
     }
   };
 
+  const setInitialData = () => {
+    setData(initState);
+    setIsValid(false);
+  };
+
   return (
-    <div>
-      <PageHeading>Edit any subject:</PageHeading>
-      <SearchBoxSection>
-        <ToastContainer />
-        <SearchParamSection>
-          <SearchForm
-            onSubmit={(e) =>
-              submitHandler(e, `http://localhost:8090/${userrole}/updateSub`)
-            }
+    // <div>
+    //   <PageHeading>Edit any subject:</PageHeading>
+    //   <SearchBoxSection>
+    //     <ToastContainer />
+    //     <SearchParamSection>
+    //       <SearchForm
+    //         onSubmit={(e) =>
+    //           submitHandler(e, `http://localhost:8090/${userrole}/updateSub`)
+    //         }
+    //       >
+    //         <TeacherInputTabContainer>
+    //           <InputContainerComponent
+    //             value={data.subjectId}
+    //             objKey={"subjectId"}
+    //             width={"100%"}
+    //             handler={dataChangeHandler}
+    //             name={"subid"}
+    //             icon={FaOrcid}
+    //             isRequired={true}
+    //             labelText={"Provide SubId for subject to be updated:"}
+    //           ></InputContainerComponent>
+    //         </TeacherInputTabContainer>
+    //         <div
+    //           style={{
+    //             display: "flex",
+    //             justifyContent: "center",
+    //             alignItems: "center",
+    //           }}
+    //         >
+    //           <h3>Only fill the fields you wish to update data:</h3>
+    //         </div>
+    //         <TeacherInputTabContainer>
+    //           <InputContainerComponent
+    //             value={data.subjectName}
+    //             objKey={"subjectName"}
+    //             width={"33.3%"}
+    //             handler={dataChangeHandler}
+    //             name={"subname"}
+    //             icon={LuBookA}
+    //             isRequired={true}
+    //             labelText={"Provide subject name:"}
+    //           ></InputContainerComponent>
+    //           <InputContainerComponent
+    //             value={data.subjectCredit}
+    //             objKey={"subjectCredit"}
+    //             width={"33.3%"}
+    //             handler={dataChangeHandler}
+    //             name={"credits"}
+    //             icon={IoIosRibbon}
+    //             labelText={"Provide new credit:"}
+    //           ></InputContainerComponent>
+    //           <InputContainerComponent
+    //             value={data.subjectStd}
+    //             objKey={"subjectStd"}
+    //             width={"33.3%"}
+    //             handler={dataChangeHandler}
+    //             name={"subLevel"}
+    //             icon={RiBookShelfLine}
+    //             labelText={"Provide updated grade:"}
+    //           ></InputContainerComponent>
+    //         </TeacherInputTabContainer>
+    //         <ButtonContainer>
+    //           <StyledButton type="submit">Submit</StyledButton>
+    //         </ButtonContainer>
+    //       </SearchForm>
+    //     </SearchParamSection>
+    //   </SearchBoxSection>
+    //   {displayData !== undefined && displayData !== null ? (
+    //     <SearchOutputSection>
+    //       {typeof displayData === "string" ? (
+    //         <div style={{ padding: "10px" }}>{displayData}</div>
+    //       ) : (
+    //         <></>
+    //       )}
+    //     </SearchOutputSection>
+    //   ) : (
+    //     <></>
+    //   )}
+    // </div>
+    <AllComponentsContainer>
+      <ToastContainer />
+      <HeadingComponent position={"top"}>
+        <PageHeading>
+          Edit subject
+          <UnderlineComponent />
+        </PageHeading>
+      </HeadingComponent>
+      <HeadingComponent position={"bottom"}>
+        <p className="subHeading">
+          Update the subject's details here |{" "}
+          <a href="/app/teacher/displaySubject" style={{ color: "#008cffff" }}>
+            {" "}
+            Go back to veiw subject list
+          </a>
+        </p>
+      </HeadingComponent>
+
+      <ContentContainers elements={"single"} usage={"nongrid"}>
+        <InputContainerComponent
+          value={data.subjectId}
+          objKey={"subjectId"}
+          width={"100%"}
+          handler={dataChangeHandler}
+          name={"subid"}
+          icon={FaOrcid}
+          isRequired={true}
+          labelText={"Provide SubId for subject to be updated:"}
+        ></InputContainerComponent>
+
+        <ButtonElement
+          bgcol={"default"}
+          border={"default"}
+          textcol={"default"}
+          hovercol={"default"}
+          onClick={() => searchSubject()}
+        >
+          Search
+        </ButtonElement>
+      </ContentContainers>
+
+      <LineBreak />
+      {isValid ? (
+        <div>
+          <HeadingComponent position={"top"}>
+            <PageHeading>Only fill the fields you wish to update:</PageHeading>
+          </HeadingComponent>
+          <ContentContainers
+            elements={"multiple"}
+            style={{ marginTop: "1rem" }}
           >
-            <TeacherInputTabContainer>
-              <InputContainerComponent
-                value={data.subjectId}
-                objKey={"subjectId"}
-                width={"100%"}
-                handler={dataChangeHandler}
-                name={"subid"}
-                icon={FaOrcid}
-                isRequired={true}
-                labelText={"Provide SubId for subject to be updated:"}
-              ></InputContainerComponent>
-            </TeacherInputTabContainer>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <h3>Only fill the fields you wish to update data:</h3>
-            </div>
-            <TeacherInputTabContainer>
+            <GridContainer>
               <InputContainerComponent
                 value={data.subjectName}
                 objKey={"subjectName"}
-                width={"33.3%"}
+                width={"auto"}
                 handler={dataChangeHandler}
                 name={"subname"}
                 icon={LuBookA}
-                isRequired={true}
                 labelText={"Provide subject name:"}
               ></InputContainerComponent>
               <InputContainerComponent
                 value={data.subjectCredit}
                 objKey={"subjectCredit"}
-                width={"33.3%"}
+                width={"auto"}
                 handler={dataChangeHandler}
                 name={"credits"}
                 icon={IoIosRibbon}
@@ -137,30 +276,67 @@ export const SubEditTabComp = () => {
               <InputContainerComponent
                 value={data.subjectStd}
                 objKey={"subjectStd"}
-                width={"33.3%"}
+                width={"auto"}
                 handler={dataChangeHandler}
                 name={"subLevel"}
                 icon={RiBookShelfLine}
                 labelText={"Provide updated grade:"}
               ></InputContainerComponent>
-            </TeacherInputTabContainer>
-            <ButtonContainer>
-              <StyledButton type="submit">Submit</StyledButton>
-            </ButtonContainer>
-          </SearchForm>
-        </SearchParamSection>
-      </SearchBoxSection>
-      {displayData !== undefined && displayData !== null ? (
-        <SearchOutputSection>
-          {typeof displayData === "string" ? (
-            <div style={{ padding: "10px" }}>{displayData}</div>
-          ) : (
-            <></>
-          )}
-        </SearchOutputSection>
+            </GridContainer>
+          </ContentContainers>
+          <ContentContainers
+            elements={"multiple"}
+            style={{ marginTop: "1rem" }}
+          >
+            <GridLayers style={{ width: "100%" }}>
+              <ButtonElement
+                style={{ width: "50%" }}
+                bgcol={"default"}
+                border={"default"}
+                textcol={"default"}
+                hovercol={"default"}
+                type="submit"
+                onClick={(e) =>
+                  submitHandler(
+                    e,
+                    `http://localhost:8090/${userrole}/updateSub`
+                  )
+                }
+              >
+                Update Subject
+              </ButtonElement>
+              <GridLayers style={{ width: "48%", margin: "0" }}>
+                <ButtonElement
+                  style={{ width: "48%" }}
+                  bgcol={"transparent"}
+                  border={"1px solid #b5b5b5af"}
+                  textcol={"green"}
+                  hovercol={"#dcfff487"}
+                  onClick={() => {
+                    setInitialData();
+                    navigate("/app/teacher/editSubject");
+                  }}
+                >
+                  Cancel
+                </ButtonElement>
+                <ButtonElement
+                  style={{ width: "48%" }}
+                  bgcol={"transparent"}
+                  border={"1px solid #b5b5b5af"}
+                  textcol={"red"}
+                  hovercol={"#ffd3d3af"}
+                  type="reset"
+                  onClick={() => setInitialData()}
+                >
+                  Reset
+                </ButtonElement>
+              </GridLayers>
+            </GridLayers>
+          </ContentContainers>
+        </div>
       ) : (
         <></>
       )}
-    </div>
+    </AllComponentsContainer>
   );
 };

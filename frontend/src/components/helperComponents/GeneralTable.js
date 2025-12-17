@@ -14,17 +14,22 @@ const TableComp = styled.table`
 `;
 const TableTrEntry = styled.tr`
   background-color: ${(props) =>
-    props.isEven === 0 ? "#d7d8fe9c" : "#f7e7fc81"};
+    props.iseven === 0 ? "#d7d8fe9c" : "#f7e7fc81"};
   text-align: center;
 `;
 const TableThEntry = styled.th`
   background-color: #6366f1;
   color: white;
+  height: 30px;
   font-weight: normal;
+  svg {
+    font-size: small;
+  }
 `;
 const TableTdEntry = styled.td`
   text-align: center;
 `;
+
 export const GeneralTableComponent = ({ data, columnDefinition }) => {
   const finalData = useMemo(() => data, [data]);
   const finalColumnDef = useMemo(() => columnDefinition, [columnDefinition]);
@@ -57,12 +62,12 @@ export const GeneralTableComponent = ({ data, columnDefinition }) => {
                       colElem.column.columnDef.header,
                       colElem.getContext()
                     )}
-                    {colElem?.column.getIsSorted() === "asc" ? (
+                    {colElem.column.getIsSorted() === "asc" ? (
                       <FaArrowUpAZ />
                     ) : (
                       ""
                     )}
-                    {colElem?.column.getIsSorted() === "desc" ? (
+                    {colElem.column.getIsSorted() === "desc" ? (
                       <FaArrowUpZA />
                     ) : (
                       ""
@@ -77,7 +82,7 @@ export const GeneralTableComponent = ({ data, columnDefinition }) => {
       <tbody>
         {tableInstance.getRowModel().rows.map((rowElem, i) => {
           return (
-            <TableTrEntry isEven={i % 2} id={i} key={i}>
+            <TableTrEntry iseven={i % 2} id={i} key={i}>
               {rowElem.getVisibleCells().map((cellElem, i) => {
                 return (
                   <TableTdEntry key={i}>

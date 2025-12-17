@@ -70,9 +70,12 @@ export const Navbar = () => {
           )}
 
           {role === "teacher" || role === "admin" ? (
-            <StyledNavbarTabs>
-              Students <FaAngleUp style={{ verticalAlign: "middle" }} />
-              <StyledNavbarSubTabs>
+            <StyledNavbarTabs
+              onClick={() => handleNavigation("displayStudent")}
+            >
+              Students
+              <FaAngleUp style={{ verticalAlign: "middle" }} />
+              {/* <StyledNavbarSubTabs>
                 <NavbarTabs onClick={() => handleNavigation("displayStudent")}>
                   Display Student
                 </NavbarTabs>
@@ -88,7 +91,7 @@ export const Navbar = () => {
                 <NavbarTabs onClick={() => handleNavigation("deleteStudent")}>
                   Delete Student
                 </NavbarTabs>
-              </StyledNavbarSubTabs>
+              </StyledNavbarSubTabs> */}
             </StyledNavbarTabs>
           ) : (
             <></>
@@ -120,9 +123,11 @@ export const Navbar = () => {
             <></>
           )}
           {role === "teacher" || role === "admin" ? (
-            <StyledNavbarTabs>
+            <StyledNavbarTabs
+              onClick={() => handleNavigation("displaySubject")}
+            >
               Subjects <FaAngleUp style={{ verticalAlign: "middle" }} />
-              <StyledNavbarSubTabs>
+              {/* <StyledNavbarSubTabs>
                 <NavbarTabs onClick={() => handleNavigation("displaySubject")}>
                   List Subject
                 </NavbarTabs>
@@ -149,7 +154,7 @@ export const Navbar = () => {
                 ) : (
                   <></>
                 )}
-              </StyledNavbarSubTabs>
+              </StyledNavbarSubTabs> */}
             </StyledNavbarTabs>
           ) : (
             <></>

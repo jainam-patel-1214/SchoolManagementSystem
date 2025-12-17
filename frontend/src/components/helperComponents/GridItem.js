@@ -56,11 +56,13 @@ export const GridLayers = styled.div`
 
 export const GridItemComponent = ({
   index,
-  grNo,
+  objectId,
   password,
   name,
   grade,
   section,
+  credits,
+  isStudent,
   delete: deleteHandler,
 }) => {
   const navigate = useNavigate();
@@ -72,8 +74,18 @@ export const GridItemComponent = ({
         <HeaderData>
           <h4>{name}</h4>
           <div>
-            {grNo !== "" ? <p>Student ID:&nbsp;{grNo}</p> : <></>}
-            {password !== "" ? <p>Password:&nbsp;{password}</p> : <></>}
+            {objectId !== "" ? (
+              <p>
+                {isStudent ? "Student ID:" : "Subject ID"}&nbsp;{objectId}
+              </p>
+            ) : (
+              <></>
+            )}
+            {password !== "" && isStudent ? (
+              <p>Password:&nbsp;{password}</p>
+            ) : (
+              <></>
+            )}
           </div>
         </HeaderData>
       </ContentContainers>
@@ -86,14 +98,25 @@ export const GridItemComponent = ({
             <h4>{grade}</h4>
           </HeaderData>
         </ContentContainers>
-        <ContentContainers>
-          <HeaderData>
-            <div>
-              <p>SECTION</p>
-            </div>
-            <h4>{section}</h4>
-          </HeaderData>
-        </ContentContainers>
+        {isStudent ? (
+          <ContentContainers>
+            <HeaderData>
+              <div>
+                <p>SECTION</p>
+              </div>
+              <h4>{section}</h4>
+            </HeaderData>
+          </ContentContainers>
+        ) : (
+          <ContentContainers>
+            <HeaderData>
+              <div>
+                <p>CREDITS</p>
+              </div>
+              <h4>{credits}</h4>
+            </HeaderData>
+          </ContentContainers>
+        )}
       </GridLayers>
       <GridLayers>
         <ButtonElement
@@ -113,7 +136,11 @@ export const GridItemComponent = ({
             textcol={"green"}
             hovercol={"#dcfff487"}
             type="button"
-            onClick={() => navigate(`/app/teacher/editStudent/${grNo}`)}
+            onClick={() => {
+              isStudent
+                ? navigate(`/app/teacher/editStudent/${objectId}`)
+                : navigate(`/app/teacher/editSubject/${objectId}`);
+            }}
           >
             Edit
           </ButtonElement>
@@ -124,12 +151,17 @@ export const GridItemComponent = ({
             textcol={"red"}
             hovercol={"#ffd3d3af"}
             type="button"
-            onClick={() =>
-              deleteHandler(
-                `http://localhost:8090/${userrole}/delStudent`,
-                Number(grNo)
-              )
-            }
+            onClick={() => {
+              isStudent
+                ? deleteHandler(
+                    `http://localhost:8090/${userrole}/delStudent`,
+                    Number(objectId)
+                  )
+                : deleteHandler(
+                    `http://localhost:8090/${userrole}/delSubject`,
+                    Number(objectId)
+                  );
+            }}
           >
             Delete
           </ButtonElement>

@@ -48,7 +48,10 @@ function ProjectRouter() {
 
         <Route path="displaySubject" element={<DisplaySubTabComp />}></Route>
         <Route path="addSubject" element={<SubAddTabComp />}></Route>
-        <Route path="editSubject" element={<SubEditTabComp />}></Route>
+        <Route path="editSubject" element={<SubEditTabComp />}>
+          <Route index element={<SubEditTabComp />} />
+          <Route path=":id" element={<SubEditTabComp />}></Route>
+        </Route>
         <Route path="deleteSubject" element={<SubDelTabComp />}></Route>
 
         <Route path="enterMarks" element={<AddMarkTab />}></Route>

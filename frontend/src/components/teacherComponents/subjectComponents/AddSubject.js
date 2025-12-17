@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   GradeValidation,
   GrNoOrSubIdValidation,
@@ -6,23 +6,27 @@ import {
 import { fetchApi } from "../../../utils/fetchApiCode";
 import { ErrorToast, Toaster } from "../../../utils/toasterCode";
 import { toast, ToastContainer } from "react-toastify";
-import {
-  SearchBoxSection,
-  SearchForm,
-  SearchOutputSection,
-  SearchParamSection,
-} from "../../studentComponents/SchoolResult";
-import { ButtonContainer, TeacherInputTabContainer } from "../StudentsTab";
 import { FaOrcid } from "react-icons/fa6";
 import { RiBookShelfLine } from "react-icons/ri";
 import { IoIosRibbon } from "react-icons/io";
 import { LuBookA } from "react-icons/lu";
-import { StyledButton } from "../../../styled-components/StyledButton";
 import { roleExtractor } from "../../../utils/roleExtractor";
 import { InputContainerComponent } from "../../helperComponents/InputContainer";
-import { PageHeading } from "../../../styled-components/HelperStyledComponents";
+import {
+  AllComponentsContainer,
+  ButtonElement,
+  ContentContainers,
+  GridContainer,
+  HeadingComponent,
+  PageHeading,
+  UnderlineComponent,
+} from "../../../styled-components/HelperStyledComponents";
+import { LineBreak } from "../../../styled-components/LineBreak";
+import { GridLayers } from "../../helperComponents/GridItem";
+import { useNavigate } from "react-router-dom";
 
 export const SubAddTabComp = () => {
+  const navigate = useNavigate();
   const userrole = roleExtractor(window.location.pathname);
   const initState = {
     subjectId: "",
@@ -38,9 +42,21 @@ export const SubAddTabComp = () => {
       [key]: value,
     }));
   };
-
-  const submitHandler = async (e, apiUrl) => {
+  const setInitialData = () => {
+    setData(initState);
+  };
+  const createSubjectHandler = async (e, apiUrl) => {
     e.preventDefault();
+    if (
+      data.subjectCredit === "" ||
+      data.subjectId === "" ||
+      data.subjectName === "" ||
+      data.subjectStd === "" ||
+      data.subjectCredit === null
+    ) {
+      ErrorToast("Please fill all the fields");
+      return;
+    }
     if (!GradeValidation(Number(data.subjectStd))) {
       ErrorToast("invalid grade. Allowed range is 1 - 12");
       return;
@@ -77,91 +93,211 @@ export const SubAddTabComp = () => {
       ErrorToast(err, toast);
     } finally {
       setData(initState);
-      e.target.reset();
     }
   };
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
 
   return (
-    <div>
-      <PageHeading>Create new Subject:</PageHeading>
-      <SearchBoxSection>
-        <ToastContainer />
-        <SearchParamSection>
-          <SearchForm
-            onSubmit={(e) =>
-              submitHandler(e, `http://localhost:8090/${userrole}/createSub`)
+    <AllComponentsContainer>
+      <ToastContainer />
+      <HeadingComponent position={"top"}>
+        <PageHeading>
+          New Subject Addition
+          <UnderlineComponent />
+        </PageHeading>
+      </HeadingComponent>
+      <HeadingComponent position={"bottom"}>
+        <p className="subHeading">
+          Create a subject which would be considered from now |{" "}
+          <a href="/app/teacher/displaySubject" style={{ color: "#008cffff" }}>
+            {" "}
+            Go back to veiw subject list
+          </a>
+        </p>
+      </HeadingComponent>
+
+      <ContentContainers elements={"single"} usage={"nongrid"}>
+        <InputContainerComponent
+          value={data.subjectId}
+          objKey={"subjectId"}
+          width={"100%"}
+          handler={dataChangeHandler}
+          name={"subId"}
+          isRequired={true}
+          icon={FaOrcid}
+          labelText={"Provide unique ID for subject you wish to create:"}
+        ></InputContainerComponent>
+      </ContentContainers>
+
+      <LineBreak />
+
+      <HeadingComponent position={"top"}>
+        <PageHeading>
+          Ensure all required information below is filled in accurately:
+        </PageHeading>
+      </HeadingComponent>
+      <ContentContainers elements={"multiple"} style={{ marginTop: "1rem" }}>
+        <GridContainer>
+          <InputContainerComponent
+            value={data.subjectName}
+            objKey={"subjectName"}
+            width={"auto"}
+            handler={dataChangeHandler}
+            name={"subName"}
+            isRequired={true}
+            icon={LuBookA}
+            labelText={"Assign name to subject:"}
+          ></InputContainerComponent>
+          <InputContainerComponent
+            value={data.subjectStd}
+            objKey={"subjectStd"}
+            width={"auto"}
+            handler={dataChangeHandler}
+            isRequired={true}
+            name={"grade"}
+            icon={RiBookShelfLine}
+            labelText={"Provide subject's level:"}
+          ></InputContainerComponent>
+          <InputContainerComponent
+            value={data.subjectCredit}
+            objKey={"subjectCredit"}
+            width={"auto"}
+            handler={dataChangeHandler}
+            isRequired={true}
+            name={"credits"}
+            icon={IoIosRibbon}
+            labelText={"Assign subject's credits:"}
+          ></InputContainerComponent>
+        </GridContainer>
+      </ContentContainers>
+      <ContentContainers elements={"multiple"} style={{ marginTop: "1rem" }}>
+        <GridLayers style={{ width: "100%" }}>
+          <ButtonElement
+            style={{ width: "50%" }}
+            bgcol={"default"}
+            border={"default"}
+            textcol={"default"}
+            hovercol={"default"}
+            type="submit"
+            onClick={(e) =>
+              createSubjectHandler(
+                e,
+                `http://localhost:8090/${userrole}/createSub`
+              )
             }
           >
-            <TeacherInputTabContainer>
-              <InputContainerComponent
-                value={data.subjectId}
-                objKey={"subjectId"}
-                width={"100%"}
-                handler={dataChangeHandler}
-                name={"subid"}
-                icon={FaOrcid}
-                isRequired={true}
-                labelText={"Provide SubId for new subject:"}
-              ></InputContainerComponent>
-            </TeacherInputTabContainer>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
+            Create Subject
+          </ButtonElement>
+          <GridLayers style={{ width: "48%", margin: "0" }}>
+            <ButtonElement
+              style={{ width: "48%" }}
+              bgcol={"transparent"}
+              border={"1px solid #b5b5b5af"}
+              textcol={"green"}
+              hovercol={"#dcfff487"}
+              onClick={() => {
+                setInitialData();
+                navigate("/app/teacher/displaySubject");
               }}
             >
-              <h3>Fill further mendatory details below:</h3>
-            </div>
-            <TeacherInputTabContainer>
-              <InputContainerComponent
-                value={data.subjectName}
-                objKey={"subjectName"}
-                width={"33.3%"}
-                handler={dataChangeHandler}
-                name={"subname"}
-                icon={LuBookA}
-                isRequired={true}
-                labelText={"Provide subject name:"}
-              ></InputContainerComponent>
-              <InputContainerComponent
-                value={data.subjectCredit}
-                objKey={"subjectCredit"}
-                width={"33.3%"}
-                handler={dataChangeHandler}
-                name={"credits"}
-                icon={IoIosRibbon}
-                isRequired={true}
-                labelText={"Provide subject credit:"}
-              ></InputContainerComponent>
-              <InputContainerComponent
-                value={data.subjectStd}
-                objKey={"subjectStd"}
-                width={"33.3%"}
-                handler={dataChangeHandler}
-                name={"subLevel"}
-                icon={RiBookShelfLine}
-                isRequired={true}
-                labelText={"Provide subject's grade:"}
-              ></InputContainerComponent>
-            </TeacherInputTabContainer>
-            <ButtonContainer>
-              <StyledButton type="submit">Submit</StyledButton>
-            </ButtonContainer>
-          </SearchForm>
-        </SearchParamSection>
-      </SearchBoxSection>
-      {displayData !== undefined && displayData !== null ? (
-        <SearchOutputSection>
-          {typeof displayData === "string" ? (
-            <div style={{ padding: "10px" }}>{displayData}</div>
-          ) : (
-            <></>
-          )}
-        </SearchOutputSection>
-      ) : (
-        <></>
-      )}
-    </div>
+              Cancel
+            </ButtonElement>
+            <ButtonElement
+              style={{ width: "48%" }}
+              bgcol={"transparent"}
+              border={"1px solid #b5b5b5af"}
+              textcol={"red"}
+              hovercol={"#ffd3d3af"}
+              onClick={() => setInitialData()}
+            >
+              Reset
+            </ButtonElement>
+          </GridLayers>
+        </GridLayers>
+      </ContentContainers>
+    </AllComponentsContainer>
+    // <div>
+    //   <PageHeading>Create new Subject:</PageHeading>
+    //   <SearchBoxSection>
+    //     <ToastContainer />
+    //     <SearchParamSection>
+    //       <SearchForm
+    //         onSubmit={(e) =>
+    //           submitHandler(e, `http://localhost:8090/${userrole}/createSub`)
+    //         }
+    //       >
+    //         <TeacherInputTabContainer>
+    //           <InputContainerComponent
+    //             value={data.subjectId}
+    //             objKey={"subjectId"}
+    //             width={"100%"}
+    //             handler={dataChangeHandler}
+    //             name={"subid"}
+    //             icon={FaOrcid}
+    //             isRequired={true}
+    //             labelText={"Provide SubId for new subject:"}
+    //           ></InputContainerComponent>
+    //         </TeacherInputTabContainer>
+    //         <div
+    //           style={{
+    //             display: "flex",
+    //             justifyContent: "center",
+    //             alignItems: "center",
+    //           }}
+    //         >
+    //           <h3>Fill further mendatory details below:</h3>
+    //         </div>
+    //         <TeacherInputTabContainer>
+    //           <InputContainerComponent
+    //             value={data.subjectName}
+    //             objKey={"subjectName"}
+    //             width={"33.3%"}
+    //             handler={dataChangeHandler}
+    //             name={"subname"}
+    //             icon={LuBookA}
+    //             isRequired={true}
+    //             labelText={"Provide subject name:"}
+    //           ></InputContainerComponent>
+    //           <InputContainerComponent
+    //             value={data.subjectCredit}
+    //             objKey={"subjectCredit"}
+    //             width={"33.3%"}
+    //             handler={dataChangeHandler}
+    //             name={"credits"}
+    //             icon={IoIosRibbon}
+    //             isRequired={true}
+    //             labelText={"Provide subject credit:"}
+    //           ></InputContainerComponent>
+    //           <InputContainerComponent
+    //             value={data.subjectStd}
+    //             objKey={"subjectStd"}
+    //             width={"33.3%"}
+    //             handler={dataChangeHandler}
+    //             name={"subLevel"}
+    //             icon={RiBookShelfLine}
+    //             isRequired={true}
+    //             labelText={"Provide subject's grade:"}
+    //           ></InputContainerComponent>
+    //         </TeacherInputTabContainer>
+    //         <ButtonContainer>
+    //           <StyledButton type="submit">Submit</StyledButton>
+    //         </ButtonContainer>
+    //       </SearchForm>
+    //     </SearchParamSection>
+    //   </SearchBoxSection>
+    //   {displayData !== undefined && displayData !== null ? (
+    //     <SearchOutputSection>
+    //       {typeof displayData === "string" ? (
+    //         <div style={{ padding: "10px" }}>{displayData}</div>
+    //       ) : (
+    //         <></>
+    //       )}
+    //     </SearchOutputSection>
+    //   ) : (
+    //     <></>
+    //   )}
+    // </div>
   );
 };

@@ -168,7 +168,7 @@ export const StudentAddComponent = () => {
             name={"password"}
             isRequired={true}
             icon={FaKey}
-            labelText={"Assign new password:"}
+            labelText={"Assign new 8 digit password:"}
           ></InputContainerComponent>
           <InputContainerComponent
             value={data.name}

@@ -24,11 +24,24 @@ import { LineBreak } from "../../../styled-components/LineBreak";
 import { GridItemComponent } from "../../helperComponents/GridItem";
 import { MdTableRows, MdWindow } from "react-icons/md";
 import styled from "styled-components";
-// import { PendingBtnComp } from "../../adminComponents/Home";
 import { createColumnHelper } from "@tanstack/react-table";
 import { GeneralTableComponent } from "../../helperComponents/GeneralTable";
 import { useNavigate } from "react-router-dom";
 import { roleExtractor } from "../../../utils/roleExtractor";
+
+export const DataContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  svg {
+    font-size: x-large;
+    padding: 5px;
+    border-radius: 10px;
+    background-color: #ddddddac;
+    margin: 0 5px;
+    cursor: pointer;
+  }
+`;
 
 export const StudentDataComponent = () => {
   const [filterData, setFilterData] = useState(null);
@@ -76,20 +89,6 @@ export const StudentDataComponent = () => {
   useEffect(() => {
     fetchData();
   }, []);
-
-  const DataContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    svg {
-      font-size: x-large;
-      padding: 5px;
-      border-radius: 10px;
-      background-color: #ddddddac;
-      margin: 0 5px;
-      cursor: pointer;
-    }
-  `;
   const navigate = useNavigate();
   const columnHelper = createColumnHelper();
   const columns = [
@@ -237,12 +236,14 @@ export const StudentDataComponent = () => {
                 <GridItemComponent
                   key={i}
                   index={i}
-                  grNo={value.grNo}
+                  objectId={value.grNo}
                   password={value.password}
                   name={value.studentName}
                   grade={value.grade}
                   section={value.section}
                   delete={deleteStudentHandler}
+                  credits={""}
+                  isStudent={true}
                 ></GridItemComponent>
               ))}
             </GridContainer>
