@@ -49,9 +49,13 @@ export const ContentContainers = styled.div`
     props.elements === "single" ? "row" : "column"};
   justify-content: ${(props) =>
     props.usage === "ingrid" ? "flex-start" : "space-evenly"};
-  /* align-items: ${(props) =>
-    props.usage === "ingrid" ? "center" : "flex-start"}; */
-  align-items: center;
+  align-items: ${({ usage }) =>
+    usage === "ingrid"
+      ? "center"
+      : usage === "nongrid"
+      ? "center"
+      : "flex-start"};
+  /* align-items: center; */
 `;
 export const UnderlineComponent = styled.div`
   background-color: #914dffff;

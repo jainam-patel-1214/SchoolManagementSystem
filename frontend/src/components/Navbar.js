@@ -160,17 +160,17 @@ export const Navbar = () => {
             <></>
           )}
           {role === "teacher" || role === "admin" ? (
-            <StyledNavbarTabs>
+            <StyledNavbarTabs onClick={() => handleNavigation("enterMarks")}>
               Exams <FaAngleUp style={{ verticalAlign: "middle" }} />
-              <StyledNavbarSubTabs>
-                <NavbarTabs onClick={() => handleNavigation("enterMarks")}>
+              {/* <StyledNavbarSubTabs>
+                <NavbarTabs>
                   Add Marks
                 </NavbarTabs>
 
                 <NavbarTabs onClick={() => handleNavigation("editMarks")}>
                   Edit Marks
                 </NavbarTabs>
-              </StyledNavbarSubTabs>
+              </StyledNavbarSubTabs> */}
             </StyledNavbarTabs>
           ) : (
             <></>

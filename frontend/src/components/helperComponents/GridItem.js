@@ -76,7 +76,7 @@ export const GridItemComponent = ({
           <div>
             {objectId !== "" ? (
               <p>
-                {isStudent ? "Student ID:" : "Subject ID"}&nbsp;{objectId}
+                {isStudent ? "Student ID:" : "Subject ID:"}&nbsp;{objectId}
               </p>
             ) : (
               <></>
