@@ -48,6 +48,7 @@ export const GridItemBox = styled.div`
 `;
 export const GridLayers = styled.div`
   display: flex;
+  width: 100%;
   flex-direction: row;
   margin-top: 10px;
   justify-content: space-between;
@@ -138,8 +139,8 @@ export const GridItemComponent = ({
             type="button"
             onClick={() => {
               isStudent
-                ? navigate(`/app/teacher/editStudent/${objectId}`)
-                : navigate(`/app/teacher/editSubject/${objectId}`);
+                ? navigate(`/app/${userrole}/editStudent/${objectId}`)
+                : navigate(`/app/${userrole}/editSubject/${objectId}`);
             }}
           >
             Edit

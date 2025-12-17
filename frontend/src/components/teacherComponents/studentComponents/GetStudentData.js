@@ -55,7 +55,7 @@ export const StudentDataComponent = () => {
     try {
       setIsLoading(true);
       const res = await fetchApi(
-        `http://localhost:8090/teacher/allStudents`,
+        `http://localhost:8090/${userrole}/allStudents`,
         "GET",
         {}
       );
@@ -129,7 +129,7 @@ export const StudentDataComponent = () => {
             border={"1px solid #b5b5b5af"}
             textcol={"green"}
             hovercol={"#dcfff487"}
-            onClick={() => navigate(`/app/teacher/editStudent/${v.grNo}`)}
+            onClick={() => navigate(`/app/${userrole}/editStudent/${v.grNo}`)}
           >
             Edit
           </ButtonElement>
@@ -174,7 +174,7 @@ export const StudentDataComponent = () => {
       <HeadingComponent position={"bottom"}>
         <p className="subHeading">
           List of all the students within the school |{" "}
-          <a href="/app/teacher/addStudent" style={{ color: "#00c200" }}>
+          <a href={`/app/${userrole}/addStudent`} style={{ color: "#00c200" }}>
             {" "}
             Create a new student here
           </a>

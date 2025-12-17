@@ -14,6 +14,17 @@ import { fetchApi } from "../../utils/fetchApiCode";
 import { LabelValuePair } from "../helperComponents/LabelValuePair";
 import { ReactTableComponent } from "../helperComponents/ResultTable";
 import { roleExtractor } from "../../utils/roleExtractor";
+import {
+  AllComponentsContainer,
+  ContentContainers,
+  HeadingComponent,
+  InfoBox,
+  InfoBoxContainer,
+  PageHeading,
+  UnderlineComponent,
+} from "../../styled-components/HelperStyledComponents";
+import { GridLayers } from "../helperComponents/GridItem";
+import { GeneralTableComponent } from "../helperComponents/GeneralTable";
 export const TeacherHome = () => {
   const [displayData, setDisplayData] = useState({});
   const [displayReport, setDisplayReport] = useState({});
@@ -73,23 +84,82 @@ export const TeacherHome = () => {
         <>Fetching the data</>
       ) : (
         <div>
-          <StudentHomeSection>
+          <AllComponentsContainer>
             <ToastContainer />
-            <ProfileComponent>
-              <ProfileTabs>
+            <InfoBoxContainer>
+              <InfoBox>
                 <LabelValuePair
                   label={"Id:"}
                   value={displayData.Id}
                 ></LabelValuePair>
+              </InfoBox>
+              <InfoBox>
                 <LabelValuePair
                   label={"Name:"}
                   value={displayData.Name}
                 ></LabelValuePair>
+              </InfoBox>
+              <InfoBox>
                 <LabelValuePair
                   label={"Password:"}
                   value={displayData.Password}
                 ></LabelValuePair>
-              </ProfileTabs>
+              </InfoBox>
+              <InfoBox>
+                <LabelValuePair
+                  label={"Total Students:"}
+                  value={"data coming soon"}
+                ></LabelValuePair>
+              </InfoBox>
+            </InfoBoxContainer>
+            <ContentContainers
+              elements={"multiple"}
+              style={{ marginTop: "1rem" }}
+            >
+              <HeadingComponent position={"top"}>
+                <PageHeading>Class & Subject information:</PageHeading>
+              </HeadingComponent>
+              <GridLayers>
+                <LabelValuePair
+                  width={"23%"}
+                  infobox={true}
+                  label={"Subject allocated Id:"}
+                  value={displayData.SubId}
+                ></LabelValuePair>
+                <LabelValuePair
+                  width={"23%"}
+                  infobox={true}
+                  label={"Class Allocated:"}
+                  value={displayData.Std + displayData.Section}
+                ></LabelValuePair>
+                <LabelValuePair
+                  width={"40%"}
+                  infobox={true}
+                  label={"Subject Name:"}
+                  value={displayData.SubName}
+                ></LabelValuePair>
+              </GridLayers>
+            </ContentContainers>
+            <ContentContainers
+              elements={"multiple"}
+              style={{ marginTop: "1rem" }}
+            >
+              <HeadingComponent position={"top"}>
+                <PageHeading>
+                  Performance among peers
+                  <UnderlineComponent />
+                </PageHeading>
+              </HeadingComponent>
+              <GeneralTableComponent
+                marginTopRequired={"1rem"}
+                data={displayReport}
+                columnDefinition={columnDef}
+              ></GeneralTableComponent>
+            </ContentContainers>
+          </AllComponentsContainer>
+          {/* <StudentHomeSection>
+            <ToastContainer />
+            <ProfileComponent>
               <ProfileTabs>
                 <LabelValuePair
                   label={"Subject allocated Id:"}
@@ -98,10 +168,6 @@ export const TeacherHome = () => {
                 <LabelValuePair
                   label={"Class Allocated:"}
                   value={displayData.Std + displayData.Section}
-                ></LabelValuePair>
-                <LabelValuePair
-                  label={"Total Students:"}
-                  value={"data coming soon"}
                 ></LabelValuePair>
               </ProfileTabs>
             </ProfileComponent>
@@ -119,7 +185,7 @@ export const TeacherHome = () => {
             ) : (
               <>No performance report</>
             )}
-          </PerformanceWindow>
+          </PerformanceWindow> */}
         </div>
       )}
     </>

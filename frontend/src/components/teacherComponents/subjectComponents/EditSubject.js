@@ -135,7 +135,10 @@ export const SubEditTabComp = () => {
       <HeadingComponent position={"bottom"}>
         <p className="subHeading">
           Update the subject's details here |{" "}
-          <a href="/app/teacher/displaySubject" style={{ color: "#008cffff" }}>
+          <a
+            href={`/app/${userrole}/displaySubject`}
+            style={{ color: "#008cffff" }}
+          >
             {" "}
             Go back to veiw subject list
           </a>
@@ -235,7 +238,7 @@ export const SubEditTabComp = () => {
                   hovercol={"#dcfff487"}
                   onClick={() => {
                     setInitialData();
-                    navigate("/app/teacher/editSubject");
+                    navigate(`/app/${userrole}/editSubject`);
                   }}
                 >
                   Cancel

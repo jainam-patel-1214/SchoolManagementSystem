@@ -67,7 +67,7 @@ export const DisplaySubTabComp = () => {
     try {
       setIsLoading(true);
       const res = await fetchApi(
-        `http://localhost:8090/teacher/allSubjects`,
+        `http://localhost:8090/${userrole}/allSubjects`,
         "GET",
         {}
       );
@@ -136,7 +136,9 @@ export const DisplaySubTabComp = () => {
             border={"1px solid #b5b5b5af"}
             textcol={"green"}
             hovercol={"#dcfff487"}
-            onClick={() => navigate(`/app/teacher/editSubject/${v.subjectId}`)}
+            onClick={() =>
+              navigate(`/app/${userrole}/editSubject/${v.subjectId}`)
+            }
           >
             Edit
           </ButtonElement>
@@ -181,7 +183,7 @@ export const DisplaySubTabComp = () => {
       <HeadingComponent position={"bottom"}>
         <p className="subHeading">
           List of all the subjects within the school |{" "}
-          <a href="/app/teacher/addSubject" style={{ color: "#00c200" }}>
+          <a href={`/app/${userrole}/addSubject`} style={{ color: "#00c200" }}>
             {" "}
             Create a new subject here
           </a>

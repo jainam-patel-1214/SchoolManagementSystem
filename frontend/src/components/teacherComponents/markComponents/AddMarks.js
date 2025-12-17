@@ -117,12 +117,15 @@ export const AddMarkTab = () => {
       <HeadingComponent position={"bottom"}>
         <p className="subHeading">
           Add academic performance record for students |{" "}
-          <a href="/app/teacher/displayStudent" style={{ color: "#008cffff" }}>
+          <a
+            href={`/app/${userrole}/displayStudent`}
+            style={{ color: "#008cffff" }}
+          >
             {" "}
             View particular student's performance
           </a>{" "}
           |{" "}
-          <a href="/app/teacher/editMarks" style={{ color: "#00c200" }}>
+          <a href={`/app/${userrole}/editMarks`} style={{ color: "#00c200" }}>
             {" "}
             Update student marks record here
           </a>
@@ -213,115 +216,5 @@ export const AddMarkTab = () => {
         </GridLayers>
       </ContentContainers>
     </AllComponentsContainer>
-    // <div>
-    //   <PageHeading>Enter new marks record for student:</PageHeading>
-    //   <SearchBoxSection>
-    //     <ToastContainer />
-    //     <SearchParamSection>
-    //       <SearchForm
-    //         onSubmit={(e) => {
-    //           submitHandler(e, `http://localhost:8090/${userrole}/enterMarks`);
-    //         }}
-    //       >
-    //         <TeacherInputTabContainer>
-    //           <InputContainer style={{ width: "50%" }}>
-    //             <FaCircleUser style={{ fontSize: "xx-large" }} />
-    //             <InputWrapper>
-    //               <FloatingInput
-    //                 type="number"
-    //                 value={data.grNo || ""}
-    //                 required
-    //                 name="grno"
-    //                 placeholder=" "
-    //                 maxLength={8}
-    //                 onChange={(e) => {
-    //                   dataChangeHandler("grNo", Number(e.target.value));
-    //                 }}
-    //               />
-    //               <FloatingLabel>Provide Gr NO for student:</FloatingLabel>
-    //             </InputWrapper>
-    //           </InputContainer>
-    //           <InputContainer style={{ width: "50%" }}>
-    //             <FaOrcid style={{ fontSize: "xx-large" }} />
-    //             <InputWrapper>
-    //               <FloatingInput
-    //                 type="number"
-    //                 value={data.subId || ""}
-    //                 required
-    //                 name="sid"
-    //                 placeholder=" "
-    //                 maxLength={8}
-    //                 onChange={(e) => {
-    //                   dataChangeHandler("subId", Number(e.target.value));
-    //                 }}
-    //               />
-    //               <FloatingLabel>Provide subject id here:</FloatingLabel>
-    //             </InputWrapper>
-    //           </InputContainer>
-    //         </TeacherInputTabContainer>
-    //         <div
-    //           style={{
-    //             display: "flex",
-    //             justifyContent: "center",
-    //             alignItems: "center",
-    //           }}
-    //         >
-    //           <h3>Fill further details for the student's score:</h3>
-    //         </div>
-    //         <TeacherInputTabContainer>
-    //           <InputContainer style={{ width: "50%" }}>
-    //             <PiExamFill style={{ fontSize: "xx-large" }} />
-    //             <InputWrapper>
-    //               <FloatingInput
-    //                 type="number"
-    //                 value={data.theoryMarks || ""}
-    //                 name="tm"
-    //                 required
-    //                 placeholder=" "
-    //                 onChange={(e) => {
-    //                   dataChangeHandler("theoryMarks", Number(e.target.value));
-    //                 }}
-    //               />
-    //               <FloatingLabel>Provide theoritical marks:</FloatingLabel>
-    //             </InputWrapper>
-    //           </InputContainer>
-    //           <InputContainer style={{ width: "50%" }}>
-    //             <PiExamLight style={{ fontSize: "xx-large" }} />
-    //             <InputWrapper>
-    //               <FloatingInput
-    //                 type="number"
-    //                 value={data.practicalMarks || ""}
-    //                 name="pm"
-    //                 required
-    //                 placeholder=" "
-    //                 onChange={(e) => {
-    //                   dataChangeHandler(
-    //                     "practicalMarks",
-    //                     Number(e.target.value)
-    //                   );
-    //                 }}
-    //               />
-    //               <FloatingLabel>Provide practical marks:</FloatingLabel>
-    //             </InputWrapper>
-    //           </InputContainer>
-    //         </TeacherInputTabContainer>
-    //         <ButtonContainer>
-    //           <StyledButton type="submit">Submit</StyledButton>
-    //         </ButtonContainer>
-    //       </SearchForm>
-    //     </SearchParamSection>
-    //   </SearchBoxSection>
-    //   {displayData !== undefined && displayData !== null ? (
-    //     <SearchOutputSection>
-    //       {typeof displayData === "string" ? (
-    //         <div style={{ padding: "10px" }}>{displayData}</div>
-    //       ) : (
-    //         <></>
-    //       )}
-    //     </SearchOutputSection>
-    //   ) : (
-    //     <></>
-    //   )}
-    // </div>
   );
 };

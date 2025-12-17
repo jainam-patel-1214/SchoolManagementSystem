@@ -146,7 +146,7 @@ export const StudentEditComponent = () => {
     } finally {
       setInitialData();
       setIsValid(false);
-      navigate("/app/teacher/editStudent");
+      navigate(`/app/${userrole}/editStudent`);
     }
   };
 
@@ -167,7 +167,10 @@ export const StudentEditComponent = () => {
       <HeadingComponent position={"bottom"}>
         <p className="subHeading">
           Update the student's details here |{" "}
-          <a href="/app/teacher/displayStudent" style={{ color: "#008cffff" }}>
+          <a
+            href={`/app/${userrole}/displayStudent`}
+            style={{ color: "#008cffff" }}
+          >
             {" "}
             Go back to veiw student list
           </a>
@@ -275,7 +278,7 @@ export const StudentEditComponent = () => {
                   hovercol={"#dcfff487"}
                   onClick={() => {
                     setInitialData();
-                    navigate("/app/teacher/editStudent");
+                    navigate(`/app/${userrole}/editStudent`);
                   }}
                 >
                   Cancel

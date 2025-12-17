@@ -1,28 +1,31 @@
-import {
-  SearchBoxSection,
-  SearchForm,
-  SearchParamSection,
-} from "../studentComponents/SchoolResult";
-import { toast, ToastContainer } from "react-toastify";
-import { StyledButton } from "../../styled-components/StyledButton";
 import { useState } from "react";
-import { TeacherInputTabContainer } from "./StudentsTab";
 import { MdRateReview } from "react-icons/md";
 import { FaCircleUser } from "react-icons/fa6";
 import { fetchApi } from "../../utils/fetchApiCode";
-import { ErrorToast, Toaster } from "../../utils/toasterCode";
+import { ErrorToast, SuccessToast, Toaster } from "../../utils/toasterCode";
 import { GrNoOrSubIdValidation } from "../../utils/validations";
 import { roleExtractor } from "../../utils/roleExtractor";
 import { InputContainerComponent } from "../helperComponents/InputContainer";
-import { PageHeading } from "../../styled-components/HelperStyledComponents";
+import {
+  AllComponentsContainer,
+  ButtonElement,
+  ContentContainers,
+  HeadingComponent,
+  PageHeading,
+  UnderlineComponent,
+} from "../../styled-components/HelperStyledComponents";
+import { LineBreak } from "../../styled-components/LineBreak";
+import { GridLayers } from "../helperComponents/GridItem";
+import { ToastContainer } from "react-toastify";
 
 export const ReviewTab = () => {
   const userrole = roleExtractor(window.location.pathname);
   const initState = {
-    grNo: 0,
+    grNo: "",
     comment: "",
   };
   const [data, setData] = useState(initState);
+  const [isValid, setIsValid] = useState(false);
   const dataChangeHandler = (key, value) => {
     setData((prevdata) => ({
       ...prevdata,
@@ -33,9 +36,13 @@ export const ReviewTab = () => {
     e.preventDefault();
     const errobj = {
       grno: { condition: false, message: "invalid gr no" },
-      comment: { condition: false, message: "Please provide a comment to add" },
+      comment: {
+        condition: false,
+        message:
+          "Please provide a comment within minimum 8 to maximum 250 characters",
+      },
     };
-    if (data?.comment?.length <= 0) {
+    if (data.comment.length <= 8 || data.comment.length > 255) {
       ErrorToast(errobj.comment.message);
       return;
     }
@@ -46,52 +53,130 @@ export const ReviewTab = () => {
     try {
       const apiUrl = `http://localhost:8090/${userrole}/addReview`;
       const res = await fetchApi(apiUrl, "POST", {
-        grNo: data?.grNo,
-        comment: data?.comment,
+        grNo: Number(data.grNo),
+        comment: data.comment,
       });
-      Toaster(res, toast);
+      Toaster(res);
     } catch (err) {
-      ErrorToast(err, toast);
+      ErrorToast(err);
     } finally {
-      setData(initState);
-      e.target.reset();
+      setInitialData();
     }
   };
 
-  return (
-    <div>
-      <PageHeading>Give review to student:</PageHeading>
+  const searchStudent = async () => {
+    try {
+      const isValidRes = await fetchApi(
+        `http://localhost:8090/${userrole}/isValidStudent/${data.grNo}`,
+        "GET",
+        {}
+      );
+      if (isValidRes.output) {
+        SuccessToast("Student Exists you wish to give review, go on!!");
+        setIsValid(true);
+      }
+    } catch (error) {
+      ErrorToast("Student doesnot exists you wish to edit, try again!!");
+      setIsValid(false);
+      console.log("no student found");
+    }
+  };
+  const setInitialData = () => {
+    setData(initState);
+    setIsValid(false);
+  };
 
-      <SearchBoxSection>
-        <ToastContainer />
-        <SearchParamSection>
-          <SearchForm onSubmit={(e) => sumbitHandler(e)}>
-            <TeacherInputTabContainer>
-              <InputContainerComponent
-                width={"50%"}
-                value={data.grNo}
-                objKey={"grNo"}
-                handler={dataChangeHandler}
-                name={"grNo"}
-                labelText={"Provide Gr NO. of the student:"}
-                icon={FaCircleUser}
-                isRequired={true}
-              ></InputContainerComponent>
-              <InputContainerComponent
-                width={"50%"}
-                value={data.comment}
-                objKey={"comment"}
-                handler={dataChangeHandler}
-                name={"comment"}
-                labelText={"Enter. a review:"}
-                icon={MdRateReview}
-                isRequired={true}
-              ></InputContainerComponent>
-            </TeacherInputTabContainer>
-            <StyledButton>Submit</StyledButton>
-          </SearchForm>
-        </SearchParamSection>
-      </SearchBoxSection>
-    </div>
+  return (
+    <AllComponentsContainer>
+      <ToastContainer />
+      <HeadingComponent position={"top"}>
+        <PageHeading>
+          Add review
+          <UnderlineComponent />
+        </PageHeading>
+      </HeadingComponent>
+      <ContentContainers elements={"single"} usage={"nongrid"}>
+        <InputContainerComponent
+          value={data.grNo}
+          objKey={"grNo"}
+          width={"100%"}
+          handler={dataChangeHandler}
+          name={"grNo"}
+          isRequired={true}
+          icon={FaCircleUser}
+          labelText={"Provide Gr NO for student you wish to give review:"}
+        ></InputContainerComponent>
+        <ButtonElement
+          bgcol={"default"}
+          border={"default"}
+          textcol={"default"}
+          hovercol={"default"}
+          onClick={() => searchStudent()}
+        >
+          Search
+        </ButtonElement>
+      </ContentContainers>
+      <LineBreak />
+      {isValid ? (
+        <div>
+          <HeadingComponent position={"top"}>
+            <PageHeading>Provide a review which fits best:</PageHeading>
+          </HeadingComponent>
+          <HeadingComponent position={"bottom"}>
+            <p className="subHeading" style={{ color: "red" }}>
+              You can only add one review per student
+            </p>
+          </HeadingComponent>
+          <ContentContainers elements={"single"} usage={"nongrid"}>
+            <InputContainerComponent
+              width={"100%"}
+              value={data.comment}
+              objKey={"comment"}
+              handler={dataChangeHandler}
+              name={"comment"}
+              labelText={"Enter a review (250 characters max):"}
+              icon={MdRateReview}
+              isRequired={true}
+            ></InputContainerComponent>
+          </ContentContainers>
+          <ContentContainers
+            elements={"multiple"}
+            style={{ marginTop: "1rem" }}
+          >
+            <GridLayers style={{ width: "100%" }}>
+              <ButtonElement
+                style={{ width: "48%" }}
+                bgcol={"default"}
+                border={"default"}
+                textcol={"default"}
+                hovercol={"default"}
+                type="submit"
+                onClick={(e) =>
+                  sumbitHandler(
+                    e,
+                    `http://localhost:8090/${userrole}/updateStud`
+                  )
+                }
+              >
+                Add Review
+              </ButtonElement>
+              <ButtonElement
+                style={{ width: "48%" }}
+                bgcol={"transparent"}
+                border={"1px solid #b5b5b5af"}
+                textcol={"red"}
+                hovercol={"#ffd3d3af"}
+                type="reset"
+                onClick={() => setInitialData()}
+              >
+                Clear Fields
+              </ButtonElement>
+            </GridLayers>
+          </ContentContainers>
+        </div>
+      ) : (
+        <></>
+      )}
+    </AllComponentsContainer>
   );
 };

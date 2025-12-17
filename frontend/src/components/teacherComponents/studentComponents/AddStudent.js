@@ -131,7 +131,10 @@ export const StudentAddComponent = () => {
       <HeadingComponent position={"bottom"}>
         <p className="subHeading">
           Create a student profile and get them started right away |{" "}
-          <a href="/app/teacher/displayStudent" style={{ color: "#008cffff" }}>
+          <a
+            href={`/app/${userrole}/displayStudent`}
+            style={{ color: "#008cffff" }}
+          >
             {" "}
             Go back to veiw student list
           </a>
@@ -226,7 +229,7 @@ export const StudentAddComponent = () => {
               hovercol={"#dcfff487"}
               onClick={() => {
                 setInitialData();
-                navigate("/app/teacher/displayStudent");
+                navigate(`/app/${userrole}/displayStudent`);
               }}
             >
               Cancel

@@ -11,6 +11,8 @@ const TableComp = styled.table`
   width: 45%;
   height: fit-content;
   border: none;
+  margin-top: ${({ marginTopRequired }) =>
+    marginTopRequired !== "" ? marginTopRequired : "0"};
 `;
 const TableTrEntry = styled.tr`
   background-color: ${(props) =>
@@ -30,7 +32,11 @@ const TableTdEntry = styled.td`
   text-align: center;
 `;
 
-export const GeneralTableComponent = ({ data, columnDefinition }) => {
+export const GeneralTableComponent = ({
+  data,
+  columnDefinition,
+  marginTopRequired,
+}) => {
   const finalData = useMemo(() => data, [data]);
   const finalColumnDef = useMemo(() => columnDefinition, [columnDefinition]);
   const [sorting, setSorting] = useState([]);
@@ -46,7 +52,7 @@ export const GeneralTableComponent = ({ data, columnDefinition }) => {
     getSortedRowModel: getSortedRowModel(),
   });
   return (
-    <TableComp style={{ width: "100%" }}>
+    <TableComp style={{ width: "100%" }} marginTopRequired={marginTopRequired}>
       <thead style={{ backgroundColor: "pink" }}>
         {tableInstance.getHeaderGroups().map((headElem, i) => {
           return (
