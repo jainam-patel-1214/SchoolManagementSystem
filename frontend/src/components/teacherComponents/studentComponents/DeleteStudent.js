@@ -29,7 +29,7 @@ export const StudentDelComponent = () => {
   const [grNo, setGrNo] = useState(0);
   const [displayData, setDisplayData] = useState(null);
 
-  const sumbitHandler = async (e, apiUrl) => {
+  const submitHandler = async (e, apiUrl) => {
     e.preventDefault();
     if (!GrNoOrSubIdValidation(grNo)) {
       ErrorToast("invalid gr no");
@@ -59,7 +59,7 @@ export const StudentDelComponent = () => {
         <SearchParamSection>
           <SearchForm
             onSubmit={(e) =>
-              sumbitHandler(e, `http://localhost:8090/${userrole}/delStudent`)
+              submitHandler(e, `http://localhost:8090/${userrole}/delStudent`)
             }
           >
             <TeacherInputTabContainer>

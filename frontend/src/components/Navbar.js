@@ -75,23 +75,6 @@ export const Navbar = () => {
             >
               Students
               <FaAngleUp style={{ verticalAlign: "middle" }} />
-              {/* <StyledNavbarSubTabs>
-                <NavbarTabs onClick={() => handleNavigation("displayStudent")}>
-                  Display Student
-                </NavbarTabs>
-
-                <NavbarTabs onClick={() => handleNavigation("addStudent")}>
-                  Add Student
-                </NavbarTabs>
-
-                <NavbarTabs onClick={() => handleNavigation("editStudent")}>
-                  Edit Student
-                </NavbarTabs>
-
-                <NavbarTabs onClick={() => handleNavigation("deleteStudent")}>
-                  Delete Student
-                </NavbarTabs>
-              </StyledNavbarSubTabs> */}
             </StyledNavbarTabs>
           ) : (
             <></>
@@ -127,34 +110,6 @@ export const Navbar = () => {
               onClick={() => handleNavigation("displaySubject")}
             >
               Subjects <FaAngleUp style={{ verticalAlign: "middle" }} />
-              {/* <StyledNavbarSubTabs>
-                <NavbarTabs onClick={() => handleNavigation("displaySubject")}>
-                  List Subject
-                </NavbarTabs>
-
-                <NavbarTabs onClick={() => handleNavigation("addSubject")}>
-                  Add Subject
-                </NavbarTabs>
-
-                <NavbarTabs onClick={() => handleNavigation("editSubject")}>
-                  Edit Subject
-                </NavbarTabs>
-
-                <NavbarTabs onClick={() => handleNavigation("deleteSubject")}>
-                  Delete Subject
-                </NavbarTabs>
-                {role === "admin" ? (
-                  <>
-                    <NavbarTabs
-                      onClick={() => handleNavigation("setSubjectLimit")}
-                    >
-                      Subject Limit
-                    </NavbarTabs>
-                  </>
-                ) : (
-                  <></>
-                )}
-              </StyledNavbarSubTabs> */}
             </StyledNavbarTabs>
           ) : (
             <></>
@@ -162,15 +117,6 @@ export const Navbar = () => {
           {role === "teacher" || role === "admin" ? (
             <StyledNavbarTabs onClick={() => handleNavigation("enterMarks")}>
               Exams <FaAngleUp style={{ verticalAlign: "middle" }} />
-              {/* <StyledNavbarSubTabs>
-                <NavbarTabs>
-                  Add Marks
-                </NavbarTabs>
-
-                <NavbarTabs onClick={() => handleNavigation("editMarks")}>
-                  Edit Marks
-                </NavbarTabs>
-              </StyledNavbarSubTabs> */}
             </StyledNavbarTabs>
           ) : (
             <></>
@@ -182,10 +128,6 @@ export const Navbar = () => {
               <StyledNavbarSubTabs>
                 <NavbarTabs onClick={() => handleNavigation("/app/student")}>
                   Account
-                </NavbarTabs>
-
-                <NavbarTabs onClick={() => handleNavigation("searchSubject")}>
-                  Subjects
                 </NavbarTabs>
               </StyledNavbarSubTabs>
             ) : (

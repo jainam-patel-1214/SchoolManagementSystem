@@ -47,7 +47,7 @@ export const StudentAddComponent = () => {
     setData(initState);
   };
 
-  const sumbitHandler = async (e, apiUrl) => {
+  const submitHandler = async (e, apiUrl) => {
     e.preventDefault();
     const errobj = {
       grno: { condition: false, message: "invalid gr no" },
@@ -215,7 +215,7 @@ export const StudentAddComponent = () => {
             hovercol={"default"}
             type="submit"
             onClick={(e) =>
-              sumbitHandler(e, `http://localhost:8090/${userrole}/createStud`)
+              submitHandler(e, `http://localhost:8090/${userrole}/createStud`)
             }
           >
             Create Student

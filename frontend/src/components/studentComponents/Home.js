@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import { ToastContainer } from "react-toastify";
 import {
@@ -12,16 +12,19 @@ import getCookie from "../../utils/getCookie";
 import { GradeCalculator } from "../../utils/gradeCalculator";
 import { FaFileDownload } from "react-icons/fa";
 import { DownloadBtn } from "../../styled-components/StyledButton";
-import { SearchOutputSection } from "./SchoolResult";
 import { fetchApi } from "../../utils/fetchApiCode";
 import { ErrorToast } from "../../utils/toasterCode";
-import { ReactTableComponent } from "../helperComponents/ResultTable";
 import { LabelValuePair } from "../helperComponents/LabelValuePair";
 import {
   InfoBox,
   InfoBoxContainer,
   AllComponentsContainer,
+  ContentContainers,
+  HeadingComponent,
+  PageHeading,
+  UnderlineComponent,
 } from "../../styled-components/HelperStyledComponents";
+import { GeneralTableComponent } from "../helperComponents/GeneralTable";
 
 export const StudentHomeSection = styled.div`
   display: flex;
@@ -128,7 +131,7 @@ export const StudentHomePage = () => {
           sum += Number(e.practicalMM) + Number(e.theoryMM);
         });
         const res = GradeCalculator(
-          (sum * 100) / (100 * displayReport?.MarkInfo?.length)
+          (sum * 100) / (100 * report.output?.MarkInfo?.length)
         );
         setTotalMsg(res);
       } catch (err) {
@@ -171,79 +174,94 @@ export const StudentHomePage = () => {
               ></LabelValuePair>
             </InfoBox>
           </InfoBoxContainer>
-          {typeof displayData?.SubList !== "string" &&
+          {typeof displayData.SubList !== "string" &&
           displayData.SubList?.length > 0 ? (
-            <ReactTableComponent
-              data={displayData.SubList}
-              columnDefinition={subjectColumnDef}
-              heading={"Your Modules"}
-            ></ReactTableComponent>
+            <>
+              <HeadingComponent position={"top"}>
+                <PageHeading>
+                  Your Modules
+                  <UnderlineComponent />
+                </PageHeading>
+              </HeadingComponent>
+              <ContentContainers
+                elements={"multiple"}
+                style={{ marginTop: "1rem" }}
+              >
+                <GeneralTableComponent
+                  marginTopRequired={"1rem"}
+                  data={displayData.SubList}
+                  columnDefinition={subjectColumnDef}
+                ></GeneralTableComponent>
+              </ContentContainers>
+            </>
           ) : (
             <>No Subject Info Found</>
           )}
           {displayReport !== undefined && displayReport !== null ? (
-            <SearchOutputSection>
-              <PerformanceWindow ref={performanceComponent}>
-                <h2>Your Report Card</h2>
-                <div style={{ border: "1px solid black", width: "100%" }}>
-                  <div
-                    style={{
-                      border: "1px solid black",
-                      margin: "10px",
-                      padding: "1rem",
-                      display: "flex",
-                      justifyContent: "center",
-                      flexDirection: "column",
-                      alignItems: "center",
-                    }}
-                  >
-                    <h3>Faculty reviews</h3>
-                    {displayReport.CommentInfo?.length > 0 ? (
-                      <>
-                        <CommentsContainer>
-                          {displayReport.CommentInfo.map((element, index) => {
-                            return (
-                              <div
-                                key={index}
-                                style={{
-                                  display: "flex",
-                                  flexDirection: "row",
-                                  justifyContent: "space-between",
-                                  margin: "3px 0",
-                                }}
-                              >
-                                <CommentTeacher>
-                                  <h3>{element.tName}</h3>
-                                  <p>ID:{element.tId}</p>
-                                </CommentTeacher>
-                                <CommentContent>
-                                  <FaRegCommentDots />
-                                  <p>Review:&nbsp;{element.comment}</p>
-                                </CommentContent>
-                              </div>
-                            );
-                          })}
-                        </CommentsContainer>
-                      </>
-                    ) : (
-                      <>No review made by any teacher</>
-                    )}
-                  </div>
-                  {typeof displayReport.MarkInfo !== "string" &&
-                  displayReport.MarkInfo?.length > 0 &&
-                  displayReport !== null &&
-                  displayReport !== undefined ? (
-                    <ReactTableComponent
-                      data={displayReport.MarkInfo}
-                      columnDefinition={marksColumnDef}
-                      heading={"Academic Performance"}
-                    ></ReactTableComponent>
-                  ) : (
-                    <>No entry of marks scroed in exam by any teacher</>
-                  )}
-                </div>
-              </PerformanceWindow>
-            </SearchOutputSection>
+            <div>
+              <HeadingComponent position={"top"}>
+                <PageHeading>
+                  Your Report Card
+                  <UnderlineComponent />
+                </PageHeading>
+              </HeadingComponent>
+              <ContentContainers
+                elements={"multiple"}
+                style={{ marginTop: "1rem" }}
+              >
+                <HeadingComponent position={"top"}>
+                  <PageHeading>Faculty Reviews:</PageHeading>
+                </HeadingComponent>
+                {displayReport.CommentInfo?.length > 0 ? (
+                  <CommentsContainer>
+                    {displayReport.CommentInfo.map((element, index) => {
+                      return (
+                        <div
+                          key={index}
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            margin: "3px 0",
+                          }}
+                        >
+                          <CommentTeacher>
+                            <h3>Name: {element.tName}</h3>
+                            <p>Teacher ID:{element.tId}</p>
+                          </CommentTeacher>
+                          <CommentContent>
+                            <FaRegCommentDots />
+                            <p>Review:&nbsp;{element.comment}</p>
+                          </CommentContent>
+                        </div>
+                      );
+                    })}
+                  </CommentsContainer>
+                ) : (
+                  <>No review made by any teacher</>
+                )}
+              </ContentContainers>
+              <ContentContainers
+                elements={"multiple"}
+                style={{ marginTop: "1rem" }}
+              >
+                <HeadingComponent position={"top"}>
+                  <PageHeading>Performance Overview:</PageHeading>
+                </HeadingComponent>
+                {typeof displayReport.MarkInfo !== "string" &&
+                displayReport.MarkInfo?.length > 0 &&
+                displayReport !== null &&
+                displayReport !== undefined ? (
+                  <GeneralTableComponent
+                    marginTopRequired={"1rem"}
+                    data={displayReport.MarkInfo}
+                    columnDefinition={marksColumnDef}
+                  ></GeneralTableComponent>
+                ) : (
+                  <>No entry of marks scroed in exam by any teacher</>
+                )}
+              </ContentContainers>
+            </div>
           ) : (
             <></>
           )}

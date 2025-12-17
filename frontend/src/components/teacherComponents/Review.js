@@ -32,7 +32,7 @@ export const ReviewTab = () => {
       [key]: value,
     }));
   };
-  const sumbitHandler = async (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
     const errobj = {
       grno: { condition: false, message: "invalid gr no" },
@@ -152,7 +152,7 @@ export const ReviewTab = () => {
                 hovercol={"default"}
                 type="submit"
                 onClick={(e) =>
-                  sumbitHandler(
+                  submitHandler(
                     e,
                     `http://localhost:8090/${userrole}/updateStud`
                   )

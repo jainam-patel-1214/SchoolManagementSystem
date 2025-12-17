@@ -81,7 +81,7 @@ export const EditMarkTab = () => {
     }
   };
 
-  const sumbitHandler = async (e, apiUrl) => {
+  const submitHandler = async (e, apiUrl) => {
     e.preventDefault();
     const errobj = {
       grno: { condition: false, message: "invalid gr no" },
@@ -248,7 +248,7 @@ export const EditMarkTab = () => {
                 hovercol={"default"}
                 type="submit"
                 onClick={(e) =>
-                  sumbitHandler(
+                  submitHandler(
                     e,
                     `http://localhost:8090/${userrole}/updateMarks`
                   )

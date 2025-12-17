@@ -47,7 +47,7 @@ export const CommentTeacher = styled.div`
   padding: 5px;
   h3 {
     margin: 0;
-    font-weight: bold;
+    font-weight: 500;
   }
   p {
     margin: 0;
