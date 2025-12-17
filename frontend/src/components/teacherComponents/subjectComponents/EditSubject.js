@@ -110,9 +110,9 @@ export const SubEditTabComp = () => {
         }
       }
       res = await fetchApi(apiUrl, "PUT", bodyObj);
-      Toaster(res, toast);
+      Toaster(res);
     } catch (err) {
-      ErrorToast(err, toast);
+      ErrorToast(err);
     } finally {
       setInitialData();
     }

@@ -38,13 +38,13 @@ export const StudentDelComponent = () => {
     try {
       let res;
       res = await fetchApi(apiUrl, "DELETE", { grNo: grNo });
-      Toaster(res, toast);
+      Toaster(res);
       if (res.output) {
         setDisplayData(res.output);
         return;
       }
     } catch (err) {
-      ErrorToast(err, toast);
+      ErrorToast(err);
     } finally {
       setGrNo(null);
       e.target.reset();

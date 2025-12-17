@@ -65,7 +65,7 @@ export const StudentDataComponent = () => {
         return;
       }
     } catch (err) {
-      ErrorToast(err, toast);
+      ErrorToast(err);
     } finally {
       setIsLoading(false);
     }
@@ -78,12 +78,12 @@ export const StudentDataComponent = () => {
       }
       let res;
       res = await fetchApi(apiUrl, "DELETE", { grNo: grNo });
-      Toaster(res, toast);
+      Toaster(res);
       if (res.output) {
         fetchData();
       }
     } catch (err) {
-      ErrorToast(err, toast);
+      ErrorToast(err);
     }
   };
   useEffect(() => {

@@ -94,9 +94,9 @@ export const AddMarkTab = () => {
         }
       }
       res = await fetchApi(apiUrl, "POST", bodyObj);
-      Toaster(res, toast);
+      Toaster(res);
     } catch (err) {
-      ErrorToast(err, toast);
+      ErrorToast(err);
     } finally {
       setInitialData();
     }

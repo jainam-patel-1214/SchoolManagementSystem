@@ -43,7 +43,7 @@ export const TeacherHome = () => {
         setDisplayData(dataRes.output);
         setDisplayReport(reportRes.output);
       } catch (err) {
-        ErrorToast(err, toast);
+        ErrorToast(err);
       } finally {
         setIsLoading(false);
       }
@@ -150,42 +150,17 @@ export const TeacherHome = () => {
                   <UnderlineComponent />
                 </PageHeading>
               </HeadingComponent>
-              <GeneralTableComponent
-                marginTopRequired={"1rem"}
-                data={displayReport}
-                columnDefinition={columnDef}
-              ></GeneralTableComponent>
+              {Object.keys(displayReport).length > 0 ? (
+                <GeneralTableComponent
+                  marginTopRequired={"1rem"}
+                  data={displayReport}
+                  columnDefinition={columnDef}
+                ></GeneralTableComponent>
+              ) : (
+                <div> No Performance Report available</div>
+              )}
             </ContentContainers>
           </AllComponentsContainer>
-          {/* <StudentHomeSection>
-            <ToastContainer />
-            <ProfileComponent>
-              <ProfileTabs>
-                <LabelValuePair
-                  label={"Subject allocated Id:"}
-                  value={displayData.SubId}
-                ></LabelValuePair>
-                <LabelValuePair
-                  label={"Class Allocated:"}
-                  value={displayData.Std + displayData.Section}
-                ></LabelValuePair>
-              </ProfileTabs>
-            </ProfileComponent>
-          </StudentHomeSection>
-          <PerformanceWindow>
-            {displayReport?.length > 0 &&
-            typeof displayReport !== "string" &&
-            displayReport !== null &&
-            displayReport !== undefined > 0 ? (
-              <ReactTableComponent
-                data={displayReport}
-                heading={"Performance among peers"}
-                columnDefinition={columnDef}
-              ></ReactTableComponent>
-            ) : (
-              <>No performance report</>
-            )}
-          </PerformanceWindow> */}
         </div>
       )}
     </>

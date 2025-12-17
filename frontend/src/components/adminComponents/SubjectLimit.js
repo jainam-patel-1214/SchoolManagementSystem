@@ -44,9 +44,9 @@ export const SubjectLimit = () => {
         "POST",
         payload
       );
-      Toaster(res, toast);
+      Toaster(res);
     } catch (error) {
-      ErrorToast(error, toast);
+      ErrorToast(error);
     } finally {
       setData({ grade: 0, limit: 0 });
       e.target.reset();

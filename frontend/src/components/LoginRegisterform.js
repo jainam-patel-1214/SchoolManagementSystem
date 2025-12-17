@@ -139,7 +139,7 @@ export const LoginRegisterForm = () => {
         "POST",
         body
       );
-      Toaster(res, toast);
+      Toaster(res);
     } catch (error) {
       ErrorToast(error, toast);
       console.log(error);
@@ -169,7 +169,7 @@ export const LoginRegisterForm = () => {
       const res = await fetchApi("http://localhost:8090/login", "POST", body);
       console.log("login body", res);
 
-      Toaster(res, toast);
+      Toaster(res);
       CookieSetter(data.userId, res.username, res.output, res.role);
       if (res.role === "student") {
         navigate("/app/student");

@@ -117,13 +117,13 @@ export const CreateTeacherComponent = () => {
       }
       bodyObj["role"] = "teacher";
       res = await fetchApi(apiUrl, "POST", bodyObj);
-      Toaster(res, toast);
+      Toaster(res);
       if (res.output) {
         setDisplayData(res.output);
         return;
       }
     } catch (err) {
-      ErrorToast(err, toast);
+      ErrorToast(err);
     } finally {
       setData(initState);
       e.target.reset();

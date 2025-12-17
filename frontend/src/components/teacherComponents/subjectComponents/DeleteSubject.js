@@ -37,13 +37,13 @@ export const SubDelTabComp = () => {
     try {
       let res;
       res = await fetchApi(apiUrl, "DELETE", { subId: subId });
-      Toaster(res, toast);
+      Toaster(res);
       if (res.output) {
         setDisplayData(res.output);
         return;
       }
     } catch (err) {
-      ErrorToast(err, toast);
+      ErrorToast(err);
     } finally {
       setSubId(null);
       e.target.reset();

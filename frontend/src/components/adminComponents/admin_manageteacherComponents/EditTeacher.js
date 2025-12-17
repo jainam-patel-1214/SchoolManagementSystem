@@ -120,13 +120,13 @@ export const TeacherEditComponent = () => {
         }
       }
       res = await fetchApi(apiUrl, "PUT", bodyObj);
-      Toaster(res, toast);
+      Toaster(res);
       if (res.output) {
         setDisplayData(res.output);
         return;
       }
     } catch (err) {
-      ErrorToast(err, toast);
+      ErrorToast(err);
     } finally {
       if (!errOccured) {
         setData(initState);

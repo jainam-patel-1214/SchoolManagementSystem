@@ -38,13 +38,13 @@ export const TeacherDelComponent = () => {
     try {
       let res;
       res = await fetchApi(apiUrl, "DELETE", { teacherId: teacherId });
-      Toaster(res, toast);
+      Toaster(res);
       if (res.output) {
         setDisplayData(res.output);
         return;
       }
     } catch (err) {
-      ErrorToast(err, toast);
+      ErrorToast(err);
     } finally {
       setTeacherId(null);
       e.target.reset();

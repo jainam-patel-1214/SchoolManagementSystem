@@ -191,14 +191,14 @@ export const SchoolResult = () => {
         "GET",
         {}
       );
-      Toaster(res, toast);
+      Toaster(res);
       if (res.output) {
         setDisplayData(res.output);
       } else {
         setDisplayData(res.error);
       }
     } catch (err) {
-      ErrorToast(err, toast);
+      ErrorToast(err);
     } finally {
       setData(initState);
       e.target.reset();

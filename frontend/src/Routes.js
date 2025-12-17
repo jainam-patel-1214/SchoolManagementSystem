@@ -63,22 +63,16 @@ function ProjectRouter() {
 
         <Route path="displayStudent" element={<StudentDataComponent />}></Route>
         <Route path="addStudent" element={<StudentAddComponent />}></Route>
-        {/* <Route path="editStudent" element={<StudentEditComponent />}></Route> */}
         <Route path="editStudent" element={<StudentEditComponent />}>
           <Route index element={<StudentEditComponent />} />
           <Route path=":id" element={<StudentEditComponent />}></Route>
         </Route>
-        {/* <Route path="deleteStudent" element={<StudentDelComponent />}></Route> */}
-
         <Route path="displaySubject" element={<DisplaySubTabComp />}></Route>
         <Route path="addSubject" element={<SubAddTabComp />}></Route>
-        {/* <Route path="editSubject" element={<SubEditTabComp />}></Route> */}
         <Route path="editSubject" element={<SubEditTabComp />}>
           <Route index element={<SubEditTabComp />} />
           <Route path=":id" element={<SubEditTabComp />}></Route>
         </Route>
-        {/* <Route path="deleteSubject" element={<SubDelTabComp />}></Route> */}
-
         <Route path="setSubjectLimit" element={<SubjectLimit />}></Route>
 
         <Route path="enterMarks" element={<AddMarkTab />}></Route>

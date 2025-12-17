@@ -2,28 +2,14 @@ import { useState, useEffect } from "react";
 import { fetchApi } from "../../../utils/fetchApiCode";
 import { ErrorToast, Toaster } from "../../../utils/toasterCode";
 import { toast, ToastContainer } from "react-toastify";
-import {
-  SearchBoxSection,
-  SearchForm,
-  SearchParamSection,
-} from "../../studentComponents/SchoolResult";
-import {
-  ButtonContainer,
-  InputContainer,
-  TeacherInputTabContainer,
-} from "../StudentsTab";
+import { InputContainer } from "../StudentsTab";
 import { RiBookShelfLine } from "react-icons/ri";
 import {
   FloatingInput,
   FloatingLabel,
   InputWrapper,
 } from "../../../styled-components/InputComp";
-import { StyledButton } from "../../../styled-components/StyledButton";
-import { ReactTableComponent } from "../../helperComponents/ResultTable";
-import {
-  GradeValidation,
-  GrNoOrSubIdValidation,
-} from "../../../utils/validations";
+import { GrNoOrSubIdValidation } from "../../../utils/validations";
 import { roleExtractor } from "../../../utils/roleExtractor";
 import {
   AllComponentsContainer,
@@ -35,7 +21,6 @@ import {
   PageHeading,
   UnderlineComponent,
 } from "../../../styled-components/HelperStyledComponents";
-import { FaCircleUser } from "react-icons/fa6";
 import { LineBreak } from "../../../styled-components/LineBreak";
 import { DataContainer } from "../studentComponents/GetStudentData";
 import { MdTableRows, MdWindow } from "react-icons/md";
@@ -77,7 +62,7 @@ export const DisplaySubTabComp = () => {
         return;
       }
     } catch (err) {
-      ErrorToast(err, toast);
+      ErrorToast(err);
     } finally {
       setIsLoading(false);
     }
@@ -90,12 +75,12 @@ export const DisplaySubTabComp = () => {
       }
       let res;
       res = await fetchApi(apiUrl, "DELETE", { subId: subjectId });
-      Toaster(res, toast);
+      Toaster(res);
       if (res.output) {
         fetchData();
       }
     } catch (err) {
-      ErrorToast(err, toast);
+      ErrorToast(err);
     }
   };
   useEffect(() => {

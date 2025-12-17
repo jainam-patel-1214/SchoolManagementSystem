@@ -52,6 +52,8 @@ export const GeneralTableComponent = ({
     getSortedRowModel: getSortedRowModel(),
   });
   return (
+    // <>
+    //   {Object.keys(data).length > 0 ? (
     <TableComp style={{ width: "100%" }} marginTopRequired={marginTopRequired}>
       <thead style={{ backgroundColor: "pink" }}>
         {tableInstance.getHeaderGroups().map((headElem, i) => {
@@ -104,5 +106,9 @@ export const GeneralTableComponent = ({
         })}
       </tbody>
     </TableComp>
+    //   ) : (
+    //     <div> no data found</div>
+    //   )}
+    // </>
   );
 };
