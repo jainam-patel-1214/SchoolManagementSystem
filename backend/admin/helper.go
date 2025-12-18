@@ -1176,6 +1176,91 @@ func DisplayAllStudents(ctx *gin.Context) {
 	}
 }
 
+func IsValidTeacher(ctx *gin.Context) {
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer db.Close()
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "admin") {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		return
+	} else {
+		tID, _ := strconv.Atoi(ctx.Param("tid"))
+		var amount int
+		err = db.QueryRow("SELECT COUNT(tId) FROM teachers WHERE tId = ?", tID).Scan(&amount)
+		if err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if amount <= 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "teacher not exist"})
+			return
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": "valid teacher"})
+			return
+		}
+	}
+}
+
+func DisplayAllTeachers(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "admin") {
+		fmt.Println("no token found")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+		return
+	} else {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "CANNOT CONNECT TO DB"})
+			return
+		}
+		defer db.Close()
+		type TeacherList struct {
+			Tid      int            `json:"teacherId"`
+			Password string         `json:"teacherPwd"`
+			Name     string         `json:"teacherName"`
+			Grade    sql.NullInt64  `json:"gradeAllocated"`
+			Section  sql.NullString `json:"sectionAllocated"`
+			Subject  sql.NullString `json:"subjectAllocated"`
+			SubId    sql.NullInt64  `json:"subjectId"`
+		}
+		var TeachersData []TeacherList
+		res, err := db.Query("SELECT t.tId,t.tPwd,t.tName,t.stdAllocated,t.sectionAllocated,s.subName,s.subId FROM teachers t LEFT JOIN subjects s ON t.subId = s.subId")
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		defer res.Close()
+
+		for res.Next() {
+			var teacher TeacherList
+
+			err := res.Scan(
+				&teacher.Tid,
+				&teacher.Password,
+				&teacher.Name,
+				&teacher.Grade,
+				&teacher.Section,
+				&teacher.Subject,
+				&teacher.SubId,
+			)
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			TeachersData = append(TeachersData, teacher)
+		}
+		if len(TeachersData) > 0 {
+			ctx.JSON(http.StatusOK, gin.H{"output": TeachersData})
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": "no teachers found"})
+		}
+	}
+}
+
 func DisplayAllSubjects(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || (role != "teacher" && role != "admin") {

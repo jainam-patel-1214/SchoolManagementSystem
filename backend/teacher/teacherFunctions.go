@@ -72,6 +72,63 @@ func IsValidStudent(ctx *gin.Context) {
 		}
 	}
 }
+func IsValidSubject(ctx *gin.Context) {
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer db.Close()
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "teacher" && role != "admin") {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		return
+	} else {
+		studId, _ := strconv.Atoi(ctx.Param("subId"))
+		var amount int
+		err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId = ?", studId).Scan(&amount)
+		if err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if amount <= 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject not exist"})
+			return
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": "valid subject"})
+			return
+		}
+	}
+}
+func DoMarkRecordExists(ctx *gin.Context) {
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer db.Close()
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "teacher" && role != "admin") {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		return
+	} else {
+		studId, _ := strconv.Atoi(ctx.Query("grNo"))
+		subId, _ := strconv.Atoi(ctx.Query("subId"))
+		var amount int
+		err = db.QueryRow("SELECT COUNT(grNo) FROM marks WHERE subId = ? AND grNo=?", subId, studId).Scan(&amount)
+		if err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if amount <= 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject not exist"})
+			return
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": "valid subject"})
+			return
+		}
+	}
+}
 
 func AddStudent(ctx *gin.Context) {
 	db, err := sql.Open("mysql", dsn)
@@ -1059,10 +1116,11 @@ func SelfData(ctx *gin.Context) {
 			Password string
 			Name     string
 			SubId    int
+			SubName  string
 			Std      int
 			Section  string
 		}
-		err = db.QueryRow("SELECT t.tId,t.tPwd,t.tName,t.subId,t.stdAllocated,t.sectionAllocated FROM teachers t WHERE t.tId=?", tid).Scan(&otpt.Id, &otpt.Password, &otpt.Name, &otpt.SubId, &otpt.Std, &otpt.Section)
+		err = db.QueryRow("SELECT t.tId,t.tPwd,t.tName,t.subId,t.stdAllocated,t.sectionAllocated, s.subName FROM teachers t INNER JOIN subjects s ON s.subId = t.subId WHERE t.tId=?", tid).Scan(&otpt.Id, &otpt.Password, &otpt.Name, &otpt.SubId, &otpt.Std, &otpt.Section, &otpt.SubName)
 		if err != nil && err != sql.ErrNoRows {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
