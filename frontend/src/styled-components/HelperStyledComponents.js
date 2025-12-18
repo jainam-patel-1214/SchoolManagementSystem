@@ -55,7 +55,7 @@ export const ContentContainers = styled.div`
       : usage === "nongrid"
       ? "center"
       : "flex-start"};
-  /* align-items: center; */
+  overflow: auto;
 `;
 export const UnderlineComponent = styled.div`
   background-color: #914dffff;

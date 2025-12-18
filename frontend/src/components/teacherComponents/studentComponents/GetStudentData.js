@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { GrNoOrSubIdValidation } from "../../../utils/validations";
+import { GrNoSubIdTeacherIdAdminIdValidation } from "../../../utils/validations";
 import { fetchApi } from "../../../utils/fetchApiCode";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { ErrorToast, Toaster } from "../../../utils/toasterCode";
 import { InputContainer } from "../StudentsTab";
 import { FaCircleUser } from "react-icons/fa6";
@@ -72,7 +72,7 @@ export const StudentDataComponent = () => {
   };
   const deleteStudentHandler = async (apiUrl, grNo) => {
     try {
-      if (!GrNoOrSubIdValidation(grNo)) {
+      if (!GrNoSubIdTeacherIdAdminIdValidation(grNo)) {
         ErrorToast("invalid gr no");
         return;
       }

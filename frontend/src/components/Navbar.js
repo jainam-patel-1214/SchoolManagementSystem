@@ -80,27 +80,10 @@ export const Navbar = () => {
             <></>
           )}
           {role === "admin" ? (
-            <StyledNavbarTabs>
+            <StyledNavbarTabs
+              onClick={() => handleNavigation("displayTeacher")}
+            >
               Teachers <FaAngleUp style={{ verticalAlign: "middle" }} />
-              <StyledNavbarSubTabs>
-                <NavbarTabs onClick={() => handleNavigation("addTeacher")}>
-                  Add Teacher{" "}
-                </NavbarTabs>
-
-                <NavbarTabs onClick={() => handleNavigation("editTeacher")}>
-                  Edit Teacher{" "}
-                </NavbarTabs>
-
-                <NavbarTabs onClick={() => handleNavigation("delTeacher")}>
-                  Delete Teacher{" "}
-                </NavbarTabs>
-
-                <NavbarTabs
-                  onClick={() => handleNavigation("teacherPerformance")}
-                >
-                  Performance
-                </NavbarTabs>
-              </StyledNavbarSubTabs>
             </StyledNavbarTabs>
           ) : (
             <></>

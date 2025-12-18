@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import {
   GradeValidation,
-  GrNoOrSubIdValidation,
+  GrNoSubIdTeacherIdAdminIdValidation,
   PasswordValidation,
   StringValidator,
 } from "../../../utils/validations";
 import { fetchApi } from "../../../utils/fetchApiCode";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { ErrorToast, SuccessToast, Toaster } from "../../../utils/toasterCode";
 import { FaAddressCard, FaCircleUser, FaKey } from "react-icons/fa6";
 import { MdWindow } from "react-icons/md";
@@ -50,32 +50,18 @@ export const StudentEditComponent = () => {
   const { id } = useParams();
   useEffect(() => {
     if (!id) return;
-
-    const checkStudent = async () => {
+    searchStudent(id);
+  }, []);
+  const searchStudent = async (id) => {
+    try {
       const isValidRes = await fetchApi(
         `http://localhost:8090/${userrole}/isValidStudent/${id}`,
         "GET",
         {}
       );
       if (isValidRes.output) {
-        dataChangeHandler("grNo", id);
-        setIsValid(true);
-      } else {
-        ErrorToast("Student does not exist, try again!");
-        setIsValid(false);
-      }
-    };
-    checkStudent();
-  }, []);
-  const searchStudent = async () => {
-    try {
-      const isValidRes = await fetchApi(
-        `http://localhost:8090/${userrole}/isValidStudent/${data.grNo}`,
-        "GET",
-        {}
-      );
-      if (isValidRes.output) {
         SuccessToast("Student Exists you wish to edit, go on!!");
+        dataChangeHandler("grNo", id);
         setIsValid(true);
       }
     } catch (error) {
@@ -101,7 +87,10 @@ export const StudentEditComponent = () => {
       ErrorToast(errobj.password.message);
       return;
     }
-    if (data.grNo !== "" && !GrNoOrSubIdValidation(Number(data.grNo))) {
+    if (
+      data.grNo !== "" &&
+      !GrNoSubIdTeacherIdAdminIdValidation(Number(data.grNo))
+    ) {
       ErrorToast(errobj.grno.message);
       return;
     }
@@ -193,7 +182,7 @@ export const StudentEditComponent = () => {
           border={"default"}
           textcol={"default"}
           hovercol={"default"}
-          onClick={() => searchStudent()}
+          onClick={() => searchStudent(data.grNo)}
         >
           Search
         </ButtonElement>

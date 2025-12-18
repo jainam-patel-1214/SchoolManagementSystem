@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import styled from "styled-components";
 import { ToastContainer } from "react-toastify";
 import {
   CommentContent,
@@ -11,7 +10,6 @@ import { FaRegCommentDots } from "react-icons/fa6";
 import getCookie from "../../utils/getCookie";
 import { GradeCalculator } from "../../utils/gradeCalculator";
 import { FaFileDownload } from "react-icons/fa";
-import { DownloadBtn } from "../../styled-components/StyledButton";
 import { fetchApi } from "../../utils/fetchApiCode";
 import { ErrorToast } from "../../utils/toasterCode";
 import { LabelValuePair } from "../helperComponents/LabelValuePair";
@@ -25,45 +23,22 @@ import {
   UnderlineComponent,
 } from "../../styled-components/HelperStyledComponents";
 import { GeneralTableComponent } from "../helperComponents/GeneralTable";
+import styled from "styled-components";
 
-export const StudentHomeSection = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
-  margin: 1rem;
-`;
-export const StudentInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  margin: 0.5rem;
-`;
-
-export const StudentInfoSegment = styled.div`
-  display: flex;
-  flex-direction: row;
-`;
-
-export const SubInfo = styled.table`
-  width: 45%;
+const DownloadBtn = styled.button`
+  padding: 10px 30px;
+  cursor: pointer;
+  vertical-align: middle;
+  border: none;
+  border-radius: 15px;
+  margin-right: 15px;
+  background-color: #2ad2008a;
+  box-shadow: 10px 10px 20px #9d9d9d82;
   height: fit-content;
-  border: 1px solid black;
-  th {
-    border: 1px solid black;
+  transition: 0.3s ease-in-out;
+  &:hover {
+    background-color: #30f0008a;
   }
-  td {
-    border: 1px solid black;
-  }
-`;
-export const TableEntry = styled.td`
-  text-align: center;
-`;
-
-export const PerformanceWindow = styled.div`
-  display: flex;
-  margin: 10px;
-  flex-direction: column;
-  align-items: center;
 `;
 
 export const StudentHomePage = () => {
@@ -198,7 +173,7 @@ export const StudentHomePage = () => {
             <>No Subject Info Found</>
           )}
           {displayReport !== undefined && displayReport !== null ? (
-            <div>
+            <div ref={performanceComponent}>
               <HeadingComponent position={"top"}>
                 <PageHeading>
                   Your Report Card

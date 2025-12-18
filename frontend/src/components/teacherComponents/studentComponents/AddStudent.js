@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   GradeValidation,
-  GrNoOrSubIdValidation,
+  GrNoSubIdTeacherIdAdminIdValidation,
   PasswordValidation,
   StringValidator,
 } from "../../../utils/validations";
@@ -73,7 +73,7 @@ export const StudentAddComponent = () => {
       ErrorToast(errobj.password.message);
       return;
     }
-    if (!GrNoOrSubIdValidation(data.grNo)) {
+    if (!GrNoSubIdTeacherIdAdminIdValidation(data.grNo)) {
       ErrorToast(errobj.grno.message);
       return;
     }

@@ -30,6 +30,7 @@ const TableThEntry = styled.th`
 `;
 const TableTdEntry = styled.td`
   text-align: center;
+  padding: 0px 10px;
 `;
 
 export const GeneralTableComponent = ({
@@ -92,6 +93,9 @@ export const GeneralTableComponent = ({
           return (
             <TableTrEntry iseven={i % 2} id={i} key={i}>
               {rowElem.getVisibleCells().map((cellElem, i) => {
+                if (cellElem.id.includes("gradeAllocated")) {
+                  console.log(cellElem.id, cellElem.renderValue);
+                }
                 return (
                   <TableTdEntry key={i}>
                     {flexRender(

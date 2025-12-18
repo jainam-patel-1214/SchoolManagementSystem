@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { FaCircleUser, FaOrcid } from "react-icons/fa6";
 import { PiExamFill, PiExamLight } from "react-icons/pi";
 import {
-  GrNoOrSubIdValidation,
+  GrNoSubIdTeacherIdAdminIdValidation,
   PracticalMarksValidation,
   TheoryMarksValidation,
 } from "../../../utils/validations";
@@ -103,11 +103,11 @@ export const EditMarkTab = () => {
       ErrorToast(errobj.practical.message);
       return;
     }
-    if (!GrNoOrSubIdValidation(data.grNo)) {
+    if (!GrNoSubIdTeacherIdAdminIdValidation(data.grNo)) {
       ErrorToast(errobj.grno.message);
       return;
     }
-    if (!GrNoOrSubIdValidation(data.subjectId)) {
+    if (!GrNoSubIdTeacherIdAdminIdValidation(data.subjectId)) {
       ErrorToast(errobj.subjectId.message);
       return;
     }

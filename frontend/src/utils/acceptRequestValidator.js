@@ -1,22 +1,18 @@
 import { ErrorToast } from "./toasterCode";
 import {
   GradeValidation,
-  GrNoOrSubIdValidation,
+  GrNoSubIdTeacherIdAdminIdValidation,
   StringValidator,
 } from "./validations";
 
 export const adminRequestFieldValidator = (data) => {
-  console.log("data here", data);
-
   switch (data.uRole) {
     case "student":
-      if (!GrNoOrSubIdValidation(data.id) || data.id === 0) {
+      if (!GrNoSubIdTeacherIdAdminIdValidation(data.id) || data.id === 0) {
         ErrorToast("invalid gr no/user id provided for student");
         return false;
       }
       if (!GradeValidation(data.std)) {
-        console.log("std validation");
-
         ErrorToast("invalid grade/std provided for student");
         return false;
       }
@@ -24,13 +20,16 @@ export const adminRequestFieldValidator = (data) => {
         ErrorToast("invalid section provided for student");
         return false;
       }
-      break;
+      return true;
     case "teacher":
-      if (!GrNoOrSubIdValidation(data.id) || data.id === 0) {
+      if (!GrNoSubIdTeacherIdAdminIdValidation(data.id) || data.id === 0) {
         ErrorToast("invalid gr teacher id assigned");
         return false;
       }
-      if (!GrNoOrSubIdValidation(data.subjectId) || data.subjectId === 0) {
+      if (
+        !GrNoSubIdTeacherIdAdminIdValidation(data.subjectId) ||
+        data.subjectId === 0
+      ) {
         ErrorToast("invalid subject id assigned for teacher");
         return false;
       }
@@ -42,14 +41,14 @@ export const adminRequestFieldValidator = (data) => {
         ErrorToast("invalid section assigned for teacher");
         return false;
       }
-      break;
+      return true;
     case "admin":
-      if (!GrNoOrSubIdValidation(data.id) || data.id === 0) {
+      if (!GrNoSubIdTeacherIdAdminIdValidation(data.id) || data.id === 0) {
         ErrorToast("invalid admin id provided");
         return false;
       }
-      break;
-    default:
       return true;
+    default:
+      return false;
   }
 };

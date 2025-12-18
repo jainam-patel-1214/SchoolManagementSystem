@@ -4,7 +4,7 @@ export const GradeValidation = (a) => {
   else return true;
 };
 
-export const GrNoOrSubIdValidation = (b) => {
+export const GrNoSubIdTeacherIdAdminIdValidation = (b) => {
   if ((b <= 0 || b > 99999999 || isNaN(b)) && b !== undefined && b !== null)
     return false;
   else return true;
@@ -38,19 +38,8 @@ export const PracticalMarksValidation = (g) => {
   else return true;
 };
 
-export const TeacherAdminIdValid = (h) => {
-  if ((h <= 0 || h > 99999999 || isNaN(h)) && h !== undefined && h !== null)
-    return false;
-  else return true;
-};
 export const isNotEmptyPair = (value) => {
-  if (
-    value !== null &&
-    value !== undefined &&
-    value !== 0 &&
-    value !== "" &&
-    !isNaN(value)
-  )
+  if (value !== null && value !== undefined && value !== 0 && value !== "")
     return true;
   else return false;
 };

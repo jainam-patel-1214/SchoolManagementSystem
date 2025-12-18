@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { fetchApi } from "../../../utils/fetchApiCode";
 import { ErrorToast, Toaster } from "../../../utils/toasterCode";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { InputContainer } from "../StudentsTab";
 import { RiBookShelfLine } from "react-icons/ri";
 import {
@@ -9,7 +9,7 @@ import {
   FloatingLabel,
   InputWrapper,
 } from "../../../styled-components/InputComp";
-import { GrNoOrSubIdValidation } from "../../../utils/validations";
+import { GrNoSubIdTeacherIdAdminIdValidation } from "../../../utils/validations";
 import { roleExtractor } from "../../../utils/roleExtractor";
 import {
   AllComponentsContainer,
@@ -36,18 +36,6 @@ export const DisplaySubTabComp = () => {
   const [searchKey, setSearchKey] = useState("");
   const [originalData, setOriginalData] = useState(null);
   const [isTable, setIsTable] = useState(false);
-  // const SuperScriptText = (num) => {
-  //   switch (num) {
-  //     case 1:
-  //       return "st";
-  //     case 2:
-  //       return "nd";
-  //     case 3:
-  //       return "rd";
-  //     default:
-  //       return "th";
-  //   }
-  // };
   const fetchData = async () => {
     try {
       setIsLoading(true);
@@ -69,7 +57,7 @@ export const DisplaySubTabComp = () => {
   };
   const deleteSubjectHandler = async (apiUrl, subjectId) => {
     try {
-      if (!GrNoOrSubIdValidation(subjectId)) {
+      if (!GrNoSubIdTeacherIdAdminIdValidation(subjectId)) {
         ErrorToast("invalid gr no");
         return;
       }
@@ -172,6 +160,17 @@ export const DisplaySubTabComp = () => {
             {" "}
             Create a new subject here
           </a>
+          {userrole === "admin" && (
+            <>
+              {" | "}
+              <a
+                href={`/app/${userrole}/setSubjectLimit`}
+                style={{ color: "#8513ffff" }}
+              >
+                Set subject limit here
+              </a>
+            </>
+          )}
         </p>
       </HeadingComponent>
 

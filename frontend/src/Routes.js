@@ -1,6 +1,5 @@
 import { CreateTeacherComponent } from "./components/adminComponents/admin_manageteacherComponents/CreateTeacher";
-import { TeacherDelComponent } from "./components/adminComponents/admin_manageteacherComponents/DeleteTeacher";
-import { DisplayTeacherPerformanceComponent } from "./components/adminComponents/admin_manageteacherComponents/DisplayTeacher";
+import { DisplayTeacherComponent } from "./components/adminComponents/admin_manageteacherComponents/DisplayTeacher";
 import { TeacherEditComponent } from "./components/adminComponents/admin_manageteacherComponents/EditTeacher";
 import { AdminHome } from "./components/adminComponents/Home";
 import { AdminPendingReqTab } from "./components/adminComponents/PendingRequestPage";
@@ -14,11 +13,9 @@ import { AddMarkTab } from "./components/teacherComponents/markComponents/AddMar
 import { EditMarkTab } from "./components/teacherComponents/markComponents/EditMarks";
 import { ReviewTab } from "./components/teacherComponents/Review";
 import { StudentAddComponent } from "./components/teacherComponents/studentComponents/AddStudent";
-import { StudentDelComponent } from "./components/teacherComponents/studentComponents/DeleteStudent";
 import { StudentEditComponent } from "./components/teacherComponents/studentComponents/EditStudent";
 import { StudentDataComponent } from "./components/teacherComponents/studentComponents/GetStudentData";
 import { SubAddTabComp } from "./components/teacherComponents/subjectComponents/AddSubject";
-import { SubDelTabComp } from "./components/teacherComponents/subjectComponents/DeleteSubject";
 import { DisplaySubTabComp } from "./components/teacherComponents/subjectComponents/DisplaySubject";
 import { SubEditTabComp } from "./components/teacherComponents/subjectComponents/EditSubject";
 import "./index.css";
@@ -44,7 +41,6 @@ function ProjectRouter() {
           <Route index element={<StudentEditComponent />} />
           <Route path=":id" element={<StudentEditComponent />}></Route>
         </Route>
-        {/* <Route path="deleteStudent" element={<StudentDelComponent />}></Route> */}
 
         <Route path="displaySubject" element={<DisplaySubTabComp />}></Route>
         <Route path="addSubject" element={<SubAddTabComp />}></Route>
@@ -52,8 +48,6 @@ function ProjectRouter() {
           <Route index element={<SubEditTabComp />} />
           <Route path=":id" element={<SubEditTabComp />}></Route>
         </Route>
-        <Route path="deleteSubject" element={<SubDelTabComp />}></Route>
-
         <Route path="enterMarks" element={<AddMarkTab />}></Route>
         <Route path="editMarks" element={<EditMarkTab />}></Route>
       </Route>
@@ -79,13 +73,14 @@ function ProjectRouter() {
         <Route path="editMarks" element={<EditMarkTab />}></Route>
 
         <Route
-          path="teacherPerformance"
-          element={<DisplayTeacherPerformanceComponent />}
+          path="displayTeacher"
+          element={<DisplayTeacherComponent />}
         ></Route>
         <Route path="addTeacher" element={<CreateTeacherComponent />}></Route>
-        <Route path="editTeacher" element={<TeacherEditComponent />}></Route>
-        <Route path="delTeacher" element={<TeacherDelComponent />}></Route>
-
+        <Route path="editTeacher" element={<TeacherEditComponent />}>
+          <Route index element={<TeacherEditComponent />} />
+          <Route path=":id" element={<TeacherEditComponent />}></Route>
+        </Route>
         <Route
           path="pendingApplications"
           element={<AdminPendingReqTab />}

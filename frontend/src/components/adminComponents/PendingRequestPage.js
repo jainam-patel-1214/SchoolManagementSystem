@@ -4,11 +4,18 @@ import { fetchApi } from "../../utils/fetchApiCode";
 import { ErrorToast, SuccessToast, Toaster } from "../../utils/toasterCode";
 import { createColumnHelper } from "@tanstack/react-table";
 import { PopoupComponent } from "./AcceptPopup";
-import { RequestsTableComponent } from "../helperComponents/RequestsTable";
 import { adminRequestFieldValidator } from "../../utils/acceptRequestValidator";
 import styled from "styled-components";
 import { PendingBtnComp } from "./Home";
-import { PageHeading } from "../../styled-components/HelperStyledComponents";
+import {
+  AllComponentsContainer,
+  ContentContainers,
+  HeadingComponent,
+  PageHeading,
+  UnderlineComponent,
+} from "../../styled-components/HelperStyledComponents";
+import { ToastContainer } from "react-toastify";
+import { GeneralTableComponent } from "../helperComponents/GeneralTable";
 
 const Overlay = styled.div`
   position: fixed;
@@ -236,8 +243,17 @@ export const AdminPendingReqTab = () => {
   ];
 
   return (
-    <>
-      <PageHeading>Users pending requests:</PageHeading>
+    <AllComponentsContainer>
+      <ToastContainer />
+      <HeadingComponent position={"top"}>
+        <PageHeading>
+          Pending requests tab
+          <UnderlineComponent />
+        </PageHeading>
+      </HeadingComponent>
+      <HeadingComponent position={"bottom"}>
+        <p className="subHeading">List of all the users who wish to register</p>
+      </HeadingComponent>
       <Overlay styleDisplay={styleDisplay}></Overlay>
       <div style={{ padding: "1rem" }}>
         <PopoupComponent
@@ -250,15 +266,20 @@ export const AdminPendingReqTab = () => {
           newHandler={dataChangeHandler}
         ></PopoupComponent>
         {displayData?.length > 0 ? (
-          <RequestsTableComponent
-            heading={"Pending user requests"}
-            data={displayData}
-            columnDefinition={columns}
-          />
+          <ContentContainers
+            elements={"single"}
+            usage={"nongrid"}
+            style={{ padding: "15px" }}
+          >
+            <GeneralTableComponent
+              data={displayData}
+              columnDefinition={columns}
+            />
+          </ContentContainers>
         ) : (
           <>There are no pending applications</>
         )}
       </div>
-    </>
+    </AllComponentsContainer>
   );
 };

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import {
   GradeValidation,
-  GrNoOrSubIdValidation,
+  GrNoSubIdTeacherIdAdminIdValidation,
 } from "../../../utils/validations";
 import { fetchApi } from "../../../utils/fetchApiCode";
 import { ErrorToast, Toaster } from "../../../utils/toasterCode";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { FaOrcid } from "react-icons/fa6";
 import { RiBookShelfLine } from "react-icons/ri";
 import { IoIosRibbon } from "react-icons/io";
@@ -61,7 +61,7 @@ export const SubAddTabComp = () => {
       ErrorToast("invalid grade. Allowed range is 1 - 12");
       return;
     }
-    if (!GrNoOrSubIdValidation(Number(data.subjectId))) {
+    if (!GrNoSubIdTeacherIdAdminIdValidation(Number(data.subjectId))) {
       ErrorToast("invalid sub id");
       return;
     }

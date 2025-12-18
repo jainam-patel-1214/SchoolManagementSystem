@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import {
   GradeValidation,
-  GrNoOrSubIdValidation,
+  GrNoSubIdTeacherIdAdminIdValidation,
 } from "../../../utils/validations";
 import { fetchApi } from "../../../utils/fetchApiCode";
 import { ErrorToast, SuccessToast, Toaster } from "../../../utils/toasterCode";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { FaOrcid } from "react-icons/fa6";
 import { RiBookShelfLine } from "react-icons/ri";
 import { IoIosRibbon } from "react-icons/io";
@@ -37,6 +37,9 @@ export const SubEditTabComp = () => {
   const [isValid, setIsValid] = useState(false);
   const userrole = roleExtractor(window.location.pathname);
   const dataChangeHandler = (key, value) => {
+    if (key === "subjectId") {
+      setIsValid(false);
+    }
     setData((prevdata) => ({
       ...prevdata,
       [key]: value,
@@ -46,32 +49,18 @@ export const SubEditTabComp = () => {
   const { id } = useParams();
   useEffect(() => {
     if (!id) return;
-
-    const checkSubject = async () => {
+    searchSubject(id);
+  }, []);
+  const searchSubject = async (id) => {
+    try {
       const isValidRes = await fetchApi(
         `http://localhost:8090/${userrole}/isValidSubject/${id}`,
         "GET",
         {}
       );
       if (isValidRes.output) {
-        dataChangeHandler("grNo", id);
-        setIsValid(true);
-      } else {
-        ErrorToast("Student does not exist, try again!");
-        setIsValid(false);
-      }
-    };
-    checkSubject();
-  }, []);
-  const searchSubject = async () => {
-    try {
-      const isValidRes = await fetchApi(
-        `http://localhost:8090/${userrole}/isValidSubject/${data.subjectId}`,
-        "GET",
-        {}
-      );
-      if (isValidRes.output) {
         SuccessToast("Subject Exists you wish to edit, go on!!");
+        dataChangeHandler("subjectId", id);
         setIsValid(true);
       }
     } catch (error) {
@@ -87,7 +76,7 @@ export const SubEditTabComp = () => {
       ErrorToast("invalid grade. Allowed range is 1 - 12");
       return;
     }
-    if (!GrNoOrSubIdValidation(Number(data.subjectId))) {
+    if (!GrNoSubIdTeacherIdAdminIdValidation(Number(data.subjectId))) {
       ErrorToast("invalid sub id");
       return;
     }
@@ -162,7 +151,7 @@ export const SubEditTabComp = () => {
           border={"default"}
           textcol={"default"}
           hovercol={"default"}
-          onClick={() => searchSubject()}
+          onClick={() => searchSubject(data.subjectId)}
         >
           Search
         </ButtonElement>

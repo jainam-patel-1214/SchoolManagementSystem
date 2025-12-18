@@ -1,34 +1,36 @@
 import { useState } from "react";
 import {
   GradeValidation,
-  GrNoOrSubIdValidation,
+  GrNoSubIdTeacherIdAdminIdValidation,
   isNotEmptyPair,
   PasswordValidation,
   StringValidator,
-  TeacherAdminIdValid,
 } from "../../../utils/validations";
 import { fetchApi } from "../../../utils/fetchApiCode";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { ErrorToast, Toaster } from "../../../utils/toasterCode";
-import {
-  SearchBoxSection,
-  SearchForm,
-  SearchOutputSection,
-  SearchParamSection,
-} from "../../studentComponents/SchoolResult";
-import { TeacherInputTabContainer } from "../TeachersTab";
-import { ButtonContainer } from "../../teacherComponents/StudentsTab";
 import { FaIdCardAlt } from "react-icons/fa";
 import { FaAddressCard, FaKey } from "react-icons/fa6";
 import { RiBookShelfLine, RiContactsBook2Fill } from "react-icons/ri";
 import { MdWindow } from "react-icons/md";
-import { StyledButton } from "../../../styled-components/StyledButton";
 import { roleExtractor } from "../../../utils/roleExtractor";
 import { InputContainerComponent } from "../../helperComponents/InputContainer";
-import { PageHeading } from "../../../styled-components/HelperStyledComponents";
+import {
+  AllComponentsContainer,
+  ButtonElement,
+  ContentContainers,
+  GridContainer,
+  HeadingComponent,
+  PageHeading,
+  UnderlineComponent,
+} from "../../../styled-components/HelperStyledComponents";
+import { useNavigate } from "react-router-dom";
+import { LineBreak } from "../../../styled-components/LineBreak";
+import { GridLayers } from "../../helperComponents/GridItem";
 
 export const CreateTeacherComponent = () => {
   const userrole = roleExtractor(window.location.pathname);
+  const navigate = useNavigate();
   const initState = {
     teacherId: "",
     teacherPassword: "",
@@ -38,8 +40,9 @@ export const CreateTeacherComponent = () => {
     sectionAllocated: "",
   };
   const [data, setData] = useState(initState);
-  const [displayData, setDisplayData] = useState(null);
-
+  const setInitialData = () => {
+    setData(initState);
+  };
   const dataChangeHandler = (key, value) => {
     setData((prevdata) => ({
       ...prevdata,
@@ -48,6 +51,16 @@ export const CreateTeacherComponent = () => {
   };
   const submitHandler = async (e, apiUrl) => {
     e.preventDefault();
+    if (
+      data.teacherId === "" ||
+      data.teacherName === "" ||
+      data.teacherPassword === ""
+    ) {
+      ErrorToast(
+        "Atleast Teacher's ID, name and password are required to create new teacher"
+      );
+      return;
+    }
     const errobj = {
       std: {
         condition: false,
@@ -70,12 +83,15 @@ export const CreateTeacherComponent = () => {
       stdAllocated: Number(data.standardAllocated),
       sectionAllocated: data.sectionAllocated,
     };
-    if (!TeacherAdminIdValid(payload.teacherId)) {
+    if (!GrNoSubIdTeacherIdAdminIdValidation(payload.teacherId)) {
       ErrorToast(errobj.tid.message);
       return;
     }
 
-    if (payload.subId !== 0 && !GrNoOrSubIdValidation(payload.subId)) {
+    if (
+      payload.subId !== 0 &&
+      !GrNoSubIdTeacherIdAdminIdValidation(payload.subId)
+    ) {
       ErrorToast(errobj.subid.message);
       return;
     }
@@ -116,122 +132,149 @@ export const CreateTeacherComponent = () => {
         }
       }
       bodyObj["role"] = "teacher";
+      console.log(payload, "payload", bodyObj, "body");
+
       res = await fetchApi(apiUrl, "POST", bodyObj);
       Toaster(res);
-      if (res.output) {
-        setDisplayData(res.output);
-        return;
-      }
     } catch (err) {
       ErrorToast(err);
     } finally {
-      setData(initState);
-      e.target.reset();
+      setInitialData();
     }
   };
 
   return (
-    <div>
-      <PageHeading>Create new teacher:</PageHeading>
-      <SearchBoxSection>
-        <ToastContainer />
-        <SearchParamSection>
-          <SearchForm
-            onSubmit={(e) => {
-              submitHandler(e, `http://localhost:8090/${userrole}/addTeacher`);
-            }}
+    <AllComponentsContainer>
+      <ToastContainer />
+      <HeadingComponent position={"top"}>
+        <PageHeading>
+          Appoint New Teacher
+          <UnderlineComponent />
+        </PageHeading>
+      </HeadingComponent>
+      <HeadingComponent position={"bottom"}>
+        <p className="subHeading">
+          Create new teacher profile and get them started right away |{" "}
+          <a
+            href={`/app/${userrole}/displayTeacher`}
+            style={{ color: "#008cffff" }}
           >
-            <TeacherInputTabContainer>
-              <InputContainerComponent
-                icon={FaIdCardAlt}
-                labelText={"Provide Id for new teacher to be created:"}
-                width={"100%"}
-                handler={dataChangeHandler}
-                value={data.teacherId}
-                name={"tid"}
-                objKey={"teacherId"}
-                isRequired={true}
-              ></InputContainerComponent>
-            </TeacherInputTabContainer>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
+            {" "}
+            Go back to veiw teacher's list
+          </a>
+        </p>
+      </HeadingComponent>
+
+      <ContentContainers elements={"single"} usage={"nongrid"}>
+        <InputContainerComponent
+          icon={FaIdCardAlt}
+          labelText={"Provide Id for new teacher to be created:"}
+          width={"100%"}
+          handler={dataChangeHandler}
+          value={data.teacherId}
+          name={"tid"}
+          objKey={"teacherId"}
+        ></InputContainerComponent>
+      </ContentContainers>
+
+      <LineBreak />
+
+      <HeadingComponent position={"top"}>
+        <PageHeading>
+          Ensure all required information below is filled in accurately:
+        </PageHeading>
+      </HeadingComponent>
+      <ContentContainers elements={"multiple"} style={{ marginTop: "1rem" }}>
+        <GridContainer>
+          <InputContainerComponent
+            icon={FaAddressCard}
+            labelText={"Provide teacher's name:"}
+            width={"auto"}
+            handler={dataChangeHandler}
+            value={data.teacherName}
+            name={"tname"}
+            objKey={"teacherName"}
+          ></InputContainerComponent>
+          <InputContainerComponent
+            icon={RiContactsBook2Fill}
+            labelText={"Provide subject to be assigned:"}
+            width={"auto"}
+            handler={dataChangeHandler}
+            value={data.subjectId}
+            name={"subname"}
+            objKey={"subjectId"}
+          ></InputContainerComponent>
+          <InputContainerComponent
+            icon={FaKey}
+            labelText={"Provide password for teacher:"}
+            width={"auto"}
+            handler={dataChangeHandler}
+            value={data.teacherPassword}
+            name={"password"}
+            objKey={"teacherPassword"}
+          ></InputContainerComponent>
+          <InputContainerComponent
+            width={"auto"}
+            value={data.standardAllocated}
+            name={"std"}
+            handler={dataChangeHandler}
+            objKey={"standardAllocated"}
+            icon={RiBookShelfLine}
+            labelText={"Provide standard to be assigned:"}
+          ></InputContainerComponent>
+          <InputContainerComponent
+            width={"auto"}
+            value={data.sectionAllocated}
+            name={"section"}
+            handler={dataChangeHandler}
+            objKey={"sectionAllocated"}
+            icon={MdWindow}
+            labelText={"Provide section to be assigned:"}
+          ></InputContainerComponent>
+        </GridContainer>
+      </ContentContainers>
+      <ContentContainers elements={"multiple"} style={{ marginTop: "1rem" }}>
+        <GridLayers style={{ width: "100%" }}>
+          <ButtonElement
+            style={{ width: "50%" }}
+            bgcol={"default"}
+            border={"default"}
+            textcol={"default"}
+            hovercol={"default"}
+            type="submit"
+            onClick={(e) =>
+              submitHandler(e, `http://localhost:8090/${userrole}/addTeacher`)
+            }
+          >
+            Create Student
+          </ButtonElement>
+          <GridLayers style={{ width: "48%", margin: "0" }}>
+            <ButtonElement
+              style={{ width: "48%" }}
+              bgcol={"transparent"}
+              border={"1px solid #b5b5b5af"}
+              textcol={"green"}
+              hovercol={"#dcfff487"}
+              onClick={() => {
+                setInitialData();
+                navigate(`/app/${userrole}/displayTeacher`);
               }}
             >
-              <h3>Provide further details of teacher:</h3>
-            </div>
-            <TeacherInputTabContainer>
-              <InputContainerComponent
-                icon={FaAddressCard}
-                labelText={"Provide teacher's name:"}
-                width={"50%"}
-                isRequired={true}
-                handler={dataChangeHandler}
-                value={data.teacherName}
-                name={"tname"}
-                objKey={"teacherName"}
-              ></InputContainerComponent>
-              <InputContainerComponent
-                icon={RiContactsBook2Fill}
-                labelText={"Provide subject to be assigned:"}
-                width={"50%"}
-                handler={dataChangeHandler}
-                value={data.subjectId}
-                name={"subname"}
-                objKey={"subjectId"}
-              ></InputContainerComponent>
-            </TeacherInputTabContainer>
-            <TeacherInputTabContainer>
-              <InputContainerComponent
-                icon={FaKey}
-                labelText={"Provide password for teacher:"}
-                width={"100%"}
-                isRequired={true}
-                handler={dataChangeHandler}
-                value={data.teacherPassword}
-                name={"password"}
-                objKey={"teacherPassword"}
-              ></InputContainerComponent>
-            </TeacherInputTabContainer>
-            <TeacherInputTabContainer>
-              <InputContainerComponent
-                width={"50%"}
-                value={data.standardAllocated}
-                name={"std"}
-                handler={dataChangeHandler}
-                objKey={"standardAllocated"}
-                icon={RiBookShelfLine}
-                labelText={"Provide standard to be assigned:"}
-              ></InputContainerComponent>
-              <InputContainerComponent
-                width={"50%"}
-                value={data.sectionAllocated}
-                name={"section"}
-                handler={dataChangeHandler}
-                objKey={"sectionAllocated"}
-                icon={MdWindow}
-                labelText={"Provide section to be assigned:"}
-              ></InputContainerComponent>
-            </TeacherInputTabContainer>
-            <ButtonContainer>
-              <StyledButton type="submit">Submit</StyledButton>
-            </ButtonContainer>
-          </SearchForm>
-        </SearchParamSection>
-      </SearchBoxSection>
-      {displayData !== null && displayData !== undefined ? (
-        <SearchOutputSection>
-          {typeof displayData === "string" ? (
-            <div style={{ padding: "10px" }}>{displayData}</div>
-          ) : (
-            <></>
-          )}
-        </SearchOutputSection>
-      ) : (
-        <></>
-      )}
-    </div>
+              Cancel
+            </ButtonElement>
+            <ButtonElement
+              style={{ width: "48%" }}
+              bgcol={"transparent"}
+              border={"1px solid #b5b5b5af"}
+              textcol={"red"}
+              hovercol={"#ffd3d3af"}
+              onClick={() => setInitialData()}
+            >
+              Reset
+            </ButtonElement>
+          </GridLayers>
+        </GridLayers>
+      </ContentContainers>
+    </AllComponentsContainer>
   );
 };

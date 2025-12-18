@@ -1,135 +1,288 @@
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { ErrorToast, Toaster } from "../../../utils/toasterCode";
-import { TeacherAdminIdValid } from "../../../utils/validations";
-import { useState } from "react";
-import {
-  SearchBoxSection,
-  SearchForm,
-  SearchParamSection,
-} from "../../studentComponents/SchoolResult";
-import { TeacherInputTabContainer } from "../TeachersTab";
-import {
-  ButtonContainer,
-  InputContainer,
-} from "../../teacherComponents/StudentsTab";
-import { GiTeacher } from "react-icons/gi";
+import { GrNoSubIdTeacherIdAdminIdValidation } from "../../../utils/validations";
+import { useEffect, useState } from "react";
+import { InputContainer } from "../../teacherComponents/StudentsTab";
 import {
   FloatingInput,
   FloatingLabel,
   InputWrapper,
 } from "../../../styled-components/InputComp";
-import { StyledButton } from "../../../styled-components/StyledButton";
-import { ReactTableComponent } from "../../helperComponents/ResultTable";
 import { fetchApi } from "../../../utils/fetchApiCode";
 import { roleExtractor } from "../../../utils/roleExtractor";
-import { PageHeading } from "../../../styled-components/HelperStyledComponents";
+import {
+  AllComponentsContainer,
+  ButtonElement,
+  ContentContainers,
+  DisplayViewFormatContainer,
+  GridContainer,
+  HeadingComponent,
+  PageHeading,
+  UnderlineComponent,
+} from "../../../styled-components/HelperStyledComponents";
+import { useNavigate } from "react-router-dom";
+import { createColumnHelper } from "@tanstack/react-table";
+import { FaCircleUser } from "react-icons/fa6";
+import { LineBreak } from "../../../styled-components/LineBreak";
+import { DataContainer } from "../../teacherComponents/studentComponents/GetStudentData";
+import { MdTableRows, MdWindow } from "react-icons/md";
+import { GeneralTableComponent } from "../../helperComponents/GeneralTable";
+import { GridItemComponent } from "../../helperComponents/GridItem";
 
-export const DisplayTeacherPerformanceComponent = () => {
+export const DisplayTeacherComponent = () => {
   const userrole = roleExtractor(window.location.pathname);
   const [teacherId, setTeacherId] = useState(0);
-  const [displayData, setDisplayData] = useState(null);
+  const [searchKey, setSearchKey] = useState("");
+  const [filterData, setFilterData] = useState(null);
+  const [originalData, setOriginalData] = useState(null);
+  const [isTable, setIsTable] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const submitHandler = async (e, apiUrl) => {
-    e.preventDefault();
-
-    if (!TeacherAdminIdValid(teacherId)) {
-      ErrorToast("invalid teacher id");
-      return;
-    }
+  const fetchData = async () => {
     try {
-      let res;
-      res = await fetchApi(apiUrl, "GET", {});
-      Toaster(res);
+      setIsLoading(true);
+      const res = await fetchApi(
+        `http://localhost:8090/${userrole}/allTeachers`,
+        "GET",
+        {}
+      );
       if (res.output) {
-        setDisplayData(res.output);
+        const output = [];
+        res.output.forEach((e) => {
+          const data = {};
+          for (const [key, value] of Object.entries(e)) {
+            if (typeof value === "object") {
+              if (key === "gradeAllocated" || key === "subjectId") {
+                data[key] = value.Int64 !== 0 ? value.Int64 : "";
+              } else {
+                data[key] = value.String;
+              }
+            } else {
+              data[key] = value;
+            }
+          }
+          output.push(data);
+        });
+        setOriginalData(res.output);
+        setFilterData(output);
         return;
       }
     } catch (err) {
       ErrorToast(err);
     } finally {
-      setTeacherId(null);
-      e.target.reset();
+      setIsLoading(false);
+    }
+  };
+  const deleteTeacherHandler = async (apiUrl, teacherId) => {
+    try {
+      if (!GrNoSubIdTeacherIdAdminIdValidation(teacherId)) {
+        ErrorToast("invalid teacher's id");
+        return;
+      }
+      let res;
+      res = await fetchApi(apiUrl, "DELETE", { teacherId: teacherId });
+      Toaster(res);
+      if (res.output) {
+        fetchData();
+      }
+    } catch (err) {
+      ErrorToast(err);
     }
   };
 
-  const columnDef = [
-    {
-      header: "Teacher Id",
-      accessorKey: "Tid",
-    },
-    {
-      header: "Teacher Name",
-      accessorKey: "TName",
-    },
-    {
-      header: "Standard Allocated",
-      accessorKey: "StdAllocated",
-    },
-    {
+  const navigate = useNavigate();
+  const columnHelper = createColumnHelper();
+  const columns = [
+    columnHelper.accessor("teacherId", {
+      header: "Teacher ID",
+      cell: (info) => info.getValue(),
+      enableSorting: false,
+    }),
+    columnHelper.accessor("teacherName", {
+      header: "Name",
+      cell: (info) => info.getValue(),
+      enableSorting: true,
+    }),
+    columnHelper.accessor("teacherPwd", {
+      header: "Password",
+      cell: (info) => info.getValue(),
+      enableSorting: false,
+    }),
+    columnHelper.accessor("gradeAllocated", {
+      header: "Grade allocated",
+      cell: (info) => info.getValue(),
+      enableSorting: false,
+    }),
+    columnHelper.accessor("sectionAllocated", {
+      header: "Section Allocated",
+      cell: (info) => info.getValue(),
+      enableSorting: false,
+    }),
+    columnHelper.accessor("subjectAllocated", {
       header: "Subject Allocated",
-      accessorKey: "SubName",
-    },
-    {
-      header: "Total Practical Marks",
-      accessorKey: "TotalPracticalMarks",
-    },
-    {
-      header: "Total Theory Marks",
-      accessorKey: "TotalTheoryMarks",
-    },
-  ];
-  return (
-    <div>
-      <PageHeading>Edit a teacher:</PageHeading>
-      <SearchBoxSection>
-        <ToastContainer />
-        <SearchParamSection>
-          <SearchForm
-            onSubmit={(e) => {
-              submitHandler(
-                e,
-                `http://localhost:8090/${userrole}/displayTeacherPerformance/${teacherId}`
-              );
-            }}
+      cell: (info) => info.getValue(),
+      enableSorting: false,
+    }),
+    columnHelper.display({
+      id: "edit",
+      header: "",
+      cell: ({ row }) => {
+        const v = row.original;
+        return (
+          <ButtonElement
+            style={{ width: "100%" }}
+            bgcol={"transparent"}
+            border={"1px solid #b5b5b5af"}
+            textcol={"green"}
+            hovercol={"#dcfff487"}
+            onClick={() =>
+              navigate(`/app/${userrole}/editTeacher/${v.teacherId}`)
+            }
           >
-            <TeacherInputTabContainer>
-              <InputContainer>
-                <GiTeacher style={{ fontSize: "xx-large" }} />
-                <InputWrapper>
-                  <FloatingInput
-                    type="text"
-                    value={teacherId || ""}
-                    name="teacherid"
-                    placeholder=" "
-                    maxLength={8}
-                    onChange={(e) => {
-                      setTeacherId(Number(e.target.value));
-                    }}
-                  />
-                  <FloatingLabel>
-                    Provide id of teacher you wish to look performance:
-                  </FloatingLabel>
-                </InputWrapper>
-              </InputContainer>
-            </TeacherInputTabContainer>
-            <ButtonContainer>
-              <StyledButton type="submit">Submit</StyledButton>
-            </ButtonContainer>
-          </SearchForm>
-        </SearchParamSection>
-      </SearchBoxSection>
-      {typeof displayData !== "string" &&
-      displayData?.length > 0 &&
-      displayData !== undefined &&
-      displayData !== null ? (
-        <ReactTableComponent
-          data={displayData}
-          columnDefinition={columnDef}
-          heading={"Performance among teacher's peers"}
-        />
-      ) : (
-        <>{displayData}</>
-      )}
-    </div>
+            Edit
+          </ButtonElement>
+        );
+      },
+    }),
+
+    columnHelper.display({
+      id: "reject",
+      header: "",
+      cell: ({ row }) => {
+        const v = row.original;
+        return (
+          <ButtonElement
+            style={{ width: "100%" }}
+            bgcol={"transparent"}
+            border={"1px solid #b5b5b5af"}
+            textcol={"red"}
+            hovercol={"#ffd3d3af"}
+            onClick={() =>
+              deleteTeacherHandler(
+                `http://localhost:8090/${userrole}/delTeacher`,
+                Number(v.teacherId)
+              )
+            }
+          >
+            Delete
+          </ButtonElement>
+        );
+      },
+    }),
+  ];
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  return (
+    <AllComponentsContainer>
+      <ToastContainer />
+      <HeadingComponent position={"top"}>
+        <PageHeading>
+          Display Teachers
+          <UnderlineComponent />
+        </PageHeading>
+      </HeadingComponent>
+      <HeadingComponent position={"bottom"}>
+        <p className="subHeading">
+          List of all the teachers within the school |{" "}
+          <a href={`/app/${userrole}/addTeacher`} style={{ color: "#00c200" }}>
+            {" "}
+            Create a new teacher here
+          </a>
+        </p>
+      </HeadingComponent>
+
+      <ContentContainers elements={"single"} usage={"nongrid"}>
+        <InputContainer>
+          <FaCircleUser style={{ fontSize: "xx-large" }} />
+          <InputWrapper>
+            <FloatingInput
+              type="text"
+              value={searchKey || ""}
+              name="searchQuery"
+              required
+              placeholder=" "
+              onChange={(e) => setSearchKey(e.target.value)}
+            />
+            <FloatingLabel>Filter teachers by ID or name:</FloatingLabel>
+          </InputWrapper>
+        </InputContainer>
+        <ButtonElement
+          bgcol={"default"}
+          border={"default"}
+          textcol={"default"}
+          hovercol={"default"}
+        >
+          Search
+        </ButtonElement>
+      </ContentContainers>
+
+      <LineBreak />
+      <DataContainer>
+        <DisplayViewFormatContainer>
+          <MdTableRows
+            style={{ backgroundColor: isTable ? "#878787ac" : "#ddddddac" }}
+            onClick={() => setIsTable(true)}
+          />
+          <MdWindow
+            style={{ backgroundColor: !isTable ? "#878787ac" : "#ddddddac" }}
+            onClick={() => setIsTable(false)}
+          />
+        </DisplayViewFormatContainer>
+        <ContentContainers
+          elements={"single"}
+          usage={"nongrid"}
+          style={{ padding: isTable ? "0" : "15px" }}
+        >
+          {isLoading ? (
+            <div>Fetching all teachers</div>
+          ) : isTable ? (
+            <GeneralTableComponent
+              data={filterData}
+              columnDefinition={columns}
+            ></GeneralTableComponent>
+          ) : (
+            <GridContainer>
+              {filterData?.map(
+                (
+                  {
+                    teacherId,
+                    teacherPwd,
+                    teacherName,
+                    gradeAllocated,
+                    sectionAllocated,
+                    subjectAllocated,
+                  },
+                  i
+                ) => (
+                  <GridItemComponent
+                    key={i}
+                    index={i}
+                    objectId={teacherId}
+                    password={teacherPwd}
+                    name={teacherName}
+                    grade={
+                      gradeAllocated !== 0 && gradeAllocated !== ""
+                        ? gradeAllocated
+                        : "N/"
+                    }
+                    section={sectionAllocated !== "" ? sectionAllocated : "A"}
+                    delete={deleteTeacherHandler}
+                    credits={""}
+                    isStudent={false}
+                    isTeacher={true}
+                    subjectName={
+                      subjectAllocated !== "" ? subjectAllocated : "N/A"
+                    }
+                  ></GridItemComponent>
+                )
+              )}
+            </GridContainer>
+          )}
+        </ContentContainers>
+      </DataContainer>
+    </AllComponentsContainer>
   );
 };

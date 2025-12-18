@@ -3,7 +3,7 @@ import { MdRateReview } from "react-icons/md";
 import { FaCircleUser } from "react-icons/fa6";
 import { fetchApi } from "../../utils/fetchApiCode";
 import { ErrorToast, SuccessToast, Toaster } from "../../utils/toasterCode";
-import { GrNoOrSubIdValidation } from "../../utils/validations";
+import { GrNoSubIdTeacherIdAdminIdValidation } from "../../utils/validations";
 import { roleExtractor } from "../../utils/roleExtractor";
 import { InputContainerComponent } from "../helperComponents/InputContainer";
 import {
@@ -46,7 +46,7 @@ export const ReviewTab = () => {
       ErrorToast(errobj.comment.message);
       return;
     }
-    if (!GrNoOrSubIdValidation(data?.grNo)) {
+    if (!GrNoSubIdTeacherIdAdminIdValidation(data?.grNo)) {
       ErrorToast(errobj.grno.message);
       return;
     }
@@ -124,7 +124,7 @@ export const ReviewTab = () => {
           </HeadingComponent>
           <HeadingComponent position={"bottom"}>
             <p className="subHeading" style={{ color: "red" }}>
-              You can only add one review per student
+              <strong>Note: </strong> You can only add one review per student
             </p>
           </HeadingComponent>
           <ContentContainers elements={"single"} usage={"nongrid"}>

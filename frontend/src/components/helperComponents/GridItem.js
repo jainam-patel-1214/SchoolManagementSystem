@@ -5,6 +5,7 @@ import {
 } from "../../styled-components/HelperStyledComponents";
 import { roleExtractor } from "../../utils/roleExtractor";
 import { useNavigate } from "react-router-dom";
+import { GrNoSubIdTeacherIdAdminIdValidation } from "../../utils/validations";
 
 export const IndexComp = styled.div`
   width: 32px;
@@ -64,6 +65,8 @@ export const GridItemComponent = ({
   section,
   credits,
   isStudent,
+  subjectName,
+  isTeacher,
   delete: deleteHandler,
 }) => {
   const navigate = useNavigate();
@@ -74,51 +77,75 @@ export const GridItemComponent = ({
         <IndexComp>{index + 1}</IndexComp>
         <HeaderData>
           <h4>{name}</h4>
-          <div>
-            {objectId !== "" ? (
-              <p>
-                {isStudent ? "Student ID:" : "Subject ID:"}&nbsp;{objectId}
-              </p>
-            ) : (
-              <></>
-            )}
-            {password !== "" && isStudent ? (
+          {isTeacher && objectId !== "" ? (
+            <div>
+              <p>Teacher ID:&nbsp;{objectId}</p>
               <p>Password:&nbsp;{password}</p>
-            ) : (
-              <></>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div>
+              {objectId !== "" ? (
+                <p>
+                  {isStudent ? "Student ID:" : "Subject ID:"}&nbsp;{objectId}
+                </p>
+              ) : (
+                <></>
+              )}
+              {isStudent ? <p>Password:&nbsp;{password}</p> : <></>}
+            </div>
+          )}
         </HeaderData>
       </ContentContainers>
-      <GridLayers>
-        <ContentContainers>
-          <HeaderData>
-            <div>
-              <p>GRADE</p>
-            </div>
-            <h4>{grade}</h4>
-          </HeaderData>
-        </ContentContainers>
-        {isStudent ? (
+      {isTeacher ? (
+        <GridLayers>
           <ContentContainers>
             <HeaderData>
               <div>
-                <p>SECTION</p>
+                <p>Class allocated:</p>
               </div>
-              <h4>{section}</h4>
+              <h4>{grade + section}</h4>
             </HeaderData>
           </ContentContainers>
-        ) : (
           <ContentContainers>
             <HeaderData>
               <div>
-                <p>CREDITS</p>
+                <p>Subject assigned:</p>
               </div>
-              <h4>{credits}</h4>
+              <h4>{subjectName}</h4>
             </HeaderData>
           </ContentContainers>
-        )}
-      </GridLayers>
+        </GridLayers>
+      ) : (
+        <GridLayers>
+          <ContentContainers>
+            <HeaderData>
+              <div>
+                <p>GRADE</p>
+              </div>
+              <h4>{grade}</h4>
+            </HeaderData>
+          </ContentContainers>
+          {isStudent ? (
+            <ContentContainers>
+              <HeaderData>
+                <div>
+                  <p>SECTION</p>
+                </div>
+                <h4>{section}</h4>
+              </HeaderData>
+            </ContentContainers>
+          ) : (
+            <ContentContainers>
+              <HeaderData>
+                <div>
+                  <p>CREDITS</p>
+                </div>
+                <h4>{credits}</h4>
+              </HeaderData>
+            </ContentContainers>
+          )}
+        </GridLayers>
+      )}
       <GridLayers>
         <ButtonElement
           style={{ width: "45%" }}
@@ -138,7 +165,9 @@ export const GridItemComponent = ({
             hovercol={"#dcfff487"}
             type="button"
             onClick={() => {
-              isStudent
+              isTeacher
+                ? navigate(`/app/${userrole}/editTeacher/${objectId}`)
+                : isStudent
                 ? navigate(`/app/${userrole}/editStudent/${objectId}`)
                 : navigate(`/app/${userrole}/editSubject/${objectId}`);
             }}
@@ -153,7 +182,12 @@ export const GridItemComponent = ({
             hovercol={"#ffd3d3af"}
             type="button"
             onClick={() => {
-              isStudent
+              isTeacher
+                ? deleteHandler(
+                    `http://localhost:8090/${userrole}/delTeacher`,
+                    Number(objectId)
+                  )
+                : isStudent
                 ? deleteHandler(
                     `http://localhost:8090/${userrole}/delStudent`,
                     Number(objectId)

@@ -1,6 +1,6 @@
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import styled from "styled-components";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { TiSortAlphabetically } from "react-icons/ti";
 import { RiBookShelfLine } from "react-icons/ri";
 import { fetchApi } from "../../utils/fetchApiCode";
@@ -25,32 +25,6 @@ import {
 import { GridLayers } from "../helperComponents/GridItem";
 import { GeneralTableComponent } from "../helperComponents/GeneralTable";
 
-export const SearchBoxSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  width: 90%;
-  margin: auto;
-  margin-top: 2rem;
-  padding: 5px 20px;
-  background-color: #e9f8ffff;
-  border-radius: 50px;
-  border: 1px dotted blue;
-`;
-export const SearchParamSection = styled.div`
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-`;
-export const SearchOutputSection = styled.div`
-  margin: 1rem auto;
-  display: flex;
-  flex-direction: column;
-  width: 90%;
-  padding: 25px 20px;
-  background-color: #c8ffde95;
-  border-radius: 50px;
-  border: 2px solid #8fb352;
-`;
 export const SearchForm = styled.form`
   display: flex;
   flex-direction: column;
@@ -65,21 +39,11 @@ export const SearchForm = styled.form`
 
   span input::placeholder {
     color: #b5b5b5;
-    /* padding: 5px; */
   }
-`;
-export const ErrorSpan = styled.div`
-  color: red;
-  background-color: #ffbbbb;
-  width: fit-content;
-  padding: 10px;
-  margin-left: 1rem;
-  display: none;
 `;
 
 export const SchoolResult = () => {
   const userrole = roleExtractor(window.location.pathname);
-  const errorComp = useRef(null);
   const columnDef = [
     {
       header: "Student Name",
@@ -320,86 +284,5 @@ export const SchoolResult = () => {
         <></>
       )}
     </AllComponentsContainer>
-    // <div>
-    //   <PageHeading>School result:</PageHeading>
-    //   <SearchBoxSection>
-    //     <ToastContainer />
-    //     <SearchParamSection>
-    //       <div>
-    //         <SearchForm action="" onSubmit={(e) => submitHandler(e)}>
-    //           <TeacherInputTabContainer>
-    //             <InputContainerComponent
-    //               width={"50%"}
-    //               icon={RiBookShelfLine}
-    //               isRequired={true}
-    //               handler={dataChangeHandler}
-    //               objKey={"grade"}
-    //               labelText={"Provide grade of class you wish result of:"}
-    //               name={"std"}
-    //               value={data.grade}
-    //             ></InputContainerComponent>
-    //             <InputContainerComponent
-    //               width={"50%"}
-    //               isRequired={false}
-    //               icon={TiSortAlphabetically}
-    //               handler={dataChangeHandler}
-    //               objKey={"section"}
-    //               labelText={"Provide section of class you wish to filter:"}
-    //               name={"section"}
-    //               value={data.section}
-    //             ></InputContainerComponent>
-    //           </TeacherInputTabContainer>
-    //           <TeacherInputTabContainer>
-    //             <label>Enter a range of marks you wish to filter : </label>
-    //             <InputContainerComponent
-    //               width={"50%"}
-    //               icon={PiLineSegmentsBold}
-    //               handler={dataChangeHandler}
-    //               objKey={"minMark"}
-    //               isRequired={false}
-    //               labelText={"Min marks:"}
-    //               name={"minPercent"}
-    //               value={data.minMark}
-    //             ></InputContainerComponent>
-    //             <InputContainerComponent
-    //               width={"50%"}
-    //               handler={dataChangeHandler}
-    //               objKey={"maxMark"}
-    //               isRequired={false}
-    //               labelText={"Max marks:"}
-    //               name={"maxPercent"}
-    //               value={data.maxMark}
-    //             ></InputContainerComponent>
-    //           </TeacherInputTabContainer>
-    //           <ErrorSpan id="minmaxerror" ref={errorComp}></ErrorSpan>
-    //           <ButtonContainer>
-    //             <StyledButton type="submit">Submit</StyledButton>
-    //           </ButtonContainer>
-    //         </SearchForm>
-    //       </div>
-    //     </SearchParamSection>
-    //   </SearchBoxSection>
-    //   {typeof displayData !== "string" &&
-    //   displayData !== null &&
-    //   displayData !== undefined ? (
-    //     <ReactTableComponent
-    //       data={displayData}
-    //       columnDefinition={columnDef}
-    //       heading={"List of students for requested filter"}
-    //     ></ReactTableComponent>
-    //   ) : (
-    //     <>
-    //       {typeof displayData === "string" ? (
-    //         <SearchOutputSection
-    //           style={{ background: "#fa6c61", padding: "5px" }}
-    //         >
-    //           {displayData}
-    //         </SearchOutputSection>
-    //       ) : (
-    //         <></>
-    //       )}{" "}
-    //     </>
-    //   )}
-    // </div>
   );
 };

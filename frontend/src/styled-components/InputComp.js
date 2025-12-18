@@ -37,7 +37,6 @@ export const FloatingLabel = styled.label`
   position: absolute;
   left: 10px;
   top: 13px;
-  /* width: 100%; */
   color: #777;
   font-size: 13px;
   pointer-events: none;
