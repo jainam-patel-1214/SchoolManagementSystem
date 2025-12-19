@@ -32,11 +32,12 @@ type TeacherInfo struct {
 }
 
 func HasOnlyAlphabets(s string) bool {
-	for _, r := range s {
+	for i, r := range s {
 		if unicode.IsSpace(r) {
 			continue
 		}
 		if !unicode.IsLetter(r) {
+			fmt.Println(i)
 			return false
 		}
 	}
@@ -46,7 +47,7 @@ func HasOnlyAlphabets(s string) bool {
 func AddStudent(ctx *gin.Context) {
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-
+		fmt.Println(err)
 		return
 	}
 	defer db.Close()
@@ -129,7 +130,7 @@ func AddStudent(ctx *gin.Context) {
 func EditStud(ctx *gin.Context) {
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-
+		fmt.Println(err)
 		return
 	}
 	defer db.Close()
@@ -202,8 +203,10 @@ func EditStud(ctx *gin.Context) {
 		}
 		dbstr := "UPDATE students SET "
 		var conditions []string
+		fmt.Println(editBody, "-----------------", defaultData)
 		if editBody.StudentPwd != defaultData.StudentPwd && editBody.StudentPwd != "" {
 			conditions = append(conditions, ("sPwd = '" + editBody.StudentPwd + "'"))
+			fmt.Println(conditions)
 		}
 		if editBody.StudentName != defaultData.StudentName && editBody.StudentName != "" && HasOnlyAlphabets(editBody.StudentName) {
 			conditions = append(conditions, ("studName = '" + editBody.StudentName + "'"))
@@ -214,6 +217,7 @@ func EditStud(ctx *gin.Context) {
 		if editBody.Section != defaultData.Section && editBody.Section != "" && HasOnlyAlphabets(editBody.Section) {
 			conditions = append(conditions, ("section = '" + editBody.Section + "'"))
 		}
+		fmt.Println("length of cond", conditions, len(conditions))
 		for i, v := range conditions {
 			dbstr += v
 			if i != len(conditions)-1 {
@@ -221,6 +225,7 @@ func EditStud(ctx *gin.Context) {
 			}
 		}
 		dbstr += (" WHERE grNo = " + strconv.Itoa(editBody.GR_NO))
+		fmt.Println("length of cond", conditions, len(conditions))
 		if len(conditions) > 0 {
 			_, err = db.Exec(dbstr)
 			if err != nil {
@@ -358,6 +363,7 @@ func EditSub(ctx *gin.Context) {
 			return
 		}
 		if editBody.LevelStd != 0 {
+			fmt.Println("being executed", editBody.LevelStd)
 			var amt2 int
 			if err = db.QueryRow("SELECT COUNT(subId) FROM marks WHERE subId=?", editBody.SubId).Scan(&amt2); err != nil && err != sql.ErrNoRows {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -502,7 +508,7 @@ func EnterMarks(ctx *gin.Context) {
 			return
 		}
 		if amount > 0 {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "record already present please try updating it"})
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "record already present please try updating it"})
 			return
 		}
 		var stdSt int
@@ -607,7 +613,7 @@ func EditMarks(ctx *gin.Context) {
 			return
 		}
 		if amount <= 0 {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "record not present please try inserting it first"})
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "record not present please try inserting it first"})
 			return
 		}
 		var defaultData marks
@@ -642,6 +648,7 @@ func EditMarks(ctx *gin.Context) {
 			dbstr += fmt.Sprintf(" grade = '%s' ", gradeCalculator(editBody.TheoryMarks+editBody.PracticalMarks))
 		}
 		dbstr += fmt.Sprintf("WHERE grNo = %s AND subId = %s", strconv.Itoa(editBody.GrNo), strconv.Itoa(editBody.SubId))
+		fmt.Println(dbstr)
 		if changeOccur {
 			_, err = db.Exec(dbstr)
 			if err != nil {
@@ -664,7 +671,7 @@ func EditMarks(ctx *gin.Context) {
 func AddReviews(ctx *gin.Context) {
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-
+		fmt.Println(err)
 		return
 	}
 	defer db.Close()
@@ -702,7 +709,7 @@ func AddReviews(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	if amt >= 1 {
+	if amt == 1 {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "you can only enter comment once"})
 		return
 	}
@@ -716,7 +723,7 @@ func AddReviews(ctx *gin.Context) {
 	}
 
 	if _, err := db.Exec("INSERT INTO reviews (tId, grNo, comment) VALUES (?,?,?)", tid.(int), reviewInfo.StudId, reviewInfo.Comment); err != nil {
-
+		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error while inserting error"})
 		return
 	}
@@ -726,7 +733,7 @@ func AddReviews(ctx *gin.Context) {
 func Performance(ctx *gin.Context) {
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-
+		fmt.Println(err)
 		return
 	}
 	defer db.Close()
@@ -794,6 +801,7 @@ func Performance(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, gin.H{"output": "no results found"})
 		return
 	}
+	fmt.Println(result)
 	ctx.JSON(http.StatusOK, gin.H{"output": result})
 }
 
