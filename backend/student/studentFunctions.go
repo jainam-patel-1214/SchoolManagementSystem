@@ -76,8 +76,8 @@ func DisplayStudents(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "min percent shall be within range of 0 and 100"})
 			return
 		}
-		if constraints.ViewByStd > 12 || constraints.ViewByStd <= 0 {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "only standards from 1 to 12 are available + it is compulsory to provide standard"})
+		if constraints.ViewByStd > 12 || constraints.ViewByStd < 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "only standards from 1 to 12 are available"})
 			return
 		}
 		if len(constraints.ViewBySection) > 2 || !HasOnlyAlphabets(constraints.ViewBySection) {
