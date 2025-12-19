@@ -131,7 +131,6 @@ func AcceptPendingReq(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error reading body"})
 			return
 		}
-		fmt.Println("lililili", body)
 		if body.UserName == "" {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "please provide your name"})
 			return
@@ -158,7 +157,6 @@ func AcceptPendingReq(ctx *gin.Context) {
 			return
 		}
 		var amt int
-		fmt.Println(body.PendingId, "pendding id")
 		if err = db.QueryRow(fmt.Sprintf("SELECT COUNT(id) FROM pendingApplications WHERE username='%s' AND role_requested='%s' AND user_pwd='%s' AND id='%d'", body.UserName, body.UserRole, body.UserPwd, body.PendingId)).Scan(&amt); err != nil && err != sql.ErrNoRows {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -193,7 +191,6 @@ func AcceptPendingReq(ctx *gin.Context) {
 			}
 		}
 		if body.UserRole == "teacher" {
-			fmt.Println("firsttttttt")
 			var amt int
 			if err = db.QueryRow("SELECT COUNT(tId) FROM teachers WHERE tId=?", temp).Scan(&amt); err != nil {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
