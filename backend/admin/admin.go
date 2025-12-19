@@ -211,6 +211,7 @@ func AcceptPendingReq(ctx *gin.Context) {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": "standard needs a section to be provided"})
 				return
 			}
+
 			if body.SubId != 0 && (body.SubId > 0 || body.SubId < 99999999) {
 				var amt int
 				if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", body.SubId).Scan(&amt); err != nil && err != sql.ErrNoRows {
@@ -221,54 +222,25 @@ func AcceptPendingReq(ctx *gin.Context) {
 					ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject donot exist you want to assign"})
 					return
 				}
-				if body.Section != "" {
-					if !HasOnlyAlphabets(body.Section) {
-						ctx.JSON(http.StatusBadRequest, gin.H{"error": "section only has letters"})
-						return
-					}
-					if body.Std == 0 {
-						ctx.JSON(http.StatusBadRequest, gin.H{"error": "section needs a standard to be provided"})
-						return
-					}
-					if body.Std < 1 || body.Std > 12 {
-						ctx.JSON(http.StatusBadRequest, gin.H{"error": "standar shall be between 1 and 12"})
-						return
-					}
-					if body.SubId != 0 && (body.SubId > 0 || body.SubId < 99999999) {
-						var amt int
-						if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", body.SubId).Scan(&amt); err != nil && err != sql.ErrNoRows {
-							ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-							return
-						}
-						if amt <= 0 {
-							ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject donot exist you want to assign"})
-							return
-						}
-						if body.Std < 1 || body.Std > 12 {
-							ctx.JSON(http.StatusBadRequest, gin.H{"error": "standar shall be between 1 and 12"})
-							return
-						}
-						if body.SubId != 0 && (body.SubId > 0 || body.SubId < 99999999) {
-							var amt int
-							if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", body.SubId).Scan(&amt); err != nil && err != sql.ErrNoRows {
-								ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-								return
-							}
-							if amt <= 0 {
-								ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject donot exist you want to assign"})
-								return
-							}
-						} else if body.SubId == 0 {
-						} else {
-							ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject id"})
-							return
-						}
-					} else if body.SubId == 0 {
-						fmt.Println("no subject")
-					} else {
-						ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject id"})
-						return
-					}
+				return
+			} else if body.SubId == 0 {
+				fmt.Println("no subject")
+			} else {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject id"})
+				return
+			}
+			if body.Section != "" {
+				if !HasOnlyAlphabets(body.Section) {
+					ctx.JSON(http.StatusBadRequest, gin.H{"error": "section only has letters"})
+					return
+				}
+				if body.Std == 0 {
+					ctx.JSON(http.StatusBadRequest, gin.H{"error": "section needs a standard to be provided"})
+					return
+				}
+				if body.Std < 1 || body.Std > 12 {
+					ctx.JSON(http.StatusBadRequest, gin.H{"error": "standar shall be between 1 and 12"})
+					return
 				}
 			}
 		}
