@@ -117,14 +117,14 @@ export const AddMarkTab = () => {
       <HeadingComponent position={"bottom"}>
         <p className="subHeading">
           Add academic performance record for students |{" "}
-          <a
+          {/* <a
             href={`/app/${userrole}/displayStudent`}
             style={{ color: "#008cffff" }}
           >
             {" "}
             View particular student's performance
           </a>{" "}
-          |{" "}
+          |{" "} */}
           <a href={`/app/${userrole}/editMarks`} style={{ color: "#00c200" }}>
             {" "}
             Update student marks record here

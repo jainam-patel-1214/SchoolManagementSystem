@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   NavbarTabs,
   StyledNavbar,
@@ -11,6 +11,7 @@ import delCookie from "../utils/delCookie";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import { FaAngleUp } from "react-icons/fa6";
+import { SuccessToast } from "../utils/toasterCode";
 
 export const Navbar = () => {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ export const Navbar = () => {
 
   const signOutHandler = async (e) => {
     e.preventDefault();
+    SuccessToast("Good Bye! Have a nice day");
     const msg = await delCookie("userid", "username", "token", "role");
     setTimeout(() => {
       if (msg.output !== null || msg.output !== undefined) {
@@ -38,7 +40,6 @@ export const Navbar = () => {
           progress: undefined,
           theme: "light",
         });
-        location.reload();
         navigate("/signIn");
       }
     }, 1000);

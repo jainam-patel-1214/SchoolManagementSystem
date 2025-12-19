@@ -3,7 +3,7 @@ export const Toaster = (res) => {
   if (res.output) {
     toast.success(typeof res.output === "string" ? res.output : "Success!!", {
       position: "top-right",
-      autoClose: 5000,
+      autoClose: 3000,
       hideProgressBar: false,
       closeOnClick: false,
       pauseOnHover: true,
@@ -15,7 +15,7 @@ export const Toaster = (res) => {
   } else if (res.error) {
     toast.error(res.error || "Something went wrong", {
       position: "top-right",
-      autoClose: 5000,
+      autoClose: 3000,
       hideProgressBar: false,
       closeOnClick: false,
       pauseOnHover: true,
@@ -30,7 +30,7 @@ export const Toaster = (res) => {
 export const SuccessToast = (str) => {
   toast.success(str || "Success!!", {
     position: "top-right",
-    autoClose: 5000,
+    autoClose: 3000,
     hideProgressBar: false,
     closeOnClick: false,
     pauseOnHover: true,
@@ -42,7 +42,7 @@ export const SuccessToast = (str) => {
 export const ErrorToast = (str) => {
   toast.error(str || "Something went wrong", {
     position: "top-right",
-    autoClose: 5000,
+    autoClose: 3000,
     hideProgressBar: false,
     closeOnClick: false,
     pauseOnHover: true,

@@ -62,9 +62,12 @@ export const TeacherEditComponent = () => {
       {}
     );
     if (isValidRes.output) {
-      SuccessToast("Teacher valid, go ahead and edit their details");
       dataChangeHandler("teacherId", id);
       setIsValid(true);
+      const url = new URL(window.location.href);
+      url.pathname = url.pathname.replace(/\/\d+$/, `/${id}`);
+      window.history.pushState({}, "", url);
+      SuccessToast("Teacher valid, go ahead and edit their details");
     } else {
       ErrorToast("Student does not exist, try again!");
       setIsValid(false);

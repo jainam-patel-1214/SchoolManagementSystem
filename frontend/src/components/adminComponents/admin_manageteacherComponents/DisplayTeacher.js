@@ -28,10 +28,10 @@ import { DataContainer } from "../../teacherComponents/studentComponents/GetStud
 import { MdTableRows, MdWindow } from "react-icons/md";
 import { GeneralTableComponent } from "../../helperComponents/GeneralTable";
 import { GridItemComponent } from "../../helperComponents/GridItem";
+import { debouncedFilterData } from "../../../utils/filterData";
 
 export const DisplayTeacherComponent = () => {
   const userrole = roleExtractor(window.location.pathname);
-  const [teacherId, setTeacherId] = useState(0);
   const [searchKey, setSearchKey] = useState("");
   const [filterData, setFilterData] = useState(null);
   const [originalData, setOriginalData] = useState(null);
@@ -63,7 +63,7 @@ export const DisplayTeacherComponent = () => {
           }
           output.push(data);
         });
-        setOriginalData(res.output);
+        setOriginalData(output);
         setFilterData(output);
         return;
       }
@@ -204,19 +204,20 @@ export const DisplayTeacherComponent = () => {
               name="searchQuery"
               required
               placeholder=" "
-              onChange={(e) => setSearchKey(e.target.value)}
+              onChange={(e) => {
+                setSearchKey(e.target.value);
+                const temp = debouncedFilterData(
+                  e.target.value,
+                  originalData,
+                  "teacher",
+                  setFilterData
+                );
+                setFilterData(temp);
+              }}
             />
             <FloatingLabel>Filter teachers by ID or name:</FloatingLabel>
           </InputWrapper>
         </InputContainer>
-        <ButtonElement
-          bgcol={"default"}
-          border={"default"}
-          textcol={"default"}
-          hovercol={"default"}
-        >
-          Search
-        </ButtonElement>
       </ContentContainers>
 
       <LineBreak />

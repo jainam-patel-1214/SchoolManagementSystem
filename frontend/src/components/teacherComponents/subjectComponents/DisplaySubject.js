@@ -28,6 +28,7 @@ import { GeneralTableComponent } from "../../helperComponents/GeneralTable";
 import { GridItemComponent } from "../../helperComponents/GridItem";
 import { useNavigate } from "react-router-dom";
 import { createColumnHelper } from "@tanstack/react-table";
+import { debouncedFilterData } from "../../../utils/filterData";
 
 export const DisplaySubTabComp = () => {
   const userrole = roleExtractor(window.location.pathname);
@@ -184,21 +185,31 @@ export const DisplaySubTabComp = () => {
               name="searchQuery"
               required
               placeholder=" "
-              onChange={(e) => setSearchKey(e.target.value)}
+              onChange={(e) => {
+                setSearchKey(e.target.value);
+                const temp = debouncedFilterData(
+                  e.target.value,
+                  originalData,
+                  "subject",
+                  setFilterData
+                );
+                setFilterData(temp);
+              }}
             />
             <FloatingLabel>
               Filter subjects by Subject ID or name:
             </FloatingLabel>
           </InputWrapper>
         </InputContainer>
-        <ButtonElement
+        {/* <ButtonElement
           bgcol={"default"}
           border={"default"}
           textcol={"default"}
           hovercol={"default"}
+          
         >
           Search
-        </ButtonElement>
+        </ButtonElement> */}
       </ContentContainers>
 
       <LineBreak />
@@ -227,20 +238,22 @@ export const DisplaySubTabComp = () => {
             ></GeneralTableComponent>
           ) : (
             <GridContainer>
-              {filterData?.map((value, i) => (
-                <GridItemComponent
-                  key={i}
-                  index={i}
-                  objectId={value.subjectId}
-                  password={""}
-                  name={value.subjectName}
-                  grade={value.level}
-                  section={""}
-                  credits={value.credits}
-                  isStudent={false}
-                  delete={deleteSubjectHandler}
-                ></GridItemComponent>
-              ))}
+              {filterData?.map(
+                ({ subjectId, subjectName, level, credits }, i) => (
+                  <GridItemComponent
+                    key={i}
+                    index={i}
+                    objectId={subjectId}
+                    password={""}
+                    name={subjectName}
+                    grade={level}
+                    section={""}
+                    credits={credits}
+                    isStudent={false}
+                    delete={deleteSubjectHandler}
+                  ></GridItemComponent>
+                )
+              )}
             </GridContainer>
           )}
         </ContentContainers>

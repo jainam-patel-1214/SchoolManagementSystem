@@ -60,8 +60,11 @@ export const StudentEditComponent = () => {
         {}
       );
       if (isValidRes.output) {
-        SuccessToast("Student Exists you wish to edit, go on!!");
         dataChangeHandler("grNo", id);
+        SuccessToast("student exists!, you can edit data");
+        const url = new URL(window.location.href);
+        url.pathname = url.pathname.replace(/\/\d+$/, `/${id}`);
+        window.history.pushState({}, "", url);
         setIsValid(true);
       }
     } catch (error) {

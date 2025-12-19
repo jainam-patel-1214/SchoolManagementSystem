@@ -33,6 +33,7 @@ export const NavbarTabs = styled.button`
     backdrop-filter: blur(150px);
   }
 `;
+
 export const StyledNavbarTabs = styled.div`
   /* background: #e9f8ffff; */
   color: #4359ffff;

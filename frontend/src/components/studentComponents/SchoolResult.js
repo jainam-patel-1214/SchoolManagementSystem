@@ -118,7 +118,7 @@ export const SchoolResult = () => {
       ErrorToast(errobj.min.condition);
       return;
     }
-    if (!GradeValidation(Number(data.grade))) {
+    if (data.grade !== "" && !GradeValidation(Number(data.grade))) {
       ErrorToast(errobj.std.message);
       return;
     }

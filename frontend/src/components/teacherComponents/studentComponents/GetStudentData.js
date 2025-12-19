@@ -28,6 +28,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { GeneralTableComponent } from "../../helperComponents/GeneralTable";
 import { useNavigate } from "react-router-dom";
 import { roleExtractor } from "../../../utils/roleExtractor";
+import { debouncedFilterData } from "../../../utils/filterData";
 
 export const DataContainer = styled.div`
   display: flex;
@@ -191,19 +192,20 @@ export const StudentDataComponent = () => {
               name="searchQuery"
               required
               placeholder=" "
-              onChange={(e) => setSearchKey(e.target.value)}
+              onChange={(e) => {
+                setSearchKey(e.target.value);
+                const temp = debouncedFilterData(
+                  e.target.value,
+                  originalData,
+                  "student",
+                  setFilterData
+                );
+                setFilterData(temp);
+              }}
             />
             <FloatingLabel>Filter students by Gr NO or name:</FloatingLabel>
           </InputWrapper>
         </InputContainer>
-        <ButtonElement
-          bgcol={"default"}
-          border={"default"}
-          textcol={"default"}
-          hovercol={"default"}
-        >
-          Search
-        </ButtonElement>
       </ContentContainers>
 
       <LineBreak />
@@ -232,20 +234,22 @@ export const StudentDataComponent = () => {
             ></GeneralTableComponent>
           ) : (
             <GridContainer>
-              {filterData?.map((value, i) => (
-                <GridItemComponent
-                  key={i}
-                  index={i}
-                  objectId={value.grNo}
-                  password={value.password}
-                  name={value.studentName}
-                  grade={value.grade}
-                  section={value.section}
-                  delete={deleteStudentHandler}
-                  credits={""}
-                  isStudent={true}
-                ></GridItemComponent>
-              ))}
+              {filterData?.map(
+                ({ grNo, password, studentName, grade, section }, i) => (
+                  <GridItemComponent
+                    key={i}
+                    index={i}
+                    objectId={grNo}
+                    password={password}
+                    name={studentName}
+                    grade={grade}
+                    section={section}
+                    delete={deleteStudentHandler}
+                    credits={""}
+                    isStudent={true}
+                  ></GridItemComponent>
+                )
+              )}
             </GridContainer>
           )}
         </ContentContainers>

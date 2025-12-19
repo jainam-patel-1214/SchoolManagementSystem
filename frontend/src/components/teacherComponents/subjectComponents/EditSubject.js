@@ -59,9 +59,12 @@ export const SubEditTabComp = () => {
         {}
       );
       if (isValidRes.output) {
-        SuccessToast("Subject Exists you wish to edit, go on!!");
         dataChangeHandler("subjectId", id);
         setIsValid(true);
+        const url = new URL(window.location.href);
+        url.pathname = url.pathname.replace(/\/\d+$/, `/${id}`);
+        window.history.pushState({}, "", url);
+        SuccessToast("Subject Exists you wish to edit, go on!!");
       }
     } catch (error) {
       ErrorToast("Subject doesnot exists you wish to edit, try again!!");

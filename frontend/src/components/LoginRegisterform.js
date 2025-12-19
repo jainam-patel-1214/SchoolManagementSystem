@@ -116,16 +116,16 @@ export const LoginRegisterForm = () => {
 
   const handleSignUp = async (e) => {
     e.preventDefault();
-    if (!validInp) {
-      ErrorToast("invalid values in below fields", toast);
+    if (data.userRole === "" && !validInp) {
+      ErrorToast("pick a role for yourself to register with");
       return;
     }
-    if (data.userRole === "") {
-      alert("pick a role for yourself to register with");
+    if (data.userName === "" && !validInp) {
+      ErrorToast("please enter your name");
       return;
     }
-    if (data.userName === "" || data.password === "") {
-      alert("enter userid and password properly");
+    if (!validInp && data.password.length !== 8) {
+      ErrorToast("please enter an 8 digit password");
       return;
     }
     try {
@@ -152,12 +152,16 @@ export const LoginRegisterForm = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    if (!validInp) {
-      ErrorToast("invalid values in below fields", toast);
+    if (data.userRole === "" && !validInp) {
+      ErrorToast("pick a role for yourself to register with");
       return;
     }
-    if (data.userId === "" || data.password === "") {
-      alert("enter userid and password properly");
+    if (data.userId.toString() === "" && !validInp) {
+      ErrorToast("please enter your id");
+      return;
+    }
+    if (!validInp && data.password.length !== 8) {
+      ErrorToast("please enter an 8 digit password");
       return;
     }
     try {
@@ -212,11 +216,6 @@ export const LoginRegisterForm = () => {
       (showLogin && isLoginValid) || (showRegister && isRegisterValid)
     );
   }, [data]);
-  useEffect(() => {
-    setTimeout(() => {
-      location.reload();
-    }, 300);
-  }, []);
 
   return (
     <SignInForm>
