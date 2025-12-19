@@ -1566,7 +1566,7 @@ func TestAcceptPendingRequestByAdmin(t *testing.T) {
 			reqbody:      `{"pendingId":99,"uName":"SINGHAM","uPwd":"password","uRole":"student","Uid":121111111112,"std":5,"section":"A"}`,
 			prior:        []string{`INSERT INTO pendingApplications VALUES (99,"SINGHAM","student","password")`},
 			cleanup:      []string{`DELETE FROM pendingApplications WHERE id=99`},
-			expectedCode: http.StatusOK,
+			expectedCode: http.StatusBadRequest,
 		},
 		{
 			name:         "invalid student section",
