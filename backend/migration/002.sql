@@ -1,0 +1,12 @@
+-- 002.SQL
+ALTER TABLE reviews
+DROP FOREIGN KEY reviews_ibfk_1;
+ALTER TABLE reviews
+MODIFY COLUMN tId INT;
+ALTER TABLE teachers
+MODIFY COLUMN tId INT;
+ALTER TABLE admins
+MODIFY COLUMN admin_id INT;
+ALTER TABLE reviews
+ADD FOREIGN KEY (tId)
+REFERENCES teachers (tId);
