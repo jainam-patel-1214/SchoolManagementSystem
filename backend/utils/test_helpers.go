@@ -25,37 +25,6 @@ func UserDeleter() {
 	Cleaner([]string{`DELETE FROM activeSessions where sessiontoken="` + HelperData.Token + `"`, `DELETE FROM admins where admin_id="` + strconv.Itoa(HelperData.UserId) + `"`})
 }
 
-//	func AddTempStudent(body string) {
-//		HelperData = UserGenerator("admin")
-//		router := routes.InitializeRouter()
-//		w := httptest.NewRecorder()
-//		ctx, _ := gin.CreateTestContext(w)
-//		req, err := http.NewRequest(http.MethodPost, "/admin/createStud", bytes.NewBufferString(body))
-//		if err != nil {
-//			log.Fatalf("failed to create request: %v", err)
-//		}
-//		req.Header.Set("Content-Type", "application/json")
-//		ctx.Request = req
-//		token := tokenSetter()
-//		req.Header.Set("Cookie", token)
-//		router.ServeHTTP(w, req)
-//	}
-//
-//	func DeleteTempStudent(body string) {
-//		HelperData = UserGenerator("admin")
-//		router := routes.InitializeRouter()
-//		w := httptest.NewRecorder()
-//		ctx, _ := gin.CreateTestContext(w)
-//		req, err := http.NewRequest(http.MethodDelete, "/admin/delStudent", bytes.NewBufferString(body))
-//		if err != nil {
-//			log.Fatalf("failed to create request: %v", err)
-//		}
-//		req.Header.Set("Content-Type", "application/json")
-//		ctx.Request = req
-//		token := tokenSetter()
-//		req.Header.Set("Cookie", token)
-//		router.ServeHTTP(w, req)
-//	}
 func AddTempTeacher(body string) {
 	HelperData = UserGenerator("admin")
 	router := routes.InitializeRouter()
@@ -88,19 +57,24 @@ func DeleteTempTeacher(body string) {
 	router.ServeHTTP(w, req)
 }
 func AddTempSubMarksStudent(studentbody string, subjectAllocationBody string, subjectbody string, markbody string) {
+	fmt.Println("create student 0")
 	HelperData = UserGenerator("admin")
+	fmt.Println("create student 1")
 	router := routes.InitializeRouter()
 	if studentbody != "" {
-
+		fmt.Println("create student 2")
 		p := httptest.NewRecorder()
 		ctx, _ := gin.CreateTestContext(p)
 		req, err := http.NewRequest(http.MethodPost, "/admin/createStud", bytes.NewBufferString(studentbody))
 		if err != nil {
 			log.Fatalf("failed to create request: %v", err)
 		}
+		fmt.Println("create student 3", studentbody)
 		req.Header.Set("Content-Type", "application/json")
 		ctx.Request = req
 		token := tokenSetter()
+		fmt.Println("create student 4", HelperData)
+		fmt.Println("tttoookkkeeenn", token)
 		req.Header.Set("Cookie", token)
 		router.ServeHTTP(p, req)
 		if p.Code != 200 {

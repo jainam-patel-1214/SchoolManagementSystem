@@ -39,13 +39,14 @@ func UserGenerator(role string) ResStruct {
 		"yourName": "John Doe",
 		"password": "password",
 		"roleReq":  role,
-		"secretK":  "$2a$15$NXTb8AxndfnaA82JWAxr2.apFmJkU.S1ROK10HmFBf69KxSCtW7S",
+		"secretK":  "wwww8AxndfnaA82JWAxr2.apFmJkU.1ROK10HmFBf69KxSCtW7S",
 	}
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		fmt.Println("Error marshaling JSON:", err)
 		return empty
 	}
+	fmt.Println("JSONNN DATA", string(jsonData))
 	w := httptest.NewRecorder()
 	v := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(w)
@@ -68,6 +69,8 @@ func UserGenerator(role string) ResStruct {
 	err = json.Unmarshal(body, &TempData)
 	if err != nil {
 		log.Fatalf("Error unmarshaling JSON: %v", err)
+	} else {
+		fmt.Println("BODY OF REQUEST", string(body), TempData)
 	}
 
 	logindata := map[string]any{
@@ -81,6 +84,7 @@ func UserGenerator(role string) ResStruct {
 		fmt.Println("Error marshaling JSON:", err)
 		return empty
 	}
+	fmt.Println("JSONNN DATA", string(jsonData))
 	req, err = http.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(jsonData))
 	if err != nil {
 		log.Fatalf("failed to create request: %v", err)
@@ -100,5 +104,6 @@ func UserGenerator(role string) ResStruct {
 	}
 	CurrentData.Token = LoginOp.Token
 	CurrentData.Role = LoginOp.Urole
+	fmt.Println("currenttttt data", CurrentData)
 	return CurrentData
 }

@@ -1689,6 +1689,9 @@ func TestAcceptPendingRequestByAdmin(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Log(tc.name)
 			if len(tc.prior) > 0 {
+				if tc.name == "Valid case admin" {
+					fmt.Println("heheheh", tc.prior)
+				}
 				utils.PriorRuns(tc.prior)
 			}
 			for _, task := range tc.priorFunc {
