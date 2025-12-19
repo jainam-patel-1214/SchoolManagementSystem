@@ -1162,21 +1162,23 @@ func gradeCalculator(n int) string {
 
 func FetchSecretKey() string {
 	rootPath, _ := os.Getwd()
+	fmt.Println(rootPath)
 	possiblePaths := []string{
-		filepath.Join(rootPath, ".env"),
 		filepath.Join(rootPath, "..", ".env"),
 	}
 
 	loaded := false
 	for _, path := range possiblePaths {
-		if err := godotenv.Load(path); err == nil {
-			loaded = true
-			break
+		err := godotenv.Load(path)
+		if err != nil {
+			fmt.Printf("%+v", err)
+			log.Fatal("Warning: .env not found in any known path")
 		}
+		loaded = true
 	}
 
 	if !loaded {
-		log.Fatal("Warning: .env not found in any known path")
+
 	}
 
 	secretK := os.Getenv("SECRETKEY")

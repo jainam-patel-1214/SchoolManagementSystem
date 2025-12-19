@@ -37,6 +37,7 @@ func CreatePendingReq(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "cannot read body"})
 		return
 	}
+	fmt.Println(PendingDb, "pending", FetchSecretKey())
 	if PendingDb.Username == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "please provide your name"})
 		return
@@ -76,7 +77,7 @@ func CreatePendingReq(ctx *gin.Context) {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error creating id"})
 				return
 			} else {
-				ctx.JSON(http.StatusOK, gin.H{"output": fmt.Sprintf("your_id = %d and pwd = %s", id, PendingDb.Pwd)})
+				ctx.JSON(http.StatusOK, gin.H{"uid": id, "upwd": PendingDb.Pwd})
 				return
 			}
 		case "admin":
@@ -87,7 +88,7 @@ func CreatePendingReq(ctx *gin.Context) {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error creating id"})
 				return
 			} else {
-				ctx.JSON(http.StatusOK, gin.H{"output": fmt.Sprintf("your_id = %d and pwd = %s for login", id, PendingDb.Pwd)})
+				ctx.JSON(http.StatusOK, gin.H{"uid": id, "upwd": PendingDb.Pwd})
 				return
 			}
 		default:
@@ -130,6 +131,7 @@ func AcceptPendingReq(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error reading body"})
 			return
 		}
+		fmt.Println("lililili", body)
 		if body.UserName == "" {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "please provide your name"})
 			return
@@ -191,7 +193,7 @@ func AcceptPendingReq(ctx *gin.Context) {
 			}
 		}
 		if body.UserRole == "teacher" {
-
+			fmt.Println("firsttttttt")
 			var amt int
 			if err = db.QueryRow("SELECT COUNT(tId) FROM teachers WHERE tId=?", temp).Scan(&amt); err != nil {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -219,34 +221,13 @@ func AcceptPendingReq(ctx *gin.Context) {
 					ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject donot exist you want to assign"})
 					return
 				}
-				return
-			} else if body.SubId == 0 {
-
-			} else {
-				ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject id"})
-				return
-			}
-			if body.Section != "" {
-				if !HasOnlyAlphabets(body.Section) {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": "section only has letters"})
-					return
-				}
-				if body.Std == 0 {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": "section needs a standard to be provided"})
-					return
-				}
-				if body.Std < 1 || body.Std > 12 {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": "standar shall be between 1 and 12"})
-					return
-				}
-				if body.SubId != 0 && (body.SubId > 0 || body.SubId < 99999999) {
-					var amt int
-					if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", body.SubId).Scan(&amt); err != nil && err != sql.ErrNoRows {
-						ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				if body.Section != "" {
+					if !HasOnlyAlphabets(body.Section) {
+						ctx.JSON(http.StatusBadRequest, gin.H{"error": "section only has letters"})
 						return
 					}
-					if amt <= 0 {
-						ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject donot exist you want to assign"})
+					if body.Std == 0 {
+						ctx.JSON(http.StatusBadRequest, gin.H{"error": "section needs a standard to be provided"})
 						return
 					}
 					if body.Std < 1 || body.Std > 12 {
@@ -263,18 +244,33 @@ func AcceptPendingReq(ctx *gin.Context) {
 							ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject donot exist you want to assign"})
 							return
 						}
+						if body.Std < 1 || body.Std > 12 {
+							ctx.JSON(http.StatusBadRequest, gin.H{"error": "standar shall be between 1 and 12"})
+							return
+						}
+						if body.SubId != 0 && (body.SubId > 0 || body.SubId < 99999999) {
+							var amt int
+							if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", body.SubId).Scan(&amt); err != nil && err != sql.ErrNoRows {
+								ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+								return
+							}
+							if amt <= 0 {
+								ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject donot exist you want to assign"})
+								return
+							}
+						} else if body.SubId == 0 {
+						} else {
+							ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject id"})
+							return
+						}
 					} else if body.SubId == 0 {
+						fmt.Println("no subject")
 					} else {
 						ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject id"})
+						return
 					}
-					return
-				} else if body.SubId == 0 {
-
-				} else {
-					ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject id"})
 				}
 			}
-
 		}
 		if body.UserRole == "admin" {
 
@@ -289,7 +285,7 @@ func AcceptPendingReq(ctx *gin.Context) {
 			}
 
 		}
-
+		fmt.Println("switch case incoming", body)
 		switch body.UserRole {
 		case "student":
 			if body.Std == 0 || body.Section == "" || body.UserId <= 0 || body.UserName == "" || body.UserPwd == "" {
@@ -319,12 +315,19 @@ func AcceptPendingReq(ctx *gin.Context) {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": "fill userid/std/section accurately"})
 				return
 			}
+			fmt.Println("lalalalala", body)
 			_, err = db.Exec("INSERT INTO teachers (tId,tPwd,userRole,tName,subId,stdAllocated,sectionAllocated) VALUES (?,?,?,?,?,?,?)", body.UserId, body.UserPwd, body.UserRole, body.UserName, body.SubId, body.Std, body.Section)
 			if err != nil {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			_, err = db.Exec(fmt.Sprintf("DELETE FROM pendingApplications WHERE username='%s' AND role_requested='%s' AND user_pwd='%s' AND id='%d'", body.UserName, body.UserRole, body.UserPwd, body.PendingId))
+			_, err = db.Exec(
+				"DELETE FROM pendingApplications WHERE username = ? AND role_requested = ? AND user_pwd = ? AND id = ?",
+				body.UserName,
+				body.UserRole,
+				body.UserPwd,
+				body.PendingId,
+			)
 			if err != nil {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
@@ -341,7 +344,13 @@ func AcceptPendingReq(ctx *gin.Context) {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error while updating VAL in DB"})
 				return
 			}
-			_, err = db.Exec(fmt.Sprintf("DELETE FROM pendingApplications WHERE username='%s' AND role_requested='%s' AND user_pwd='%s' AND id='%d'", body.UserName, body.UserRole, body.UserPwd, body.PendingId))
+			_, err = db.Exec(
+				"DELETE FROM pendingApplications WHERE username = ? AND role_requested = ? AND user_pwd = ? AND id = ?",
+				body.UserName,
+				body.UserRole,
+				body.UserPwd,
+				body.PendingId,
+			)
 			if err != nil {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
