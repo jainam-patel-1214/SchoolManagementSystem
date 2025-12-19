@@ -124,7 +124,6 @@ func DisplayStudents(ctx *gin.Context) {
 			}
 			dbstr += "(m.theoryM + m.practicalM) < " + strconv.Itoa(constraints.MaxPercent)
 		}
-		fmt.Println(dbstr)
 
 		db, err := sql.Open("mysql", dsn)
 		if err != nil {
@@ -209,7 +208,6 @@ func DisplaySubject(ctx *gin.Context) {
 			return
 		}
 		dbstr := "SELECT * FROM subjects WHERE levelStd = " + strconv.Itoa(constraints.Std)
-		fmt.Println(dbstr)
 
 		res, err := db.Query(dbstr)
 		if err != nil {
@@ -387,7 +385,6 @@ func SelfData(ctx *gin.Context) {
 		if len(allSubDta) > 0 {
 			otpt.SubList = allSubDta
 		}
-		fmt.Println("PPPPL", otpt)
 		ctx.JSON(http.StatusOK, gin.H{"output": otpt})
 
 	}

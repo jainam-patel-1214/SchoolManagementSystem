@@ -22,12 +22,11 @@ type DisplayConditions struct {
 }
 
 func HasOnlyAlphabets(s string) bool {
-	for i, r := range s {
+	for _, r := range s {
 		if unicode.IsSpace(r) {
 			continue
 		}
 		if !unicode.IsLetter(r) {
-			fmt.Println(i)
 			return false
 		}
 	}
@@ -155,7 +154,6 @@ func ListStudents(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, gin.H{"output": "no result found"})
 			return
 		}
-		fmt.Println(otpt)
 		ctx.JSON(http.StatusOK, gin.H{"output": otpt})
 	}
 }
@@ -215,7 +213,6 @@ func Report(ctx *gin.Context) {
 			return
 		}
 		temp := fmt.Sprintf("%v", Param.StudentGrNo)
-		fmt.Println("temp var", temp)
 		tc, err := db.Begin()
 		if err != nil {
 			log.Fatal(err)
@@ -251,8 +248,7 @@ func Report(ctx *gin.Context) {
 			var tp MarkJson
 			err = res1.Scan(&tp.SubjectId, &tp.Subject, &tp.TheoryMark, &tp.PracticalMark, &tp.Grade)
 			if err != nil {
-				fmt.Println(err)
-				// ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cant process query output"})
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cant process query output"})
 				return
 			}
 			otpt.MarkInfo = append(otpt.MarkInfo, tp)
@@ -261,7 +257,7 @@ func Report(ctx *gin.Context) {
 			var tp Comments
 			err = res2.Scan(&tp.TeacherId, &tp.TeacherName, &tp.Comment)
 			if err != nil {
-				fmt.Println(err)
+
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cant process query output"})
 				return
 			}
@@ -279,7 +275,7 @@ func Report(ctx *gin.Context) {
 func AddStudent(ctx *gin.Context) {
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-		fmt.Println(err)
+
 		return
 	}
 	defer db.Close()
@@ -301,7 +297,6 @@ func AddStudent(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		fmt.Println(studentData)
 		if studentData.GR_NO == 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid gr no provided"})
 			return
@@ -370,7 +365,7 @@ func AddStudent(ctx *gin.Context) {
 func EditStud(ctx *gin.Context) {
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-		fmt.Println(err)
+
 		return
 	}
 	defer db.Close()
@@ -648,7 +643,6 @@ func EditSub(ctx *gin.Context) {
 		if editBody.Credits != defaultData.Credits && (defaultData.Credits != 0 && editBody.Credits != 0) {
 			conditions = append(conditions, ("credits = " + strconv.Itoa(editBody.Credits)))
 		}
-		fmt.Println(editBody.Credits, "------", defaultData.Credits)
 		for i, v := range conditions {
 			dbstr += v
 			if i != len(conditions)-1 {
@@ -659,7 +653,6 @@ func EditSub(ctx *gin.Context) {
 
 		if len(conditions) > 0 {
 			_, err = db.Exec(dbstr)
-			fmt.Println("dbtrs", dbstr)
 			if err != nil {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error while updating db"})
 				return
@@ -886,7 +879,6 @@ func EditMarks(ctx *gin.Context) {
 			dbstr += fmt.Sprintf(" grade = '%s' ", gradeCalculator(editBody.TheoryMarks+editBody.PracticalMarks))
 		}
 		dbstr += fmt.Sprintf("WHERE grNo = %s AND subId = %s", strconv.Itoa(editBody.GrNo), strconv.Itoa(editBody.SubId))
-		fmt.Println(dbstr)
 		if changeOccur {
 			_, err = db.Exec(dbstr)
 			if err != nil {
@@ -909,7 +901,7 @@ func EditMarks(ctx *gin.Context) {
 func Performance(ctx *gin.Context) {
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-		fmt.Println(err)
+
 		return
 	}
 	defer db.Close()
@@ -985,7 +977,7 @@ func Performance(ctx *gin.Context) {
 		var temp int
 		err = res2.Scan(&temp)
 		if err != nil {
-			fmt.Println("cannot scan", err)
+			log.Fatal("cannot scan", err)
 		} else {
 			res3, err := db.Query("SELECT t.tId, t.tName, t.stdAllocated, s.subName, SUM(m.theoryM) AS totalTheory, SUM(m.practicalM) AS totalPractical FROM marks m LEFT JOIN teachers t ON m.subId = t.subId INNER JOIN subjects s ON t.subId = s.subId WHERE t.tId = ? GROUP BY t.tId, t.tName, t.stdAllocated, s.subName", temp)
 			if err != nil {
@@ -995,14 +987,13 @@ func Performance(ctx *gin.Context) {
 			if res3.Next() {
 				err = res3.Scan(&tempres.Tid, &tempres.TName, &tempres.StdAllocated, &tempres.SubName, &tempres.TotalTheoryMarks, &tempres.TotalPracticalMarks)
 				if err != nil {
-					fmt.Println("error finding data", err)
+					log.Fatal("error finding data", err)
 					return
 				}
 				result = append(result, tempres)
 			}
 		}
 	}
-	// fmt.Println(result)
 	if len(result) == 0 {
 		ctx.JSON(http.StatusOK, gin.H{"output": "no results found"})
 		return
@@ -1124,7 +1115,6 @@ func SelfData(ctx *gin.Context) {
 			return
 		}
 		temp := fmt.Sprintf("%v", tid)
-		fmt.Println("useriddddd", tid, temp)
 
 		var otpt struct {
 			Id       string
@@ -1136,7 +1126,6 @@ func SelfData(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		fmt.Println("PPPPL", otpt)
 		ctx.JSON(http.StatusOK, gin.H{"output": otpt})
 	}
 }
