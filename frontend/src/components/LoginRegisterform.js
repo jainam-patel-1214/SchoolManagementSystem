@@ -212,6 +212,11 @@ export const LoginRegisterForm = () => {
       (showLogin && isLoginValid) || (showRegister && isRegisterValid)
     );
   }, [data]);
+  useEffect(() => {
+    setTimeout(() => {
+      location.reload();
+    }, 300);
+  }, []);
 
   return (
     <SignInForm>

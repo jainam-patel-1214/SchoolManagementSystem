@@ -26,19 +26,22 @@ export const Navbar = () => {
   const signOutHandler = async (e) => {
     e.preventDefault();
     const msg = await delCookie("userid", "username", "token", "role");
-    if (msg.output !== null || msg.output !== undefined) {
-      toast(msg.output, {
-        position: "top-right",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-      navigate("/signIn");
-    }
+    setTimeout(() => {
+      if (msg.output !== null || msg.output !== undefined) {
+        toast(msg.output, {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+        location.reload();
+        navigate("/signIn");
+      }
+    }, 1000);
   };
   const handleNavigation = (loc) => {
     navigate(loc);
