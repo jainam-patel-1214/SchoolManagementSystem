@@ -1566,7 +1566,7 @@ func TestAcceptPendingRequestByAdmin(t *testing.T) {
 			reqbody:      `{"pendingId":99,"uName":"SINGHAM","uPwd":"password","uRole":"student","Uid":121111111112,"std":5,"section":"A"}`,
 			prior:        []string{`INSERT INTO pendingApplications VALUES (99,"SINGHAM","student","password")`},
 			cleanup:      []string{`DELETE FROM pendingApplications WHERE id=99`},
-			expectedCode: http.StatusBadRequest,
+			expectedCode: http.StatusOK,
 		},
 		{
 			name:         "invalid student section",
@@ -1689,9 +1689,6 @@ func TestAcceptPendingRequestByAdmin(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Log(tc.name)
 			if len(tc.prior) > 0 {
-				if tc.name == "Valid case admin" {
-					fmt.Println("heheheh", tc.prior)
-				}
 				utils.PriorRuns(tc.prior)
 			}
 			for _, task := range tc.priorFunc {

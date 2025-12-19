@@ -2,7 +2,6 @@ package student_test
 
 import (
 	"bytes"
-	"fmt"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -122,9 +121,7 @@ func TestDisplayStudents(t *testing.T) {
 
 	router := routes.InitializeRouter()
 	CurrentData = utils.UserGenerator("student")
-	fmt.Println("currentdata", utils.UserGenerator("student").Role, CurrentData.UserId, CurrentData.Token)
 	for _, tc := range testcases {
-		fmt.Println(CurrentData.Token)
 		t.Run(tc.name, func(t *testing.T) {
 			for _, task := range tc.priorFunc {
 				task()
@@ -138,7 +135,6 @@ func TestDisplayStudents(t *testing.T) {
 			}
 
 			ctx.Request = req
-			fmt.Println("setter else -----------", tokenSetter("valid"))
 			if tc.name == "authorization fail" {
 				tc.token = tokenSetter("invalid")
 			} else {

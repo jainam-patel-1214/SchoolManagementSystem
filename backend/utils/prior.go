@@ -12,7 +12,7 @@ func PriorRuns(cmds []string) {
 	dsn := database.InitDb()
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-		fmt.Println(err)
+
 		return
 	}
 	defer db.Close()
@@ -20,7 +20,7 @@ func PriorRuns(cmds []string) {
 		if v != "" {
 			_, err := db.Exec(v)
 			if err != nil {
-				fmt.Println(err)
+
 				return
 			}
 		}

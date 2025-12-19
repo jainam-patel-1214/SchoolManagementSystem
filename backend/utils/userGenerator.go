@@ -69,8 +69,6 @@ func UserGenerator(role string) ResStruct {
 	err = json.Unmarshal(body, &TempData)
 	if err != nil {
 		log.Fatalf("Error unmarshaling JSON: %v", err)
-	} else {
-		fmt.Println("BODY OF REQUEST", string(body), TempData)
 	}
 
 	logindata := map[string]any{
@@ -84,7 +82,6 @@ func UserGenerator(role string) ResStruct {
 		fmt.Println("Error marshaling JSON:", err)
 		return empty
 	}
-	fmt.Println("JSONNN DATA", string(jsonData))
 	req, err = http.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(jsonData))
 	if err != nil {
 		log.Fatalf("failed to create request: %v", err)
@@ -104,6 +101,5 @@ func UserGenerator(role string) ResStruct {
 	}
 	CurrentData.Token = LoginOp.Token
 	CurrentData.Role = LoginOp.Urole
-	fmt.Println("currenttttt data", CurrentData)
 	return CurrentData
 }
