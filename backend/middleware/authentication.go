@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"database/sql"
-	"fmt"
 
 	"log"
 	"net/http"
@@ -76,7 +75,6 @@ func CreateSession(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err})
 			return
 		}
-		fmt.Println("time added 1 day", temptime)
 		if res.Next() {
 			var grNo int
 			err = res.Scan(&grNo, &role, &name)
@@ -85,7 +83,6 @@ func CreateSession(ctx *gin.Context) {
 				return
 			}
 			idExist = true
-			fmt.Println("in student")
 			claim.Uid = grNo
 			claim.Role = role
 			claim.RegisteredClaims.IssuedAt = jwt.NewNumericDate(time.Now())
@@ -148,28 +145,22 @@ func CreateSession(ctx *gin.Context) {
 func ValidateSession() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		userCookie, err := ctx.Cookie("token")
-		fmt.Println("cookie received - ", userCookie, "error received - ", err)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "token not found"})
 			ctx.Abort()
 			return
 		}
-		// t := ctx.Request.CookiesNamed("userCookie")
-		// fmt.Println(t)
 		if userCookie == "" || len([]byte(userCookie)) < 3 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "token not found"})
 			ctx.Abort()
 			return
 		}
-		// fmt.Println(ck, err)
-		// userCookie := ck.Value
 		db, err := sql.Open("mysql", dsn)
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "error authorizing token validity"})
 			return
 		}
 		defer db.Close()
-		// fmt.Println(userCookie)
 		claim := &JwtClaims{}
 
 		token, err := jwt.ParseWithClaims(userCookie, claim, func(t *jwt.Token) (any, error) {
@@ -185,11 +176,20 @@ func ValidateSession() gin.HandlerFunc {
 			return
 		}
 		if claim.Role != "student" && claim.Role != "teacher" && claim.Role != "admin" {
-			fmt.Println("\n\n\n role \n\n", claim.Role)
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invaliddd or expired token provided"})
 			return
 		}
-
+		if token.Valid {
+			var amt int
+			if err = db.QueryRow(`SELECT COUNT(sessionId) FROM activeSessions WHERE sessiontoken=?`, userCookie).Scan(&amt); err != nil {
+				ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			if amt < 1 {
+				ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invaliddd or expired token provided"})
+				return
+			}
+		}
 		unixTime := claim.RegisteredClaims.ExpiresAt.Time
 		tmptime := time.Now()
 		if tmptime.After(unixTime) {

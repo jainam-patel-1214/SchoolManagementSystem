@@ -19,7 +19,6 @@ func RunMigrations(db *sql.DB, dirName string) {
 			fileName = append(fileName, f.Name())
 		}
 	}
-	fmt.Println(fileName)
 	if _, err := db.Exec("set foreign_key_checks=0"); err != nil {
 		log.Fatal(err)
 	}
