@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GrNoSubIdTeacherIdAdminIdValidation } from "../../../utils/validations";
 import { fetchApi } from "../../../utils/fetchApiCode";
 import { ToastContainer } from "react-toastify";
@@ -47,7 +47,7 @@ export const DataContainer = styled.div`
 export const StudentDataComponent = () => {
   const [filterData, setFilterData] = useState(null);
   const [searchKey, setSearchKey] = useState("");
-  const [originalData, setOriginalData] = useState(null);
+  const originalData = useRef([]);
   const userrole = roleExtractor(window.location.pathname);
   const [isTable, setIsTable] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -61,7 +61,9 @@ export const StudentDataComponent = () => {
         {}
       );
       if (res.output) {
-        setOriginalData(res.output);
+        originalData.current = res.output;
+        console.log(res.output);
+
         setFilterData(res.output);
         return;
       }
@@ -163,6 +165,21 @@ export const StudentDataComponent = () => {
       },
     }),
   ];
+
+  const handleFilterStudent = (e) => {
+    const value = e.target.value;
+    setSearchKey(value);
+    if (!value) {
+      setFilterData(originalData.current);
+      return;
+    }
+    const q = value.toLowerCase();
+    const rr = originalData.current.filter(
+      (e) =>
+        e.grNo.toString().includes(q) || e.studentName.toLowerCase().includes(q)
+    );
+    setFilterData(rr);
+  };
   return (
     <AllComponentsContainer>
       <ToastContainer />
@@ -192,16 +209,7 @@ export const StudentDataComponent = () => {
               name="searchQuery"
               required
               placeholder=" "
-              onChange={(e) => {
-                setSearchKey(e.target.value);
-                const temp = debouncedFilterData(
-                  e.target.value,
-                  originalData,
-                  "student",
-                  setFilterData
-                );
-                setFilterData(temp);
-              }}
+              onChange={(e) => handleFilterStudent(e)}
             />
             <FloatingLabel>Filter students by Gr NO or name:</FloatingLabel>
           </InputWrapper>
@@ -247,6 +255,7 @@ export const StudentDataComponent = () => {
                     delete={deleteStudentHandler}
                     credits={""}
                     isStudent={true}
+                    variant={"student"}
                   ></GridItemComponent>
                 )
               )}

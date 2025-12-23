@@ -979,10 +979,15 @@ func DelSub(ctx *gin.Context) {
 
 func Report(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
-	if !exist || role != "teacher" {
+	if !exist || (role != "teacher" && role != "admin") {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
 		return
 	} else {
+		studId, err := strconv.Atoi(ctx.Param("grNo"))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"output": "Student id not found"})
+			return
+		}
 		type MarkJson struct {
 			SubjectId     int    `json:"subId"`
 			Subject       string `json:"subjectName"`
@@ -1001,23 +1006,17 @@ func Report(ctx *gin.Context) {
 			return
 		}
 		defer db.Close()
-		var studParam struct {
-			GR_NO int `json:"grNo" binding:"required"`
-		}
-		if err = ctx.ShouldBindJSON(&studParam); err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error occured while reading params"})
-			return
-		}
-		if studParam.GR_NO == 0 {
+
+		if studId == 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid gr no provided"})
 			return
 		}
-		if studParam.GR_NO > 99999999 || studParam.GR_NO < 0 {
+		if studId > 99999999 || studId < 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid gr no provided"})
 			return
 		}
 		var amt int
-		if err = db.QueryRow("SELECT COUNT(grNo) FROM students WHERE grNo=?", studParam.GR_NO).Scan(&amt); err != nil && err != sql.ErrNoRows {
+		if err = db.QueryRow("SELECT COUNT(grNo) FROM students WHERE grNo=?", studId).Scan(&amt); err != nil && err != sql.ErrNoRows {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -1025,13 +1024,12 @@ func Report(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "student doesnot exist, please enter valid gr no"})
 			return
 		}
-		temp := studParam.GR_NO
 		tc, err := db.Begin()
 		if err != nil {
 			log.Fatal(err)
 			return
 		}
-		res1, err := db.Query("SELECT m.subId,s.subName,m.theoryM,m.practicalM,m.grade FROM marks m INNER JOIN subjects s ON s.subId = m.subId WHERE m.grNo = ?", temp)
+		res1, err := db.Query("SELECT m.subId,s.subName,m.theoryM,m.practicalM,m.grade FROM marks m INNER JOIN subjects s ON s.subId = m.subId WHERE m.grNo = ?", studId)
 		if err != nil {
 			tc.Rollback()
 			log.Fatal(err)
@@ -1042,7 +1040,7 @@ func Report(ctx *gin.Context) {
 			tc.Rollback()
 			log.Fatal("Failed to create savepoint:", err)
 		}
-		res2, err := db.Query("SELECT r.tId,t.tName,r.comment FROM reviews r INNER JOIN teachers t ON t.tId = r.tId WHERE r.grNo = ?", temp)
+		res2, err := db.Query("SELECT r.tId,t.tName,r.comment FROM reviews r INNER JOIN teachers t ON t.tId = r.tId WHERE r.grNo = ?", studId)
 		if err != nil {
 			_, err = tc.Exec("ROLLBACK TO SAVEPOINT query1done")
 			if err != nil {

@@ -1316,6 +1316,152 @@ func DisplayAllSubjects(ctx *gin.Context) {
 	}
 }
 
+func DisplayParticularTeacher(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "admin") {
+		fmt.Println("no token found")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorused access"})
+		return
+	} else {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "CANNOT CONNECT TO DB"})
+			return
+		}
+		defer db.Close()
+		tId, _ := strconv.Atoi(ctx.Param("tid"))
+		var TeachersData struct {
+			Tid      int            `json:"teacherId"`
+			Password string         `json:"teacherPwd"`
+			Name     string         `json:"teacherName"`
+			Grade    sql.NullInt64  `json:"gradeAllocated"`
+			Section  sql.NullString `json:"sectionAllocated"`
+			Subject  sql.NullString `json:"subjectAllocated"`
+			SubId    sql.NullInt64  `json:"subjectId"`
+		}
+		if err := db.QueryRow("SELECT t.tId,t.tPwd,t.tName,t.stdAllocated,t.sectionAllocated,s.subName,s.subId FROM teachers t LEFT JOIN subjects s ON t.subId = s.subId WHERE t.tId = ?", tId).Scan(
+			&TeachersData.Tid,
+			&TeachersData.Password,
+			&TeachersData.Name,
+			&TeachersData.Grade,
+			&TeachersData.Section,
+			&TeachersData.Subject,
+			&TeachersData.SubId,
+		); err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		} else if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusOK, gin.H{"output": "no teachers found"})
+			return
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": TeachersData})
+			return
+		}
+	}
+}
+func DisplayParticularStudent(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "admin" && role != "teacher") {
+		fmt.Println("no token found")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+		return
+	} else {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "CANNOT CONNECT TO DB"})
+			return
+		}
+		defer db.Close()
+		studId, _ := strconv.Atoi(ctx.Param("grNo"))
+		var StudentData struct {
+			GrNo     int    `json:"grNo"`
+			Password string `json:"studentPwd"`
+			Name     string `json:"studentName"`
+			Grade    int    `json:"grade"`
+			Section  string `json:"section"`
+		}
+		if err := db.QueryRow("SELECT grNo, sPwd, studName, std, section FROM students WHERE grNo=?", studId).Scan(&StudentData.GrNo, &StudentData.Password, &StudentData.Name, &StudentData.Grade, &StudentData.Section); err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		} else if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusOK, gin.H{"output": "no student found"})
+			return
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": StudentData})
+			return
+		}
+
+	}
+}
+func DisplayParticularSubject(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "admin" && role != "teacher") {
+		fmt.Println("no token found")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+		return
+	} else {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "CANNOT CONNECT TO DB"})
+			return
+		}
+		defer db.Close()
+		subid, _ := strconv.Atoi(ctx.Param("subId"))
+		var SubjectData struct {
+			SubjectId int    `json:"subId"`
+			Name      string `json:"sujectName"`
+			Grade     int    `json:"levelStd"`
+			Credits   int    `json:"credits"`
+		}
+		if err := db.QueryRow("SELECT subId, subName, levelStd, credits FROM subjects WHERE subId=?", subid).Scan(&SubjectData.SubjectId, &SubjectData.Name, &SubjectData.Grade, &SubjectData.Credits); err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		} else if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusOK, gin.H{"output": "no subject found"})
+			return
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": SubjectData})
+			return
+		}
+
+	}
+}
+func DisplayParticularMarks(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "admin") {
+		fmt.Println("no token found")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+		return
+	} else {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "CANNOT CONNECT TO DB"})
+			return
+		}
+		defer db.Close()
+		GrNo := ctx.DefaultQuery("grNo", "")
+		Subid := ctx.DefaultQuery("subId", "")
+		var MarkInfo struct {
+			StudentId     int    `json:"grNo"`
+			SubId         int    `json:"subId"`
+			TheoryMark    int    `json:"theoryMarks"`
+			PracticalMark int    `json:"practicalM"`
+			Grade         string `json:"markGrade"`
+		}
+		if err := db.QueryRow("SELECT grNo,subId,theoryM,practicalM,grade FROM marks WHERE grNo=? AND subId=?", GrNo, Subid).Scan(&MarkInfo.StudentId, &MarkInfo.SubId, &MarkInfo.TheoryMark, &MarkInfo.PracticalMark, &MarkInfo.Grade); err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		} else if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"output": "No such entry found"})
+			return
+		} else {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"output": MarkInfo})
+			return
+		}
+
+	}
+}
+
 func gradeCalculator(n int) string {
 	if n > 90 {
 		return "AA"

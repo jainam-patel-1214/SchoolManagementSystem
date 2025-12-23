@@ -1,15 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   GradeValidation,
   GrNoSubIdTeacherIdAdminIdValidation,
-  isNotEmptyPair,
   PasswordValidation,
   StringValidator,
 } from "../../../utils/validations";
 import { fetchApi } from "../../../utils/fetchApiCode";
 import { ToastContainer } from "react-toastify";
 import { ErrorToast, SuccessToast, Toaster } from "../../../utils/toasterCode";
-import { FaIdCardAlt } from "react-icons/fa";
 import { FaAddressCard, FaKey } from "react-icons/fa6";
 import { RiBookShelfLine, RiContactsBook2Fill } from "react-icons/ri";
 import { MdWindow } from "react-icons/md";
@@ -24,62 +22,132 @@ import {
   PageHeading,
   UnderlineComponent,
 } from "../../../styled-components/HelperStyledComponents";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { LineBreak } from "../../../styled-components/LineBreak";
 import { GridLayers } from "../../helperComponents/GridItem";
+import { SelectComponent } from "../../helperComponents/SelectComponent";
 
 export const TeacherEditComponent = () => {
   const userrole = roleExtractor(window.location.pathname);
-  const initState = {
-    teacherId: "",
-    teacherPassword: "",
-    subjectId: "",
-    teacherName: "",
-    sandardAllocated: "",
-    sectionAllocated: "",
-  };
-  const navigate = useNavigate();
-  const [data, setData] = useState(initState);
-  const [isValid, setIsValid] = useState(false);
+
+  const [data, setData] = useState({});
+  const originalData = useRef({});
+  const subjectList = useRef([]);
+  const [searchKey, setSearchKey] = useState("");
+  const [showSubjectList, setShowSubjectList] = useState(false);
+  const [filteredSubjects, setFilteredSubjects] = useState([]);
+  const { id } = useParams();
   const dataChangeHandler = (key, value) => {
-    if (key === "teacherId") {
-      setIsValid(false);
-    }
     setData((prevdata) => ({
       ...prevdata,
       [key]: value,
     }));
   };
   const setInitialData = () => {
-    setData(initState);
-    setIsValid(false);
+    setData(originalData.current);
+    setSearchKey(
+      `${originalData.current.subjectName} (Subject id: ${originalData.current.subjectId})`
+    );
   };
-  const { id } = useParams();
-  const checkTeacher = async (id) => {
-    const isValidRes = await fetchApi(
-      `http://localhost:8090/${userrole}/isValidTeacher/${id}`,
+  const handleFilterSubject = (e) => {
+    const value = e.target.value;
+    if (!value) {
+      setFilteredSubjects(subjectList.current);
+      return;
+    }
+    const q = value.toLowerCase();
+    const rr = subjectList.current.filter(
+      (e) => e.value.toString().includes(q) || e.label.toLowerCase().includes(q)
+    );
+    setFilteredSubjects(rr);
+  };
+  const fetchSubjects = async () => {
+    const tempArr = [];
+    try {
+      const res = await fetchApi(
+        `http://localhost:8090/${userrole}/allSubjects`,
+        "GET",
+        {}
+      );
+      if (res.output) {
+        res.output.forEach((e) => {
+          const tempObj = {};
+          tempObj["value"] = e.subjectId;
+          tempObj["label"] = e.subjectName;
+          tempArr.push(tempObj);
+        });
+        subjectList.current = tempArr;
+        setFilteredSubjects(tempArr);
+        return;
+      }
+    } catch (err) {
+      ErrorToast(err);
+    }
+  };
+  const searchTeacher = async (id) => {
+    const teacherData = await fetchApi(
+      `http://localhost:8090/${userrole}/teacherData/${id}`,
       "GET",
       {}
     );
-    if (isValidRes.output) {
-      dataChangeHandler("teacherId", id);
-      setIsValid(true);
-      const url = new URL(window.location.href);
-      url.pathname = url.pathname.replace(/\/\d+$/, `/${id}`);
-      window.history.pushState({}, "", url);
-      SuccessToast("Teacher valid, go ahead and edit their details");
+    if (teacherData.output) {
+      const initState = {
+        teacherId: "",
+        teacherPassword: "",
+        subjectId: "",
+        teacherName: "",
+        sandardAllocated: "",
+        sectionAllocated: "",
+        subjectName: "",
+      };
+      subjectList.current.forEach((e) => {
+        if (Number(e.value) === teacherData.output.subjectId.Int64) {
+          setSearchKey(`${e.label} (Subject id: ${e.value})`);
+        }
+      });
+      initState.teacherId = teacherData.output.teacherId || "";
+      initState.teacherPassword = teacherData.output.teacherPwd || "";
+      initState.teacherName = teacherData.output.teacherName || "";
+      initState.subjectId = teacherData.output.subjectId.Int64 || null;
+      initState.sandardAllocated =
+        teacherData.output.gradeAllocated.Int64 || null;
+      initState.sectionAllocated =
+        teacherData.output.sectionAllocated.String || null;
+      initState.subjectName =
+        teacherData.output.subjectAllocated.String || null;
+      setData(initState);
+      originalData.current = initState;
     } else {
-      ErrorToast("Student does not exist, try again!");
-      setIsValid(false);
+      ErrorToast("Teacher does not exist, try again!");
+      return;
     }
   };
   useEffect(() => {
+    fetchSubjects();
     if (!id) return;
-    checkTeacher(id);
+    searchTeacher(id);
   }, []);
 
   const submitHandler = async (e, apiUrl) => {
     e.preventDefault();
+    let isUpdateNeeded = false;
+    for (const [key, value] of Object.entries(data)) {
+      if (value !== originalData.current[key]) {
+        isUpdateNeeded = true;
+      }
+    }
+    if (!isUpdateNeeded) {
+      SuccessToast("You have not updated any values.");
+      return;
+    }
+    const keyValueMap = new Map([
+      ["teacherId", "teacherId"],
+      ["tPwd", "teacherPassword"],
+      ["subId", "subjectId"],
+      ["tName", "teacherName"],
+      ["sectionAllocated", "sectionAllocated"],
+      ["stdAllocated", "sandardAllocated"],
+    ]);
     const payload = {
       teacherId: Number(data.teacherId),
       tPwd: data.teacherPassword,
@@ -102,44 +170,39 @@ export const TeacherEditComponent = () => {
         message: "invalid password. it shall be of 8 digits",
       },
     };
-
-    let errOccured = false;
     if (!GrNoSubIdTeacherIdAdminIdValidation(payload.teacherId)) {
       ErrorToast(errobj.tid.message);
-      errOccured = true;
+      return;
     }
 
     if (
       payload.subId !== 0 &&
       !GrNoSubIdTeacherIdAdminIdValidation(payload.subId)
     ) {
-      errOccured = true;
       ErrorToast(errobj.subid.message);
+      return;
     }
 
     if (payload.tPwd !== "" && !PasswordValidation(payload.tPwd)) {
-      errOccured = true;
       ErrorToast(errobj.pwd.message);
+      return;
     }
 
     if (payload.tName !== "" && !StringValidator(payload.tName)) {
-      errOccured = true;
       ErrorToast(errobj.name.message);
+      return;
     }
 
     if (payload.stdAllocated !== 0 && !GradeValidation(payload.stdAllocated)) {
-      errOccured = true;
       ErrorToast(errobj.std.message);
+      return;
     }
 
     if (
       payload.sectionAllocated !== "" &&
       !StringValidator(payload.sectionAllocated)
     ) {
-      errOccured = true;
       ErrorToast(errobj.section.message);
-    }
-    if (errOccured) {
       return;
     }
     try {
@@ -151,19 +214,44 @@ export const TeacherEditComponent = () => {
           ErrorToast(`${key}'s value must be a number`);
           return;
         }
-        if (isNotEmptyPair(value)) {
+        if (
+          value !== null &&
+          value !== undefined &&
+          originalData.current[keyValueMap.get(key)] !== value
+        ) {
           bodyObj[key] = value;
         }
       }
+      bodyObj["teacherId"] = payload.teacherId;
       res = await fetchApi(apiUrl, "PUT", bodyObj);
       Toaster(res);
+      if (res.output) {
+        originalData.current.teacherPassword = data.teacherPassword;
+        originalData.current.teacherName = data.teacherName;
+        originalData.current.subjectId = data.subjectId;
+        originalData.current.sandardAllocated = data.sandardAllocated;
+        originalData.current.sectionAllocated = data.sectionAllocated;
+        originalData.current.subjectName = data.subjectName;
+      }
     } catch (err) {
       ErrorToast(err);
     } finally {
-      if (!errOccured) {
-        setInitialData();
-      }
+      setInitialData();
+      setShowSubjectList(false);
     }
+  };
+
+  const selectChangeHandler = (e) => {
+    const subId = Number(e.target.value);
+    console.log(subId, "id");
+
+    subjectList.current.forEach((item) => {
+      if (item.value === subId) {
+        setSearchKey(`${item.label} (Subject id: ${item.value})`);
+      }
+    });
+    dataChangeHandler("subjectId", e.target.value);
+    setShowSubjectList(false);
   };
 
   return (
@@ -171,156 +259,127 @@ export const TeacherEditComponent = () => {
       <ToastContainer />
       <HeadingComponent position={"top"}>
         <PageHeading>
-          Edit student
+          Edit teacher
           <UnderlineComponent />
         </PageHeading>
       </HeadingComponent>
       <HeadingComponent position={"bottom"}>
         <p className="subHeading">
-          Update the student's details here |{" "}
+          Update the teacher's details here |{" "}
           <a
-            href={`/app/${userrole}/displayStudent`}
+            href={`/app/${userrole}/displayTeacher`}
             style={{ color: "#008cffff" }}
           >
             {" "}
-            Go back to veiw student list
+            Go back to veiw teacher list
           </a>
         </p>
       </HeadingComponent>
-
-      <ContentContainers elements={"single"} usage={"nongrid"}>
-        <InputContainerComponent
-          width={"100%"}
-          name={"tid"}
-          value={data.teacherId}
-          isRequired={true}
-          handler={dataChangeHandler}
-          objKey={"teacherId"}
-          icon={FaIdCardAlt}
-          labelText={"Provide Id for teacher you wish to update data:"}
-        ></InputContainerComponent>
-        <ButtonElement
-          bgcol={"default"}
-          border={"default"}
-          textcol={"default"}
-          hovercol={"default"}
-          onClick={() => checkTeacher(data.teacherId)}
-        >
-          Search
-        </ButtonElement>
-      </ContentContainers>
-
       <LineBreak />
-      {isValid ? (
-        <div>
-          <HeadingComponent position={"top"}>
-            <PageHeading>Only fill the fields you wish to update:</PageHeading>
-          </HeadingComponent>
-          <ContentContainers
-            elements={"multiple"}
-            style={{ marginTop: "1rem" }}
+      <HeadingComponent position={"top"}>
+        <PageHeading>
+          You can change below fields and click update to update teacher's
+          values:
+        </PageHeading>
+      </HeadingComponent>
+      <ContentContainers elements={"multiple"} style={{ marginTop: "1rem" }}>
+        <GridContainer>
+          <InputContainerComponent
+            width={"auto"}
+            name={"tname"}
+            value={data.teacherName}
+            handler={dataChangeHandler}
+            objKey={"teacherName"}
+            icon={FaAddressCard}
+            labelText={"Provide new name:"}
+          ></InputContainerComponent>
+          <InputContainerComponent
+            width={"auto"}
+            name={"pwd"}
+            value={data.teacherPassword}
+            handler={dataChangeHandler}
+            objKey={"teacherPassword"}
+            icon={FaKey}
+            labelText={"Provide new password here:"}
+          ></InputContainerComponent>
+          {!showSubjectList ? (
+            <InputContainerComponent
+              width={"auto"}
+              name={"subname"}
+              value={searchKey}
+              handler={dataChangeHandler}
+              objKey={"subjectId"}
+              icon={RiContactsBook2Fill}
+              labelText={"Select new subject:"}
+              onFocus={() => setShowSubjectList(true)}
+              onInput={handleFilterSubject}
+              searchKeyHandler={setSearchKey}
+            ></InputContainerComponent>
+          ) : (
+            <SelectComponent
+              icon={RiContactsBook2Fill}
+              label="Select a subject from dropdown to update"
+              value={data.subjectId || ""}
+              onChange={selectChangeHandler}
+            >
+              <option value="">Select subject to update</option>
+              {filteredSubjects.map((v) => (
+                <option key={v.value} value={v.value}>
+                  {`${v.label} (subject's id: ${v.value})`}
+                </option>
+              ))}
+            </SelectComponent>
+          )}
+          <InputContainerComponent
+            width={"auto"}
+            name={"std"}
+            value={data.sandardAllocated}
+            handler={dataChangeHandler}
+            objKey={"sandardAllocated"}
+            icon={RiBookShelfLine}
+            labelText={"Provide new standard assigned:"}
+          ></InputContainerComponent>
+          <InputContainerComponent
+            width={"auto"}
+            name={"section"}
+            value={data.sectionAllocated}
+            handler={dataChangeHandler}
+            objKey={"sectionAllocated"}
+            icon={MdWindow}
+            labelText={"Provide new section assigned:"}
+          ></InputContainerComponent>
+        </GridContainer>
+      </ContentContainers>
+      <ContentContainers elements={"multiple"} style={{ marginTop: "1rem" }}>
+        <GridLayers style={{ width: "100%" }}>
+          <ButtonElement
+            style={{ width: "50%" }}
+            bgcol={"default"}
+            border={"default"}
+            textcol={"default"}
+            hovercol={"default"}
+            type="submit"
+            onClick={(e) =>
+              submitHandler(e, `http://localhost:8090/${userrole}/editTeacher`)
+            }
           >
-            <GridContainer>
-              <InputContainerComponent
-                width={"auto"}
-                name={"tname"}
-                value={data.teacherName}
-                handler={dataChangeHandler}
-                objKey={"teacherName"}
-                icon={FaAddressCard}
-                labelText={"Provide new name:"}
-              ></InputContainerComponent>
-              <InputContainerComponent
-                width={"auto"}
-                name={"pwd"}
-                value={data.teacherPassword}
-                handler={dataChangeHandler}
-                objKey={"teacherPassword"}
-                icon={FaKey}
-                labelText={"Provide new password here:"}
-              ></InputContainerComponent>
-              <InputContainerComponent
-                width={"auto"}
-                name={"subname"}
-                value={data.subjectId}
-                handler={dataChangeHandler}
-                objKey={"subjectId"}
-                icon={RiContactsBook2Fill}
-                labelText={"Provide new subject assigned:"}
-              ></InputContainerComponent>
-              <InputContainerComponent
-                width={"auto"}
-                name={"std"}
-                value={data.sandardAllocated}
-                handler={dataChangeHandler}
-                objKey={"sandardAllocated"}
-                icon={RiBookShelfLine}
-                labelText={"Provide new standard assigned:"}
-              ></InputContainerComponent>
-              <InputContainerComponent
-                width={"auto"}
-                name={"section"}
-                value={data.sectionAllocated}
-                handler={dataChangeHandler}
-                objKey={"sectionAllocated"}
-                icon={MdWindow}
-                labelText={"Provide new section assigned:"}
-              ></InputContainerComponent>
-            </GridContainer>
-          </ContentContainers>
-          <ContentContainers
-            elements={"multiple"}
-            style={{ marginTop: "1rem" }}
-          >
-            <GridLayers style={{ width: "100%" }}>
-              <ButtonElement
-                style={{ width: "50%" }}
-                bgcol={"default"}
-                border={"default"}
-                textcol={"default"}
-                hovercol={"default"}
-                type="submit"
-                onClick={(e) =>
-                  submitHandler(
-                    e,
-                    `http://localhost:8090/${userrole}/editTeacher`
-                  )
-                }
-              >
-                Update Teacher
-              </ButtonElement>
-              <GridLayers style={{ width: "48%", margin: "0" }}>
-                <ButtonElement
-                  style={{ width: "48%" }}
-                  bgcol={"transparent"}
-                  border={"1px solid #b5b5b5af"}
-                  textcol={"green"}
-                  hovercol={"#dcfff487"}
-                  onClick={() => {
-                    setInitialData();
-                    navigate(`/app/${userrole}/editTeacher`);
-                  }}
-                >
-                  Cancel
-                </ButtonElement>
-                <ButtonElement
-                  style={{ width: "48%" }}
-                  bgcol={"transparent"}
-                  border={"1px solid #b5b5b5af"}
-                  textcol={"red"}
-                  hovercol={"#ffd3d3af"}
-                  type="reset"
-                  onClick={() => setInitialData()}
-                >
-                  Reset
-                </ButtonElement>
-              </GridLayers>
-            </GridLayers>
-          </ContentContainers>
-        </div>
-      ) : (
-        <></>
-      )}
+            Update Teacher
+          </ButtonElement>
+          <GridLayers style={{ width: "48%", margin: "0" }}>
+            <ButtonElement
+              style={{ width: "100%" }}
+              bgcol={"transparent"}
+              border={"1px solid #b5b5b5af"}
+              textcol={"red"}
+              hovercol={"#ffd3d3af"}
+              type="reset"
+              onClick={() => setInitialData()}
+            >
+              Reset
+            </ButtonElement>
+          </GridLayers>
+        </GridLayers>
+      </ContentContainers>
     </AllComponentsContainer>
   );
 };

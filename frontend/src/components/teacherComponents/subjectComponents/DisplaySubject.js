@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { fetchApi } from "../../../utils/fetchApiCode";
 import { ErrorToast, Toaster } from "../../../utils/toasterCode";
 import { ToastContainer } from "react-toastify";
@@ -28,14 +28,13 @@ import { GeneralTableComponent } from "../../helperComponents/GeneralTable";
 import { GridItemComponent } from "../../helperComponents/GridItem";
 import { useNavigate } from "react-router-dom";
 import { createColumnHelper } from "@tanstack/react-table";
-import { debouncedFilterData } from "../../../utils/filterData";
 
 export const DisplaySubTabComp = () => {
   const userrole = roleExtractor(window.location.pathname);
   const [isLoading, setIsLoading] = useState(false);
-  const [filterData, setFilterData] = useState(null);
   const [searchKey, setSearchKey] = useState("");
-  const [originalData, setOriginalData] = useState(null);
+  const [data, setData] = useState([]);
+  const originalData = useRef([]);
   const [isTable, setIsTable] = useState(false);
   const fetchData = async () => {
     try {
@@ -46,8 +45,8 @@ export const DisplaySubTabComp = () => {
         {}
       );
       if (res.output) {
-        setOriginalData(res.output);
-        setFilterData(res.output);
+        originalData.current = res.output;
+        setData(res.output);
         return;
       }
     } catch (err) {
@@ -77,7 +76,31 @@ export const DisplaySubTabComp = () => {
   }, []);
   const navigate = useNavigate();
   const columnHelper = createColumnHelper();
-  const columns = [
+  const columns = useMemo(() => [
+    // {
+    //   header: "Subject ID",
+    //   accessor: "subjectId",
+    //   id: "subjectId",
+    //   enableSorting: false,
+    // },
+    // {
+    //   header: "Subject Name",
+    //   accessor: "subjectName",
+    //   id: "subjectName",
+    //   enableSorting: true,
+    // },
+    // {
+    //   header: "Grade",
+    //   accessor: "level",
+    //   id: "level",
+    //   enableSorting: false,
+    // },
+    // {
+    //   header: "Credits",
+    //   accessor: "credits",
+    //   id: "credits",
+    //   enableSorting: false,
+    // },
     columnHelper.accessor("subjectId", {
       header: "Subject ID",
       cell: (info) => info.getValue(),
@@ -144,7 +167,47 @@ export const DisplaySubTabComp = () => {
         );
       },
     }),
-  ];
+    // {
+    //   id: "accept",
+    //   Header: "",
+    //   Cell: ({ row }) => {
+    //     const v = row.original;
+    //     return (
+    //       <ButtonElement onClick={() => navigate(`/edit/${v.subjectId}`)}>
+    //         Edit
+    //       </ButtonElement>
+    //     );
+    //   },
+    // },
+    // {
+    //   id: "reject",
+    //   Header: "",
+    //   Cell: ({ row }) => {
+    //     const v = row.original;
+    //     return (
+    //       <ButtonElement onClick={() => deleteSubjectHandler(v.subjectId)}>
+    //         Delete
+    //       </ButtonElement>
+    //     );
+    //   },
+    // },
+  ]);
+
+  const handleFilterSubject = (e) => {
+    const value = e.target.value;
+    setSearchKey(value);
+    if (!value) {
+      setData(originalData.current);
+      return;
+    }
+    const q = value.toLowerCase();
+    const rr = originalData.current.filter(
+      (e) =>
+        e.subjectId.toString().includes(q) ||
+        e.subjectName.toLowerCase().includes(q)
+    );
+    setData(rr);
+  };
   return (
     <AllComponentsContainer>
       <ToastContainer />
@@ -185,31 +248,14 @@ export const DisplaySubTabComp = () => {
               name="searchQuery"
               required
               placeholder=" "
-              onChange={(e) => {
-                setSearchKey(e.target.value);
-                const temp = debouncedFilterData(
-                  e.target.value,
-                  originalData,
-                  "subject",
-                  setFilterData
-                );
-                setFilterData(temp);
-              }}
+              handleFilterSubject
+              onChange={handleFilterSubject}
             />
             <FloatingLabel>
               Filter subjects by Subject ID or name:
             </FloatingLabel>
           </InputWrapper>
         </InputContainer>
-        {/* <ButtonElement
-          bgcol={"default"}
-          border={"default"}
-          textcol={"default"}
-          hovercol={"default"}
-          
-        >
-          Search
-        </ButtonElement> */}
       </ContentContainers>
 
       <LineBreak />
@@ -232,28 +278,24 @@ export const DisplaySubTabComp = () => {
           {isLoading ? (
             <div>Fetching all subjects</div>
           ) : isTable ? (
-            <GeneralTableComponent
-              data={filterData}
-              columnDefinition={columns}
-            ></GeneralTableComponent>
+            <GeneralTableComponent data={data} columnDefinition={columns} />
           ) : (
             <GridContainer>
-              {filterData?.map(
-                ({ subjectId, subjectName, level, credits }, i) => (
-                  <GridItemComponent
-                    key={i}
-                    index={i}
-                    objectId={subjectId}
-                    password={""}
-                    name={subjectName}
-                    grade={level}
-                    section={""}
-                    credits={credits}
-                    isStudent={false}
-                    delete={deleteSubjectHandler}
-                  ></GridItemComponent>
-                )
-              )}
+              {data.map(({ subjectId, subjectName, level, credits }, i) => (
+                <GridItemComponent
+                  key={i}
+                  index={i}
+                  objectId={subjectId}
+                  password={""}
+                  name={subjectName}
+                  grade={level}
+                  section={""}
+                  credits={credits}
+                  isStudent={false}
+                  delete={deleteSubjectHandler}
+                  variant={"subject"}
+                />
+              ))}
             </GridContainer>
           )}
         </ContentContainers>

@@ -89,12 +89,12 @@ export const ButtonElement = styled.button`
     props.bgcol !== "default" ? props.bgcol : "#6366f1"};
   &:hover {
     background-color: ${(props) =>
-      props.hovercol !== "default" ? props.hovercol : "#7678f5ff"};
+      props.hovercol ? props.hovercol : "#7678f5ff"};
   }
   color: ${(props) => (props.textcol !== "default" ? props.textcol : "white")};
   cursor: pointer;
   border-radius: 10px;
-  width: 100px;
+  width: fit-content;
   height: 40px;
   border: ${(props) => (props.border !== "default" ? props.border : "none")};
   padding: 10px;

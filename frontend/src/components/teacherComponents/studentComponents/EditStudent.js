@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   GradeValidation,
   GrNoSubIdTeacherIdAdminIdValidation,
@@ -24,24 +24,13 @@ import {
 } from "../../../styled-components/HelperStyledComponents";
 import { LineBreak } from "../../../styled-components/LineBreak";
 import { GridLayers } from "../../helperComponents/GridItem";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 export const StudentEditComponent = () => {
-  const navigate = useNavigate();
   const userrole = roleExtractor(window.location.pathname);
-  const initState = {
-    grNo: "",
-    std: "",
-    section: "",
-    name: "",
-    password: "",
-  };
-  const [data, setData] = useState(initState);
-  const [isValid, setIsValid] = useState(false);
+  const [data, setData] = useState({});
+  const originalData = useRef({});
   const dataChangeHandler = (key, value) => {
-    if (key === "grNo") {
-      setIsValid(false);
-    }
     setData((prevdata) => ({
       ...prevdata,
       [key]: value,
@@ -54,28 +43,45 @@ export const StudentEditComponent = () => {
   }, []);
   const searchStudent = async (id) => {
     try {
-      const isValidRes = await fetchApi(
-        `http://localhost:8090/${userrole}/isValidStudent/${id}`,
+      const studentData = await fetchApi(
+        `http://localhost:8090/${userrole}/studentData/${id}`,
         "GET",
         {}
       );
-      if (isValidRes.output) {
-        dataChangeHandler("grNo", id);
-        SuccessToast("student exists!, you can edit data");
-        const url = new URL(window.location.href);
-        url.pathname = url.pathname.replace(/\/\d+$/, `/${id}`);
-        window.history.pushState({}, "", url);
-        setIsValid(true);
+      if (studentData.output) {
+        const initState = {
+          grNo: "",
+          standard: "",
+          section: "",
+          name: "",
+          password: "",
+        };
+        initState.grNo = studentData.output.grNo || "";
+        initState.standard = studentData.output.grade || "";
+        initState.section = studentData.output.section || "";
+        initState.name = studentData.output.studentName || "";
+        initState.password = studentData.output.studentPwd || "";
+        setData(initState);
+        originalData.current = initState;
       }
     } catch (error) {
       ErrorToast("Student doesnot exists you wish to edit, try again!!");
-      setIsValid(false);
       console.log("no student found");
     }
   };
 
   const submitHandler = async (e, apiUrl) => {
     e.preventDefault();
+    let isUpdateNeeded = false;
+    for (const [key, value] of Object.entries(data)) {
+      if (value !== originalData.current[key]) {
+        isUpdateNeeded = true;
+      }
+    }
+    if (!isUpdateNeeded) {
+      SuccessToast("You have not updated any values.");
+      return;
+    }
     const errobj = {
       grno: { condition: false, message: "invalid gr no" },
       password: {
@@ -97,9 +103,7 @@ export const StudentEditComponent = () => {
       ErrorToast(errobj.grno.message);
       return;
     }
-    console.log(GradeValidation(Number(data.std)), data.std, Number(data.std));
-
-    if (data.std !== "" && !GradeValidation(Number(data.std))) {
+    if (data.standard !== "" && !GradeValidation(Number(data.standard))) {
       ErrorToast(errobj.std.message);
       return;
     }
@@ -119,8 +123,9 @@ export const StudentEditComponent = () => {
         studName: data.name,
         studPwd: data.password,
         section: data.section,
-        std: Number(data.std),
+        std: Number(data.standard),
       };
+
       for (const [key, value] of Object.entries(payload)) {
         if (
           value !== null &&
@@ -132,19 +137,23 @@ export const StudentEditComponent = () => {
         }
       }
       res = await fetchApi(apiUrl, "PUT", bodyObj);
+      if (res.output) {
+        originalData.current.grNo = data.grNo;
+        originalData.current.standard = data.standard;
+        originalData.current.section = data.section;
+        originalData.current.name = data.name;
+        originalData.current.password = data.password;
+      }
       Toaster(res);
     } catch (err) {
       ErrorToast(err);
     } finally {
       setInitialData();
-      setIsValid(false);
-      navigate(`/app/${userrole}/editStudent`);
     }
   };
 
   const setInitialData = () => {
-    setData(initState);
-    setIsValid(false);
+    setData(originalData.current);
   };
 
   return (
@@ -169,130 +178,84 @@ export const StudentEditComponent = () => {
         </p>
       </HeadingComponent>
 
-      <ContentContainers elements={"single"} usage={"nongrid"}>
-        <InputContainerComponent
-          value={data.grNo}
-          objKey={"grNo"}
-          width={"100%"}
-          handler={dataChangeHandler}
-          name={"grNo"}
-          isRequired={true}
-          icon={FaCircleUser}
-          labelText={"Provide Gr NO for student you wish to update data:"}
-        ></InputContainerComponent>
-        <ButtonElement
-          bgcol={"default"}
-          border={"default"}
-          textcol={"default"}
-          hovercol={"default"}
-          onClick={() => searchStudent(data.grNo)}
-        >
-          Search
-        </ButtonElement>
-      </ContentContainers>
-
       <LineBreak />
-      {isValid ? (
-        <div>
-          <HeadingComponent position={"top"}>
-            <PageHeading>Only fill the fields you wish to update:</PageHeading>
-          </HeadingComponent>
-          <ContentContainers
-            elements={"multiple"}
-            style={{ marginTop: "1rem" }}
+
+      <HeadingComponent position={"top"}>
+        <PageHeading>
+          You can change below fields and click update to update student's
+          values:
+        </PageHeading>
+      </HeadingComponent>
+      <ContentContainers elements={"multiple"} style={{ marginTop: "1rem" }}>
+        <GridContainer>
+          <InputContainerComponent
+            value={data.password}
+            objKey={"password"}
+            width={"auto"}
+            handler={dataChangeHandler}
+            name={"password"}
+            icon={FaKey}
+            labelText={"Provide new password:"}
+          ></InputContainerComponent>
+          <InputContainerComponent
+            value={data.name}
+            objKey={"name"}
+            width={"auto"}
+            handler={dataChangeHandler}
+            name={"name"}
+            icon={FaAddressCard}
+            labelText={"Provide new name:"}
+          ></InputContainerComponent>
+          <InputContainerComponent
+            value={data.section}
+            objKey={"section"}
+            width={"auto"}
+            handler={dataChangeHandler}
+            name={"section"}
+            icon={MdWindow}
+            labelText={"Provide new section:"}
+          ></InputContainerComponent>
+          <InputContainerComponent
+            value={data.standard}
+            objKey={"std"}
+            width={"auto"}
+            handler={dataChangeHandler}
+            name={"std"}
+            icon={RiBookShelfLine}
+            labelText={"Provide new std:"}
+          ></InputContainerComponent>
+        </GridContainer>
+      </ContentContainers>
+      <ContentContainers elements={"multiple"} style={{ marginTop: "1rem" }}>
+        <GridLayers style={{ width: "100%" }}>
+          <ButtonElement
+            style={{ width: "50%" }}
+            bgcol={"default"}
+            border={"default"}
+            textcol={"default"}
+            hovercol={"default"}
+            type="submit"
+            onClick={(e) =>
+              submitHandler(e, `http://localhost:8090/${userrole}/updateStud`)
+            }
           >
-            <GridContainer>
-              <InputContainerComponent
-                value={data.password}
-                objKey={"password"}
-                width={"auto"}
-                handler={dataChangeHandler}
-                name={"password"}
-                icon={FaKey}
-                labelText={"Provide new password:"}
-              ></InputContainerComponent>
-              <InputContainerComponent
-                value={data.name}
-                objKey={"name"}
-                width={"auto"}
-                handler={dataChangeHandler}
-                name={"name"}
-                icon={FaAddressCard}
-                labelText={"Provide new name:"}
-              ></InputContainerComponent>
-              <InputContainerComponent
-                value={data.section}
-                objKey={"section"}
-                width={"auto"}
-                handler={dataChangeHandler}
-                name={"section"}
-                icon={MdWindow}
-                labelText={"Provide new section:"}
-              ></InputContainerComponent>
-              <InputContainerComponent
-                value={data.std}
-                objKey={"std"}
-                width={"auto"}
-                handler={dataChangeHandler}
-                name={"std"}
-                icon={RiBookShelfLine}
-                labelText={"Provide new std:"}
-              ></InputContainerComponent>
-            </GridContainer>
-          </ContentContainers>
-          <ContentContainers
-            elements={"multiple"}
-            style={{ marginTop: "1rem" }}
-          >
-            <GridLayers style={{ width: "100%" }}>
-              <ButtonElement
-                style={{ width: "50%" }}
-                bgcol={"default"}
-                border={"default"}
-                textcol={"default"}
-                hovercol={"default"}
-                type="submit"
-                onClick={(e) =>
-                  submitHandler(
-                    e,
-                    `http://localhost:8090/${userrole}/updateStud`
-                  )
-                }
-              >
-                Update Student
-              </ButtonElement>
-              <GridLayers style={{ width: "48%", margin: "0" }}>
-                <ButtonElement
-                  style={{ width: "48%" }}
-                  bgcol={"transparent"}
-                  border={"1px solid #b5b5b5af"}
-                  textcol={"green"}
-                  hovercol={"#dcfff487"}
-                  onClick={() => {
-                    setInitialData();
-                    navigate(`/app/${userrole}/editStudent`);
-                  }}
-                >
-                  Cancel
-                </ButtonElement>
-                <ButtonElement
-                  style={{ width: "48%" }}
-                  bgcol={"transparent"}
-                  border={"1px solid #b5b5b5af"}
-                  textcol={"red"}
-                  hovercol={"#ffd3d3af"}
-                  type="reset"
-                  onClick={() => setInitialData()}
-                >
-                  Reset
-                </ButtonElement>
-              </GridLayers>
-            </GridLayers>
-          </ContentContainers>
-        </div>
-      ) : (
-        <></>
-      )}
+            Update Student
+          </ButtonElement>
+          <GridLayers style={{ width: "48%", margin: "0" }}>
+            <ButtonElement
+              style={{ width: "100%" }}
+              bgcol={"transparent"}
+              border={"1px solid #b5b5b5af"}
+              textcol={"red"}
+              hovercol={"#ffd3d3af"}
+              type="reset"
+              onClick={() => setInitialData()}
+            >
+              Reset
+            </ButtonElement>
+          </GridLayers>
+        </GridLayers>
+      </ContentContainers>
     </AllComponentsContainer>
   );
 };

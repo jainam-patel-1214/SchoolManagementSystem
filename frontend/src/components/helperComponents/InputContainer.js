@@ -14,6 +14,10 @@ export const InputContainerComponent = ({
   objKey,
   labelText,
   isRequired = false,
+  onInput,
+  onFocus,
+  onBlur,
+  searchKeyHandler,
 }) => {
   return (
     <InputContainer style={{ width: width }}>
@@ -24,8 +28,15 @@ export const InputContainerComponent = ({
           name={name}
           value={value || ""}
           placeholder=" "
-          onChange={(e) => handler(objKey, e.target.value)}
+          onChange={(e) => {
+            const val = e.target.value;
+            handler(objKey, val);
+            searchKeyHandler?.(val);
+          }}
           required={isRequired}
+          onInput={onInput}
+          onFocus={onFocus}
+          onBlur={onBlur}
         />
         <FloatingLabel>{labelText}</FloatingLabel>
       </InputWrapper>

@@ -1,6 +1,7 @@
 import { CreateTeacherComponent } from "./components/adminComponents/admin_manageteacherComponents/CreateTeacher";
 import { DisplayTeacherComponent } from "./components/adminComponents/admin_manageteacherComponents/DisplayTeacher";
 import { TeacherEditComponent } from "./components/adminComponents/admin_manageteacherComponents/EditTeacher";
+import { TeacherPerformanceTab } from "./components/adminComponents/admin_manageteacherComponents/TeacherPerformanceTab";
 import { AdminHome } from "./components/adminComponents/Home";
 import { AdminPendingReqTab } from "./components/adminComponents/PendingRequestPage";
 import { SubjectLimit } from "./components/adminComponents/SubjectLimit";
@@ -18,6 +19,7 @@ import { StudentDataComponent } from "./components/teacherComponents/studentComp
 import { SubAddTabComp } from "./components/teacherComponents/subjectComponents/AddSubject";
 import { DisplaySubTabComp } from "./components/teacherComponents/subjectComponents/DisplaySubject";
 import { SubEditTabComp } from "./components/teacherComponents/subjectComponents/EditSubject";
+import { StudentPerformancePage } from "./components/teacherComponents/subjectComponents/StudentPerformanceTab";
 import "./index.css";
 import { Routes, Route } from "react-router-dom";
 
@@ -36,6 +38,10 @@ function ProjectRouter() {
         <Route path="reviews" element={<ReviewTab />}></Route>
 
         <Route path="displayStudent" element={<StudentDataComponent />}></Route>
+        <Route
+          path="studentPerformance"
+          element={<StudentPerformancePage />}
+        ></Route>
         <Route path="addStudent" element={<StudentAddComponent />}></Route>
         <Route path="editStudent" element={<StudentEditComponent />}>
           <Route index element={<StudentEditComponent />} />
@@ -61,6 +67,10 @@ function ProjectRouter() {
           <Route index element={<StudentEditComponent />} />
           <Route path=":id" element={<StudentEditComponent />}></Route>
         </Route>
+        <Route
+          path="studentPerformance"
+          element={<StudentPerformancePage />}
+        ></Route>
         <Route path="displaySubject" element={<DisplaySubTabComp />}></Route>
         <Route path="addSubject" element={<SubAddTabComp />}></Route>
         <Route path="editSubject" element={<SubEditTabComp />}>
@@ -75,6 +85,10 @@ function ProjectRouter() {
         <Route
           path="displayTeacher"
           element={<DisplayTeacherComponent />}
+        ></Route>
+        <Route
+          path="displayTeacherPerformance"
+          element={<TeacherPerformanceTab />}
         ></Route>
         <Route path="addTeacher" element={<CreateTeacherComponent />}></Route>
         <Route path="editTeacher" element={<TeacherEditComponent />}>

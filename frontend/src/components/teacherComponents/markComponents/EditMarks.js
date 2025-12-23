@@ -69,10 +69,8 @@ export const EditMarkTab = () => {
         resultForSubject.output !== "" &&
         resultForStudent.output !== "" &&
         markRecordExist.output !== ""
-      ) {
-        SuccessToast("Record exist! you can update the marks below.");
+      )
         setIsValid(true);
-      }
     } catch (err) {
       ErrorToast(
         "Record doensot exist, please try creating one by clicking second link below"

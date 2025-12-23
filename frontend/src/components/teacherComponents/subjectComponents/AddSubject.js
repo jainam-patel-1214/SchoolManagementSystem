@@ -95,9 +95,6 @@ export const SubAddTabComp = () => {
       setData(initState);
     }
   };
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
 
   return (
     <AllComponentsContainer>

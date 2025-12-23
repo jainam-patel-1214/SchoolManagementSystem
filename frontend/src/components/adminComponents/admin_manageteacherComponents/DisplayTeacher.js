@@ -1,7 +1,7 @@
 import { ToastContainer } from "react-toastify";
 import { ErrorToast, Toaster } from "../../../utils/toasterCode";
 import { GrNoSubIdTeacherIdAdminIdValidation } from "../../../utils/validations";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { InputContainer } from "../../teacherComponents/StudentsTab";
 import {
   FloatingInput,
@@ -34,7 +34,7 @@ export const DisplayTeacherComponent = () => {
   const userrole = roleExtractor(window.location.pathname);
   const [searchKey, setSearchKey] = useState("");
   const [filterData, setFilterData] = useState(null);
-  const [originalData, setOriginalData] = useState(null);
+  const originalData = useRef([]);
   const [isTable, setIsTable] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -63,7 +63,9 @@ export const DisplayTeacherComponent = () => {
           }
           output.push(data);
         });
-        setOriginalData(output);
+        console.log(output);
+
+        originalData.current = output;
         setFilterData(output);
         return;
       }
@@ -175,6 +177,22 @@ export const DisplayTeacherComponent = () => {
     fetchData();
   }, []);
 
+  const handleFilterTeacher = (e) => {
+    const value = e.target.value;
+    setSearchKey(value);
+    if (!value) {
+      setFilterData(originalData.current);
+      return;
+    }
+    const q = value.toLowerCase();
+    const rr = originalData.current.filter(
+      (e) =>
+        e.teacherId.toString().includes(q) ||
+        e.teacherName.toLowerCase().includes(q)
+    );
+    setFilterData(rr);
+  };
+
   return (
     <AllComponentsContainer>
       <ToastContainer />
@@ -204,16 +222,7 @@ export const DisplayTeacherComponent = () => {
               name="searchQuery"
               required
               placeholder=" "
-              onChange={(e) => {
-                setSearchKey(e.target.value);
-                const temp = debouncedFilterData(
-                  e.target.value,
-                  originalData,
-                  "teacher",
-                  setFilterData
-                );
-                setFilterData(temp);
-              }}
+              onChange={(e) => handleFilterTeacher(e)}
             />
             <FloatingLabel>Filter teachers by ID or name:</FloatingLabel>
           </InputWrapper>

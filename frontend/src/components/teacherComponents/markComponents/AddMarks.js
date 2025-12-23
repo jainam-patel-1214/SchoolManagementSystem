@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import { FaCircleUser, FaOrcid } from "react-icons/fa6";
 import { PiExamFill, PiExamLight } from "react-icons/pi";
@@ -22,9 +22,19 @@ import {
 import { InputContainerComponent } from "../../helperComponents/InputContainer";
 import { LineBreak } from "../../../styled-components/LineBreak";
 import { GridLayers } from "../../helperComponents/GridItem";
+import {
+  DropDownContainer,
+  DropDownElement,
+} from "../../../styled-components/Dropdown";
 
 export const AddMarkTab = () => {
   const userrole = roleExtractor(window.location.pathname);
+  const subjectList = useRef([]);
+  const studentList = useRef([]);
+  const [showStudentList, setShowStudentList] = useState(false);
+  const [showSubjectList, setShowSubjectList] = useState(false);
+  const [filteredStudent, setFilteredStudent] = useState([]);
+  const [filteredSubject, setFilteredSubject] = useState([]);
   const initState = {
     grNo: "",
     subId: "",
@@ -104,6 +114,50 @@ export const AddMarkTab = () => {
   const setInitialData = () => {
     setData(initState);
   };
+  const fetchData = async () => {
+    const [resultForStudent, resultForSubject] = await Promise.all([
+      fetchApi(`http://localhost:8090/${userrole}/allStudents`, "GET", {}),
+      fetchApi(`http://localhost:8090/${userrole}/allSubjects`, "GET", {}),
+    ]);
+    console.log(resultForStudent.output, resultForSubject.output);
+
+    if (resultForStudent.output) {
+      studentList.current = resultForStudent.output;
+      setFilteredStudent(resultForStudent.output);
+    }
+    if (resultForSubject.output) {
+      subjectList.current = resultForSubject.output;
+      setFilteredSubject(resultForSubject.output);
+    }
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleFilterStudent = (e, data, setter, type) => {
+    const value = e.target.value;
+    if (!value) {
+      setter(data);
+      return;
+    }
+    const q = value.toLowerCase();
+    let rr;
+    if (type === "subject") {
+      rr = data.filter(
+        (elem) =>
+          elem.grNo.toString().includes(q) ||
+          elem.studentName.toLowerCase().includes(q)
+      );
+    }
+    if (type === "student") {
+      rr = data.filter(
+        (elem) =>
+          elem.grNo.toString().includes(q) ||
+          elem.studentName.toLowerCase().includes(q)
+      );
+    }
+    setter(rr);
+  };
 
   return (
     <AllComponentsContainer>
@@ -144,7 +198,17 @@ export const AddMarkTab = () => {
             handler={dataChangeHandler}
             name={"grNo"}
             icon={FaCircleUser}
-            labelText={"Provide sudent's ID:"}
+            onFocus={() => setShowStudentList(true)}
+            onBlur={() => setShowStudentList(false)}
+            onInput={(e) =>
+              handleFilterStudent(
+                e,
+                studentList.current,
+                filteredStudent,
+                "student"
+              )
+            }
+            labelText={"Provide sudent's ID/Name:"}
           ></InputContainerComponent>
           <InputContainerComponent
             value={data.subId}
@@ -153,16 +217,60 @@ export const AddMarkTab = () => {
             handler={dataChangeHandler}
             name={"subId"}
             icon={FaOrcid}
-            labelText={"Provide subject's ID:"}
+            onFocus={() => setShowSubjectList(true)}
+            onBlur={() => setShowSubjectList(false)}
+            onInput={(e) =>
+              handleFilterStudent(
+                e,
+                subjectList.current,
+                filteredSubject,
+                "subject"
+              )
+            }
+            labelText={"Provide subject's ID/Name:"}
           ></InputContainerComponent>
         </GridContainer>
+        {showStudentList || showSubjectList ? (
+          <GridContainer>
+            {showStudentList ? (
+              <DropDownContainer>
+                {filteredStudent.map((v, i) => {
+                  return (
+                    <DropDownElement
+                      key={i}
+                      onClick={() => dataChangeHandler("grNo", v.grNo)}
+                    >{`${v.studentName} (GrNo: ${v.grNo})`}</DropDownElement>
+                  );
+                })}
+              </DropDownContainer>
+            ) : (
+              <div></div>
+            )}
+            {showSubjectList ? (
+              <DropDownContainer>
+                {filteredSubject.map((v, i) => {
+                  return (
+                    <DropDownElement
+                      key={i}
+                      onClick={() => dataChangeHandler("subId", v.subjectId)}
+                    >{`${v.subjectName} (GrNo: ${v.subjectId})`}</DropDownElement>
+                  );
+                })}
+              </DropDownContainer>
+            ) : (
+              <></>
+            )}
+          </GridContainer>
+        ) : (
+          <></>
+        )}
       </ContentContainers>
 
       <LineBreak />
 
       <ContentContainers elements={"multiple"} style={{ marginTop: "1rem" }}>
         <HeadingComponent position={"top"}>
-          <PageHeading>Student score details:</PageHeading>
+          <PageHeading>Give student score details he/she scored:</PageHeading>
         </HeadingComponent>
         <GridContainer>
           <InputContainerComponent

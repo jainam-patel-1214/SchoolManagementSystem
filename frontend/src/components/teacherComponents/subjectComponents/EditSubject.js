@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   GradeValidation,
   GrNoSubIdTeacherIdAdminIdValidation,
@@ -6,7 +6,6 @@ import {
 import { fetchApi } from "../../../utils/fetchApiCode";
 import { ErrorToast, SuccessToast, Toaster } from "../../../utils/toasterCode";
 import { ToastContainer } from "react-toastify";
-import { FaOrcid } from "react-icons/fa6";
 import { RiBookShelfLine } from "react-icons/ri";
 import { IoIosRibbon } from "react-icons/io";
 import { LuBookA } from "react-icons/lu";
@@ -23,23 +22,13 @@ import {
 } from "../../../styled-components/HelperStyledComponents";
 import { LineBreak } from "../../../styled-components/LineBreak";
 import { GridLayers } from "../../helperComponents/GridItem";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 export const SubEditTabComp = () => {
-  const navigate = useNavigate();
-  const initState = {
-    subjectId: "",
-    subjectName: "",
-    subjectCredit: null,
-    subjectStd: "",
-  };
-  const [data, setData] = useState(initState);
-  const [isValid, setIsValid] = useState(false);
+  const [data, setData] = useState({});
+  const originalData = useRef({});
   const userrole = roleExtractor(window.location.pathname);
   const dataChangeHandler = (key, value) => {
-    if (key === "subjectId") {
-      setIsValid(false);
-    }
     setData((prevdata) => ({
       ...prevdata,
       [key]: value,
@@ -53,28 +42,43 @@ export const SubEditTabComp = () => {
   }, []);
   const searchSubject = async (id) => {
     try {
-      const isValidRes = await fetchApi(
-        `http://localhost:8090/${userrole}/isValidSubject/${id}`,
+      const subjectData = await fetchApi(
+        `http://localhost:8090/${userrole}/subjectData/${id}`,
         "GET",
         {}
       );
-      if (isValidRes.output) {
-        dataChangeHandler("subjectId", id);
-        setIsValid(true);
-        const url = new URL(window.location.href);
-        url.pathname = url.pathname.replace(/\/\d+$/, `/${id}`);
-        window.history.pushState({}, "", url);
-        SuccessToast("Subject Exists you wish to edit, go on!!");
+      if (subjectData.output) {
+        const initState = {
+          subjectId: "",
+          subjectName: "",
+          subjectCredit: null,
+          subjectStd: "",
+        };
+        initState.subjectId = subjectData.output.subId || "";
+        initState.subjectName = subjectData.output.sujectName || "";
+        initState.subjectStd = subjectData.output.levelStd || "";
+        initState.subjectCredit = subjectData.output.credits || null;
+        setData(initState);
+        originalData.current = initState;
       }
     } catch (error) {
       ErrorToast("Subject doesnot exists you wish to edit, try again!!");
-      setIsValid(false);
       console.log("no sub found");
     }
   };
 
   const submitHandler = async (e, apiUrl) => {
     e.preventDefault();
+    let isUpdateNeeded = false;
+    for (const [key, value] of Object.entries(data)) {
+      if (value !== originalData.current[key]) {
+        isUpdateNeeded = true;
+      }
+    }
+    if (!isUpdateNeeded) {
+      SuccessToast("You have not updated any values.");
+      return;
+    }
     if (!GradeValidation(Number(data.subjectStd))) {
       ErrorToast("invalid grade. Allowed range is 1 - 12");
       return;
@@ -103,6 +107,11 @@ export const SubEditTabComp = () => {
       }
       res = await fetchApi(apiUrl, "PUT", bodyObj);
       Toaster(res);
+      if (res.output) {
+        originalData.current.subjectCredit = data.subjectCredit;
+        originalData.current.subjectStd = data.subjectStd;
+        originalData.current.subjectName = data.subjectName;
+      }
     } catch (err) {
       ErrorToast(err);
     } finally {
@@ -111,8 +120,7 @@ export const SubEditTabComp = () => {
   };
 
   const setInitialData = () => {
-    setData(initState);
-    setIsValid(false);
+    setData(originalData.current);
   };
 
   return (
@@ -136,123 +144,75 @@ export const SubEditTabComp = () => {
           </a>
         </p>
       </HeadingComponent>
-
-      <ContentContainers elements={"single"} usage={"nongrid"}>
-        <InputContainerComponent
-          value={data.subjectId}
-          objKey={"subjectId"}
-          width={"100%"}
-          handler={dataChangeHandler}
-          name={"subid"}
-          icon={FaOrcid}
-          isRequired={true}
-          labelText={"Provide SubId for subject to be updated:"}
-        ></InputContainerComponent>
-
-        <ButtonElement
-          bgcol={"default"}
-          border={"default"}
-          textcol={"default"}
-          hovercol={"default"}
-          onClick={() => searchSubject(data.subjectId)}
-        >
-          Search
-        </ButtonElement>
-      </ContentContainers>
-
       <LineBreak />
-      {isValid ? (
-        <div>
-          <HeadingComponent position={"top"}>
-            <PageHeading>Only fill the fields you wish to update:</PageHeading>
-          </HeadingComponent>
-          <ContentContainers
-            elements={"multiple"}
-            style={{ marginTop: "1rem" }}
-          >
-            <GridContainer>
-              <InputContainerComponent
-                value={data.subjectName}
-                objKey={"subjectName"}
-                width={"auto"}
-                handler={dataChangeHandler}
-                name={"subname"}
-                icon={LuBookA}
-                labelText={"Provide subject name:"}
-              ></InputContainerComponent>
-              <InputContainerComponent
-                value={data.subjectCredit}
-                objKey={"subjectCredit"}
-                width={"auto"}
-                handler={dataChangeHandler}
-                name={"credits"}
-                icon={IoIosRibbon}
-                labelText={"Provide new credit:"}
-              ></InputContainerComponent>
-              <InputContainerComponent
-                value={data.subjectStd}
-                objKey={"subjectStd"}
-                width={"auto"}
-                handler={dataChangeHandler}
-                name={"subLevel"}
-                icon={RiBookShelfLine}
-                labelText={"Provide updated grade:"}
-              ></InputContainerComponent>
-            </GridContainer>
-          </ContentContainers>
-          <ContentContainers
-            elements={"multiple"}
-            style={{ marginTop: "1rem" }}
-          >
-            <GridLayers style={{ width: "100%" }}>
+      <div>
+        <HeadingComponent position={"top"}>
+          <PageHeading>
+            You can change below fields and click update to update the values:
+          </PageHeading>
+        </HeadingComponent>
+        <ContentContainers elements={"multiple"} style={{ marginTop: "1rem" }}>
+          <GridContainer>
+            <InputContainerComponent
+              value={data.subjectName}
+              objKey={"subjectName"}
+              width={"auto"}
+              handler={dataChangeHandler}
+              name={"subname"}
+              icon={LuBookA}
+              labelText={"Provide subject name:"}
+            ></InputContainerComponent>
+            <InputContainerComponent
+              value={data.subjectCredit}
+              objKey={"subjectCredit"}
+              width={"auto"}
+              handler={dataChangeHandler}
+              name={"credits"}
+              icon={IoIosRibbon}
+              labelText={"Provide new credit:"}
+            ></InputContainerComponent>
+            <InputContainerComponent
+              value={data.subjectStd}
+              objKey={"subjectStd"}
+              width={"auto"}
+              handler={dataChangeHandler}
+              name={"subLevel"}
+              icon={RiBookShelfLine}
+              labelText={"Provide updated grade:"}
+            ></InputContainerComponent>
+          </GridContainer>
+        </ContentContainers>
+        <ContentContainers elements={"multiple"} style={{ marginTop: "1rem" }}>
+          <GridLayers style={{ width: "100%" }}>
+            <ButtonElement
+              style={{ width: "50%" }}
+              bgcol={"default"}
+              border={"default"}
+              textcol={"default"}
+              hovercol={"default"}
+              type="submit"
+              onClick={(e) =>
+                submitHandler(e, `http://localhost:8090/${userrole}/updateSub`)
+              }
+            >
+              Update Subject
+            </ButtonElement>
+            <GridLayers style={{ width: "48%", margin: "0" }}>
               <ButtonElement
-                style={{ width: "50%" }}
-                bgcol={"default"}
-                border={"default"}
-                textcol={"default"}
-                hovercol={"default"}
-                type="submit"
-                onClick={(e) =>
-                  submitHandler(
-                    e,
-                    `http://localhost:8090/${userrole}/updateSub`
-                  )
-                }
+                style={{ width: "100%" }}
+                bgcol={"transparent"}
+                border={"1px solid #b5b5b5af"}
+                textcol={"red"}
+                hovercol={"#ffd3d3af"}
+                type="reset"
+                onClick={() => setInitialData()}
               >
-                Update Subject
+                Reset
               </ButtonElement>
-              <GridLayers style={{ width: "48%", margin: "0" }}>
-                <ButtonElement
-                  style={{ width: "48%" }}
-                  bgcol={"transparent"}
-                  border={"1px solid #b5b5b5af"}
-                  textcol={"green"}
-                  hovercol={"#dcfff487"}
-                  onClick={() => {
-                    setInitialData();
-                    navigate(`/app/${userrole}/editSubject`);
-                  }}
-                >
-                  Cancel
-                </ButtonElement>
-                <ButtonElement
-                  style={{ width: "48%" }}
-                  bgcol={"transparent"}
-                  border={"1px solid #b5b5b5af"}
-                  textcol={"red"}
-                  hovercol={"#ffd3d3af"}
-                  type="reset"
-                  onClick={() => setInitialData()}
-                >
-                  Reset
-                </ButtonElement>
-              </GridLayers>
             </GridLayers>
-          </ContentContainers>
-        </div>
-      ) : (
-        <></>
-      )}
+          </GridLayers>
+        </ContentContainers>
+      </div>
     </AllComponentsContainer>
   );
 };

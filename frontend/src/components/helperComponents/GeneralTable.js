@@ -32,19 +32,18 @@ const TableTdEntry = styled.td`
   text-align: center;
   padding: 0px 10px;
 `;
-
+const initiaDala = [];
 export const GeneralTableComponent = ({
   data,
   columnDefinition,
   marginTopRequired,
 }) => {
-  const finalData = useMemo(() => data, [data]);
   const finalColumnDef = useMemo(() => columnDefinition, [columnDefinition]);
   const [sorting, setSorting] = useState([]);
 
   const tableInstance = useReactTable({
     columns: finalColumnDef,
-    data: finalData,
+    data: data,
     state: {
       sorting,
     },
@@ -53,8 +52,6 @@ export const GeneralTableComponent = ({
     getSortedRowModel: getSortedRowModel(),
   });
   return (
-    // <>
-    //   {Object.keys(data).length > 0 ? (
     <TableComp style={{ width: "100%" }} marginTopRequired={marginTopRequired}>
       <thead style={{ backgroundColor: "pink" }}>
         {tableInstance.getHeaderGroups().map((headElem, i) => {
@@ -93,9 +90,6 @@ export const GeneralTableComponent = ({
           return (
             <TableTrEntry iseven={i % 2} id={i} key={i}>
               {rowElem.getVisibleCells().map((cellElem, i) => {
-                if (cellElem.id.includes("gradeAllocated")) {
-                  console.log(cellElem.id, cellElem.renderValue);
-                }
                 return (
                   <TableTdEntry key={i}>
                     {flexRender(
@@ -110,9 +104,5 @@ export const GeneralTableComponent = ({
         })}
       </tbody>
     </TableComp>
-    //   ) : (
-    //     <div> no data found</div>
-    //   )}
-    // </>
   );
 };

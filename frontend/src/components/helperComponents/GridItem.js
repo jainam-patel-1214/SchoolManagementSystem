@@ -5,7 +5,6 @@ import {
 } from "../../styled-components/HelperStyledComponents";
 import { roleExtractor } from "../../utils/roleExtractor";
 import { useNavigate } from "react-router-dom";
-import { GrNoSubIdTeacherIdAdminIdValidation } from "../../utils/validations";
 
 export const IndexComp = styled.div`
   width: 32px;
@@ -68,6 +67,7 @@ export const GridItemComponent = ({
   subjectName,
   isTeacher,
   delete: deleteHandler,
+  variant,
 }) => {
   const navigate = useNavigate();
   const userrole = roleExtractor(window.location.pathname);
@@ -109,7 +109,7 @@ export const GridItemComponent = ({
           <ContentContainers>
             <HeaderData>
               <div>
-                <p>Subject assigned:</p>
+                <p>Subject appointed:</p>
               </div>
               <h4>{subjectName}</h4>
             </HeaderData>
@@ -147,15 +147,41 @@ export const GridItemComponent = ({
         </GridLayers>
       )}
       <GridLayers>
-        <ButtonElement
-          style={{ width: "45%" }}
-          bgcol={"default"}
-          border={"default"}
-          textcol={"default"}
-          hovercol={"default"}
-        >
-          View Details
-        </ButtonElement>
+        {variant !== "subject" ? (
+          <ButtonElement
+            style={{ width: "45%" }}
+            bgcol={"default"}
+            border={"default"}
+            textcol={"default"}
+            hovercol={"default"}
+            onClick={() => {
+              isStudent
+                ? navigate(
+                    `/app/${userrole}/studentPerformance?` +
+                      new URLSearchParams({
+                        name: name,
+                        std: grade,
+                        section: section,
+                        grNo: objectId,
+                      })
+                  )
+                : navigate(
+                    `/app/${userrole}/displayTeacherPerformance?` +
+                      new URLSearchParams({
+                        name: name,
+                        std: grade,
+                        section: section,
+                        subject: subjectName,
+                        tid: objectId,
+                      })
+                  );
+            }}
+          >
+            View Performance
+          </ButtonElement>
+        ) : (
+          <></>
+        )}
         <GridLayers style={{ width: "53%", margin: "0" }}>
           <ButtonElement
             style={{ width: "40%" }}
