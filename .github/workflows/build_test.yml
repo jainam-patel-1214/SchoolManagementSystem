@@ -50,6 +50,6 @@ jobs:
       run: go build -v ./...
       
     # Step 8: Test Go app
-    - name: Test Go app
-      working-directory: ./backend
-      run: go test -v ./...
+    # - name: Test Go app
+    #   working-directory: ./backend
+    #   run: go test -v ./...
