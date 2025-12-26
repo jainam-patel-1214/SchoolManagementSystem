@@ -23,12 +23,12 @@ jobs:
         
     # Step 3: Install React dependencies
     - name: Install React dependencies
-      working-directory: SchoolManagementSystem/frontend
+      working-directory: ./frontend
       run: npm install
       
     # Step 4: Build React app
     - name: Build React app
-      working-directory: SchoolManagementSystem/frontend
+      working-directory: ./frontend
       run: npm run build
       env:
         CI: false
@@ -41,15 +41,15 @@ jobs:
         
     # Step 6: Install Go dependencies
     - name: Install Go dependencies
-      working-directory: SchoolManagementSystem/backend
+      working-directory: ./backend
       run: go mod download
       
     # Step 7: Build Go app
     - name: Build Go app
-      working-directory: SchoolManagementSystem/backend
+      working-directory: ./backend
       run: go build -v ./...
       
     # Step 8: Test Go app
     - name: Test Go app
-      working-directory: SchoolManagementSystem/backend
+      working-directory: ./backend
       run: go test -v ./...
