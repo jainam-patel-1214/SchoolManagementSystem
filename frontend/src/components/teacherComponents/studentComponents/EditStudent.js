@@ -213,7 +213,7 @@ export const StudentEditComponent = () => {
           ></InputContainerComponent>
           <InputContainerComponent
             value={data.standard}
-            objKey={"std"}
+            objKey={"standard"}
             width={"auto"}
             handler={dataChangeHandler}
             name={"std"}

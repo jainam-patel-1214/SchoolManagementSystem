@@ -133,14 +133,6 @@ export const StudentPerformancePage = () => {
                 <p className="subHeading">
                   Update academic performance for this student here |{" "}
                   <a
-                    href={`/app/${userrole}/editMarks`}
-                    style={{ color: "#008cffff" }}
-                  >
-                    {" "}
-                    Update marks
-                  </a>
-                  |{" "}
-                  <a
                     href={`/app/${userrole}/enterMarks?grNo=${id}`}
                     style={{ color: "#00c200" }}
                   >

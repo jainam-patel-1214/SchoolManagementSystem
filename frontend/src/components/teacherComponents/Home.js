@@ -19,7 +19,23 @@ export const TeacherHome = () => {
   const [displayData, setDisplayData] = useState({});
   const [displayReport, setDisplayReport] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [studentsAmount, setStudentsAmount] = useState(0);
   const userrole = roleExtractor(window.location.pathname);
+  const fetchStudents = async (a, b, c) => {
+    const res = await fetchApi(
+      "http://localhost:8090/teacher/selfStudents?" +
+        new URLSearchParams({
+          std: a,
+          section: b,
+          subId: c,
+        }),
+      "GET",
+      {}
+    );
+    if (res.output && typeof res !== "string") {
+      setStudentsAmount(res.output);
+    }
+  };
   useEffect(() => {
     const baseApi = `http://localhost:8090/${userrole}`;
 
@@ -30,7 +46,9 @@ export const TeacherHome = () => {
           fetchApi(`${baseApi}/data`, "GET", {}),
           fetchApi(`${baseApi}/displayPerformance`, "GET", {}),
         ]);
+        const { Std, Section, SubId } = dataRes.output;
         setDisplayData(dataRes.output);
+        fetchStudents(Std, Section, SubId);
         setDisplayReport(reportRes.output);
       } catch (err) {
         ErrorToast(err);
@@ -98,7 +116,7 @@ export const TeacherHome = () => {
               <InfoBox>
                 <LabelValuePair
                   label={"Total Students:"}
-                  value={"data coming soon"}
+                  value={studentsAmount}
                 ></LabelValuePair>
               </InfoBox>
             </InfoBoxContainer>
