@@ -126,7 +126,7 @@ export const TeacherHome = () => {
                   width={"40%"}
                   infobox={true}
                   label={"Subject Name:"}
-                  value={displayData.SubName}
+                  value={displayData.SubName || "N/A"}
                 ></LabelValuePair>
               </GridLayers>
             </ContentContainers>

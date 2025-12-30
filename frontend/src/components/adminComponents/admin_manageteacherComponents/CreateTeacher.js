@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   GradeValidation,
   GrNoSubIdTeacherIdAdminIdValidation,
@@ -31,6 +31,7 @@ import { GridLayers } from "../../helperComponents/GridItem";
 export const CreateTeacherComponent = () => {
   const userrole = roleExtractor(window.location.pathname);
   const navigate = useNavigate();
+  const userList = useRef([]);
   const initState = {
     teacherId: "",
     teacherPassword: "",
@@ -40,6 +41,8 @@ export const CreateTeacherComponent = () => {
     sectionAllocated: "",
   };
   const [data, setData] = useState(initState);
+  const [idErrorMessage, setIdErrorMessage] = useState("");
+  const [idNotAvailable, setIdNotAvailable] = useState(false);
   const setInitialData = () => {
     setData(initState);
   };
@@ -136,12 +139,56 @@ export const CreateTeacherComponent = () => {
 
       res = await fetchApi(apiUrl, "POST", bodyObj);
       Toaster(res);
+      if (res.output) {
+        fetchTeachers();
+      }
     } catch (err) {
       ErrorToast(err);
     } finally {
       setInitialData();
     }
   };
+
+  const fetchTeachers = async () => {
+    try {
+      const res = await fetchApi(
+        `http://localhost:8090/admin/allTeachers`,
+        "GET",
+        {}
+      );
+      if (res.output) {
+        console.log(res);
+        userList.current = res.output;
+        return;
+      } else {
+        userList.current = [];
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTeachers();
+  }, []);
+
+  useEffect(() => {
+    let flag = false;
+    if (data.teacherId === "") {
+      setIdErrorMessage("");
+      setIdNotAvailable(false);
+      return;
+    }
+    userList.current.forEach((e) => {
+      if (e.teacherId == data.teacherId) flag = true;
+    });
+    setIdNotAvailable(flag);
+    if (flag) {
+      setIdErrorMessage(`(THIS ID IS ALREADY OCCUPIED)`);
+    } else {
+      setIdErrorMessage(`ID AVAILABLE`);
+    }
+  }, [data.teacherId]);
 
   return (
     <AllComponentsContainer>
@@ -168,12 +215,15 @@ export const CreateTeacherComponent = () => {
       <ContentContainers elements={"single"} usage={"nongrid"}>
         <InputContainerComponent
           icon={FaIdCardAlt}
-          labelText={"Provide Id for new teacher to be created:"}
           width={"100%"}
           handler={dataChangeHandler}
           value={data.teacherId}
           name={"tid"}
           objKey={"teacherId"}
+          labelText={
+            idErrorMessage || "Provide Id for new teacher to be created:"
+          }
+          errorColor={idNotAvailable ? "#FF0000" : "default"}
         ></InputContainerComponent>
       </ContentContainers>
 

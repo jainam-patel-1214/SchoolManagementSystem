@@ -18,7 +18,10 @@ export const FloatingInput = styled.input`
   transition: border-color 0.3s;
 
   &:focus {
-    border-color: #007bff;
+    border-color: ${({ errorColor }) =>
+      errorColor !== "default" ? errorColor : "#007bff"};
+    border-width: ${({ errorColor }) =>
+      errorColor !== "default" ? "2px" : "1px"};
   }
   &:not(:placeholder-shown) + label {
     top: -15px;
@@ -29,7 +32,8 @@ export const FloatingInput = styled.input`
   &:focus + label {
     top: -15px;
     font-size: 12px;
-    color: #007bff;
+    color: ${({ errorColor }) =>
+      errorColor !== "default" ? errorColor : "#00bf40ff"};
   }
 `;
 

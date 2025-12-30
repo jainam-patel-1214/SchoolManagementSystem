@@ -63,8 +63,6 @@ export const DisplayTeacherComponent = () => {
           }
           output.push(data);
         });
-        console.log(output);
-
         originalData.current = output;
         setFilterData(output);
         return;

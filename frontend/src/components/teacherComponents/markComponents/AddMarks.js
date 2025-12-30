@@ -8,7 +8,7 @@ import {
   TheoryMarksValidation,
 } from "../../../utils/validations";
 import { ErrorToast, Toaster } from "../../../utils/toasterCode";
-import { fetchApi } from "../../../utils/fetchApiCode";
+import { fetchApi, fetchUrlParams } from "../../../utils/fetchApiCode";
 import { roleExtractor } from "../../../utils/roleExtractor";
 import {
   AllComponentsContainer,
@@ -108,7 +108,10 @@ export const AddMarkTab = () => {
     } catch (err) {
       ErrorToast(err);
     } finally {
-      setInitialData();
+      setData((prev) => ({
+        ...prev,
+        grNo: data.grNo,
+      }));
     }
   };
   const setInitialData = () => {
@@ -119,8 +122,6 @@ export const AddMarkTab = () => {
       fetchApi(`http://localhost:8090/${userrole}/allStudents`, "GET", {}),
       fetchApi(`http://localhost:8090/${userrole}/allSubjects`, "GET", {}),
     ]);
-    console.log(resultForStudent.output, resultForSubject.output);
-
     if (resultForStudent.output) {
       studentList.current = resultForStudent.output;
       setFilteredStudent(resultForStudent.output);
@@ -132,9 +133,13 @@ export const AddMarkTab = () => {
   };
   useEffect(() => {
     fetchData();
+    const studentId = fetchUrlParams("grNo");
+    if (studentId) {
+      dataChangeHandler("grNo", studentId);
+    }
   }, []);
 
-  const handleFilterStudent = (e, data, setter, type) => {
+  const handleFilterStudentAndSubject = (e, data, setter, type) => {
     const value = e.target.value;
     if (!value) {
       setter(data);
@@ -145,8 +150,8 @@ export const AddMarkTab = () => {
     if (type === "subject") {
       rr = data.filter(
         (elem) =>
-          elem.grNo.toString().includes(q) ||
-          elem.studentName.toLowerCase().includes(q)
+          elem.subjectId.toString().includes(q) ||
+          elem.subjectName.toLowerCase().includes(q)
       );
     }
     if (type === "student") {
@@ -171,14 +176,14 @@ export const AddMarkTab = () => {
       <HeadingComponent position={"bottom"}>
         <p className="subHeading">
           Add academic performance record for students |{" "}
-          {/* <a
+          <a
             href={`/app/${userrole}/displayStudent`}
             style={{ color: "#008cffff" }}
           >
             {" "}
-            View particular student's performance
+            View students
           </a>{" "}
-          |{" "} */}
+          |{" "}
           <a href={`/app/${userrole}/editMarks`} style={{ color: "#00c200" }}>
             {" "}
             Update student marks record here
@@ -201,10 +206,10 @@ export const AddMarkTab = () => {
             onFocus={() => setShowStudentList(true)}
             onBlur={() => setShowStudentList(false)}
             onInput={(e) =>
-              handleFilterStudent(
+              handleFilterStudentAndSubject(
                 e,
                 studentList.current,
-                filteredStudent,
+                setFilteredStudent,
                 "student"
               )
             }
@@ -220,10 +225,10 @@ export const AddMarkTab = () => {
             onFocus={() => setShowSubjectList(true)}
             onBlur={() => setShowSubjectList(false)}
             onInput={(e) =>
-              handleFilterStudent(
+              handleFilterStudentAndSubject(
                 e,
                 subjectList.current,
-                filteredSubject,
+                setFilteredSubject,
                 "subject"
               )
             }
@@ -238,7 +243,7 @@ export const AddMarkTab = () => {
                   return (
                     <DropDownElement
                       key={i}
-                      onClick={() => dataChangeHandler("grNo", v.grNo)}
+                      onMouseDown={() => dataChangeHandler("grNo", v.grNo)}
                     >{`${v.studentName} (GrNo: ${v.grNo})`}</DropDownElement>
                   );
                 })}
@@ -252,8 +257,10 @@ export const AddMarkTab = () => {
                   return (
                     <DropDownElement
                       key={i}
-                      onClick={() => dataChangeHandler("subId", v.subjectId)}
-                    >{`${v.subjectName} (GrNo: ${v.subjectId})`}</DropDownElement>
+                      onMouseDown={() =>
+                        dataChangeHandler("subId", v.subjectId)
+                      }
+                    >{`${v.subjectName} (subject id: ${v.subjectId})`}</DropDownElement>
                   );
                 })}
               </DropDownContainer>

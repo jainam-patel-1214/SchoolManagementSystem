@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   GradeValidation,
   GrNoSubIdTeacherIdAdminIdValidation,
@@ -28,6 +28,9 @@ import { useNavigate } from "react-router-dom";
 export const SubAddTabComp = () => {
   const navigate = useNavigate();
   const userrole = roleExtractor(window.location.pathname);
+  const [idErrorMessage, setIdErrorMessage] = useState("");
+  const [idNotAvailable, setIdNotAvailable] = useState(false);
+  const subjectList = useRef([]);
   const initState = {
     subjectId: "",
     subjectName: "",
@@ -35,7 +38,6 @@ export const SubAddTabComp = () => {
     subjectStd: "",
   };
   const [data, setData] = useState(initState);
-  const [displayData, setDisplayData] = useState(null);
   const dataChangeHandler = (key, value) => {
     setData((prevdata) => ({
       ...prevdata,
@@ -86,8 +88,7 @@ export const SubAddTabComp = () => {
       res = await fetchApi(apiUrl, "POST", bodyObj);
       Toaster(res);
       if (res.output) {
-        setDisplayData(res.output);
-        return;
+        fetchSubjects();
       }
     } catch (err) {
       ErrorToast(err);
@@ -95,6 +96,46 @@ export const SubAddTabComp = () => {
       setData(initState);
     }
   };
+
+  const fetchSubjects = async () => {
+    try {
+      const res = await fetchApi(
+        `http://localhost:8090/${userrole}/allSubjects`,
+        "GET",
+        {}
+      );
+      if (res.output) {
+        subjectList.current = res.output;
+        return;
+      } else {
+        subjectList.current = [];
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSubjects();
+  }, []);
+
+  useEffect(() => {
+    let flag = false;
+    if (data.subjectId === "") {
+      setIdErrorMessage("");
+      setIdNotAvailable(false);
+      return;
+    }
+    subjectList.current.forEach((e) => {
+      if (e.subjectId == data.subjectId) flag = true;
+    });
+    setIdNotAvailable(flag);
+    if (flag) {
+      setIdErrorMessage(`(THIS ID IS ALREADY OCCUPIED)`);
+    } else {
+      setIdErrorMessage(`ID AVAILABLE`);
+    }
+  }, [data.subjectId]);
 
   return (
     <AllComponentsContainer>
@@ -127,7 +168,11 @@ export const SubAddTabComp = () => {
           name={"subId"}
           isRequired={true}
           icon={FaOrcid}
-          labelText={"Provide unique ID for subject you wish to create:"}
+          labelText={
+            idErrorMessage ||
+            "Provide unique ID for subject you wish to create:"
+          }
+          errorColor={idNotAvailable ? "#FF0000" : "default"}
         ></InputContainerComponent>
       </ContentContainers>
 

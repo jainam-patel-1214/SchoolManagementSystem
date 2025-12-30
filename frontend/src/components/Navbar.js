@@ -103,7 +103,7 @@ export const Navbar = () => {
           )}
           {role === "teacher" || role === "admin" ? (
             <StyledNavbarTabs onClick={() => handleNavigation("enterMarks")}>
-              Exams <FaAngleUp style={{ verticalAlign: "middle" }} />
+              Marks <FaAngleUp style={{ verticalAlign: "middle" }} />
             </StyledNavbarTabs>
           ) : (
             <></>

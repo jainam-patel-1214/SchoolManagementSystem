@@ -89,7 +89,7 @@ export const ButtonElement = styled.button`
     props.bgcol !== "default" ? props.bgcol : "#6366f1"};
   &:hover {
     background-color: ${(props) =>
-      props.hovercol ? props.hovercol : "#7678f5ff"};
+      props.hovercol !== "default" ? props.hovercol : "#7678f5ff"};
   }
   color: ${(props) => (props.textcol !== "default" ? props.textcol : "white")};
   cursor: pointer;

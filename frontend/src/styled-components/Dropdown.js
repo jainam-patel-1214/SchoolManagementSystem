@@ -15,6 +15,7 @@ export const DropDownContainer = styled.div`
 export const DropDownElement = styled.div`
   width: 100%;
   margin: auto;
+  pointer-events: all;
   &:hover {
     cursor: pointer;
     background-color: #d2d2d2c8;

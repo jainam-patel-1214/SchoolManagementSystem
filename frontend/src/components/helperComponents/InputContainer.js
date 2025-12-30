@@ -18,6 +18,7 @@ export const InputContainerComponent = ({
   onFocus,
   onBlur,
   searchKeyHandler,
+  errorColor,
 }) => {
   return (
     <InputContainer style={{ width: width }}>
@@ -37,6 +38,7 @@ export const InputContainerComponent = ({
           onInput={onInput}
           onFocus={onFocus}
           onBlur={onBlur}
+          errorColor={errorColor}
         />
         <FloatingLabel>{labelText}</FloatingLabel>
       </InputWrapper>

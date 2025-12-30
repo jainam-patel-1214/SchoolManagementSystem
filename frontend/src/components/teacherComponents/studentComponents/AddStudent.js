@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   GradeValidation,
   GrNoSubIdTeacherIdAdminIdValidation,
@@ -36,6 +36,10 @@ export const StudentAddComponent = () => {
     password: "",
   };
   const [data, setData] = useState(initState);
+  const [idErrorMessage, setIdErrorMessage] = useState("");
+  const [idNotAvailable, setIdNotAvailable] = useState(false);
+  const userList = useRef([]);
+  const userrole = roleExtractor(window.location.pathname);
   const dataChangeHandler = (key, value) => {
     setData((prevdata) => ({
       ...prevdata,
@@ -112,13 +116,56 @@ export const StudentAddComponent = () => {
       }
       res = await fetchApi(apiUrl, "POST", bodyObj);
       Toaster(res);
+      if (res.output) {
+        fetchStudents();
+      }
     } catch (err) {
       ErrorToast(err);
     } finally {
       setInitialData();
     }
   };
-  const userrole = roleExtractor(window.location.pathname);
+
+  const fetchStudents = async () => {
+    try {
+      const res = await fetchApi(
+        `http://localhost:8090/${userrole}/allStudents`,
+        "GET",
+        {}
+      );
+      if (res.output) {
+        console.log(res);
+        userList.current = res.output;
+        return;
+      } else {
+        userList.current = [];
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  useEffect(() => {
+    let flag = false;
+    if (data.grNo === "") {
+      setIdErrorMessage("");
+      setIdNotAvailable(false);
+      return;
+    }
+    userList.current.forEach((e) => {
+      if (e.grNo == data.grNo) flag = true;
+    });
+    setIdNotAvailable(flag);
+    if (flag) {
+      setIdErrorMessage(`(THIS ID IS ALREADY OCCUPIED)`);
+    } else {
+      setIdErrorMessage(`ID AVAILABLE`);
+    }
+  }, [data.grNo]);
   return (
     <AllComponentsContainer>
       <ToastContainer />
@@ -150,7 +197,11 @@ export const StudentAddComponent = () => {
           name={"grNo"}
           isRequired={true}
           icon={FaCircleUser}
-          labelText={"Provide unique GrNO for student you wish to create:"}
+          labelText={
+            idErrorMessage ||
+            "Provide unique GrNO for student you wish to create:"
+          }
+          errorColor={idNotAvailable ? "#FF0000" : "default"}
         ></InputContainerComponent>
       </ContentContainers>
 

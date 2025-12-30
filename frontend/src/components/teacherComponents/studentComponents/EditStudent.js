@@ -138,11 +138,7 @@ export const StudentEditComponent = () => {
       }
       res = await fetchApi(apiUrl, "PUT", bodyObj);
       if (res.output) {
-        originalData.current.grNo = data.grNo;
-        originalData.current.standard = data.standard;
-        originalData.current.section = data.section;
-        originalData.current.name = data.name;
-        originalData.current.password = data.password;
+        originalData.current = { ...data };
       }
       Toaster(res);
     } catch (err) {

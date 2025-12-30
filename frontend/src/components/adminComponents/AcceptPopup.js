@@ -5,6 +5,9 @@ import { TiSortAlphabetically } from "react-icons/ti";
 import { PendingBtnComp } from "./Home";
 import { InputContainerComponent } from "../helperComponents/InputContainer";
 import { TeacherInputTabContainer } from "./TeachersTab";
+import { ButtonElement } from "../../styled-components/HelperStyledComponents";
+import { useEffect, useRef, useState } from "react";
+import { fetchApi } from "../../utils/fetchApiCode";
 
 const DetailsSection = styled.div`
   display: none;
@@ -32,6 +35,11 @@ const CloseBtn = styled.button`
     cursor: pointer;
   }
 `;
+const generate8DigitInt = () => {
+  console.log("crypto");
+
+  return (crypto.getRandomValues(new Uint32Array(1))[0] % 90000000) + 10000000;
+};
 export const PopoupComponent = ({
   styleDisplay,
   close,
@@ -41,6 +49,69 @@ export const PopoupComponent = ({
   data,
   newHandler,
 }) => {
+  const [idNotAvailable, setIdNotAvailable] = useState(false);
+  const [idErrorMessage, setIdErrorMessage] = useState("");
+  const userList = useRef([]);
+
+  const fetchList = async () => {
+    let res;
+    try {
+      if (isStudent) {
+        res = await fetchApi(
+          `http://localhost:8090/admin/allStudents`,
+          "GET",
+          {}
+        );
+      }
+      if (isTeacher) {
+        res = await fetchApi(
+          `http://localhost:8090/admin/allTeachers`,
+          "GET",
+          {}
+        );
+      }
+      if (!isStudent && !isTeacher) {
+        res = await fetchApi(
+          `http://localhost:8090/admin/allAdmins`,
+          "GET",
+          {}
+        );
+      }
+      if (res.output) {
+        userList.current = res.output;
+        return;
+      } else {
+        userList.current = [];
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchList();
+  }, [isStudent, isTeacher]);
+
+  useEffect(() => {
+    let flag = false;
+    if (data.id === "") {
+      setIdErrorMessage("");
+      setIdNotAvailable(false);
+      return;
+    }
+    userList.current.forEach((e) => {
+      if (isStudent && e.grNo == data.id) flag = true;
+      if (isTeacher && e.teacherId == data.id) flag = true;
+      if (!isStudent && !isTeacher && e.adminId == data.id) flag = true;
+    });
+    setIdNotAvailable(flag);
+    if (flag) {
+      setIdErrorMessage(`(THIS ID IS ALREADY OCCUPIED)`);
+    } else {
+      setIdErrorMessage(`ID AVAILABLE`);
+    }
+  }, [data.id]);
+
   return (
     <DetailsSection styleDisplay={styleDisplay}>
       <SearchForm
@@ -51,16 +122,31 @@ export const PopoupComponent = ({
       >
         <TeacherInputTabContainer>
           <InputContainerComponent
-            width={"100%"}
+            width={"65%"}
             icon={RiBookShelfLine}
             name={"uid"}
             value={data.id}
             handler={newHandler}
             objKey={"id"}
-            labelText={`Provide unique ${
-              isStudent ? "student" : isTeacher ? "teacher" : "admin"
-            } id:`}
+            labelText={
+              idErrorMessage ||
+              `Provide unique ${
+                isStudent ? "student" : isTeacher ? "teacher" : "admin"
+              } id:`
+            }
+            errorColor={idNotAvailable ? "#FF0000" : "default"}
           />
+          <ButtonElement
+            type="button"
+            style={{ width: "30%" }}
+            bgcol={"default"}
+            border={"default"}
+            textcol={"default"}
+            hovercol={"#8a8cff"}
+            onClick={() => newHandler("id", generate8DigitInt())}
+          >
+            Generate ramdom ID
+          </ButtonElement>
         </TeacherInputTabContainer>
         <TeacherInputTabContainer>
           {isTeacher ? (
@@ -108,7 +194,14 @@ export const PopoupComponent = ({
         <PendingBtnComp type="submit" variant={"accept"}>
           Submit
         </PendingBtnComp>
-        <CloseBtn id="closeBtn" type="reset" onClick={(e) => close(e)}>
+        <CloseBtn
+          id="closeBtn"
+          type="reset"
+          onClick={(e) => {
+            close(e);
+            setIdErrorMessage("");
+          }}
+        >
           X
         </CloseBtn>
       </SearchForm>

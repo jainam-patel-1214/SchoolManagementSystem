@@ -108,9 +108,7 @@ export const SubEditTabComp = () => {
       res = await fetchApi(apiUrl, "PUT", bodyObj);
       Toaster(res);
       if (res.output) {
-        originalData.current.subjectCredit = data.subjectCredit;
-        originalData.current.subjectStd = data.subjectStd;
-        originalData.current.subjectName = data.subjectName;
+        originalData.current = { ...data };
       }
     } catch (err) {
       ErrorToast(err);

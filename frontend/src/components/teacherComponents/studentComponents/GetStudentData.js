@@ -62,8 +62,6 @@ export const StudentDataComponent = () => {
       );
       if (res.output) {
         originalData.current = res.output;
-        console.log(res.output);
-
         setFilterData(res.output);
         return;
       }

@@ -45,6 +45,7 @@ export const TeacherEditComponent = () => {
   };
   const setInitialData = () => {
     setData(originalData.current);
+    setShowSubjectList(false);
     setSearchKey(
       `${originalData.current.subjectName} (Subject id: ${originalData.current.subjectId})`
     );
@@ -223,15 +224,12 @@ export const TeacherEditComponent = () => {
         }
       }
       bodyObj["teacherId"] = payload.teacherId;
+      console.log(bodyObj, "body of api");
+
       res = await fetchApi(apiUrl, "PUT", bodyObj);
       Toaster(res);
       if (res.output) {
-        originalData.current.teacherPassword = data.teacherPassword;
-        originalData.current.teacherName = data.teacherName;
-        originalData.current.subjectId = data.subjectId;
-        originalData.current.sandardAllocated = data.sandardAllocated;
-        originalData.current.sectionAllocated = data.sectionAllocated;
-        originalData.current.subjectName = data.subjectName;
+        originalData.current = { ...data };
       }
     } catch (err) {
       ErrorToast(err);

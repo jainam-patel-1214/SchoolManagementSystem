@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { fetchApi, fetchUrlParams } from "../../../utils/fetchApiCode";
 import { useEffect, useRef, useState } from "react";
 import { ErrorToast } from "../../../utils/toasterCode";
@@ -19,12 +19,9 @@ import {
   CommentContent,
   CommentsContainer,
   CommentTeacher,
-  DownloadHandler,
 } from "../StudentsTab";
 import { FaRegCommentDots } from "react-icons/fa6";
 import { GeneralTableComponent } from "../../helperComponents/GeneralTable";
-import { FaFileDownload } from "react-icons/fa";
-import { GradeCalculator } from "../../../utils/gradeCalculator";
 import { roleExtractor } from "../../../utils/roleExtractor";
 
 const DownloadBtn = styled.button`
@@ -49,7 +46,6 @@ export const StudentPerformancePage = () => {
   const userrole = roleExtractor(window.location.pathname);
   const [isLoading, setIsLoading] = useState(false);
   const performanceComponent = useRef(null);
-  const [totalMsg, setTotalMsg] = useState("");
   const id = fetchUrlParams("grNo");
   const name = fetchUrlParams("name");
   const standard = fetchUrlParams("std");
@@ -75,19 +71,20 @@ export const StudentPerformancePage = () => {
       header: "Grade",
       accessorKey: "grade",
     },
-  ];
-  const subjectColumnDef = [
     {
-      header: "Subject Id",
-      accessorKey: "Subid",
-    },
-    {
-      header: "Name",
-      accessorKey: "Subname",
-    },
-    {
-      header: "Credits",
-      accessorKey: "Credit",
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <button
+          onClick={() =>
+            navigate(
+              `/app/${userrole}/editMarks?subId=${row.original.subId}&grNo=${id}&tm=${row.original.theoryMM}&pm=${row.original.practicalMM}`
+            )
+          }
+        >
+          Edit marks
+        </button>
+      ),
     },
   ];
   useEffect(() => {
@@ -97,14 +94,6 @@ export const StudentPerformancePage = () => {
         setIsLoading(true);
         const result = await fetchApi(url, "GET", {});
         setDisplayData(result.output);
-        let sum = 0;
-        result.output?.MarkInfo?.forEach((e) => {
-          sum += Number(e.practicalMM) + Number(e.theoryMM);
-        });
-        const res = GradeCalculator(
-          (sum * 100) / (100 * result.output?.MarkInfo?.length)
-        );
-        setTotalMsg(res);
       } catch (err) {
         ErrorToast(err);
       } finally {
@@ -136,9 +125,29 @@ export const StudentPerformancePage = () => {
             <div ref={performanceComponent}>
               <HeadingComponent position={"top"}>
                 <PageHeading>
-                  {`${name}'s Report Card`}
+                  {`${name}'s Academic Report`}
                   <UnderlineComponent />
                 </PageHeading>
+              </HeadingComponent>
+              <HeadingComponent position={"bottom"}>
+                <p className="subHeading">
+                  Update academic performance for this student here |{" "}
+                  <a
+                    href={`/app/${userrole}/editMarks`}
+                    style={{ color: "#008cffff" }}
+                  >
+                    {" "}
+                    Update marks
+                  </a>
+                  |{" "}
+                  <a
+                    href={`/app/${userrole}/enterMarks?grNo=${id}`}
+                    style={{ color: "#00c200" }}
+                  >
+                    {" "}
+                    Enter new marks
+                  </a>
+                </p>
               </HeadingComponent>
               <ContentContainers
                 elements={"multiple"}
@@ -200,35 +209,6 @@ export const StudentPerformancePage = () => {
           ) : (
             <></>
           )}
-          <div
-            style={{
-              border: "1px solid #a9a9a9ff",
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-              margin: "1rem auto",
-              alignItems: "center",
-              width: "97%",
-            }}
-          >
-            <p style={{ textAlign: "left", marginLeft: "3px" }}>
-              <strong>
-                <i>Result:&nbsp;</i>
-              </strong>
-              {totalMsg}
-            </p>
-            <DownloadBtn
-              onClick={(e) => {
-                DownloadHandler(
-                  e,
-                  name,
-                  performanceComponent.current.innerHTML
-                );
-              }}
-            >
-              <FaFileDownload /> &nbsp;Download
-            </DownloadBtn>
-          </div>
           <ContentContainers
             elements={"multiple"}
             style={{ marginTop: "1rem" }}
@@ -240,7 +220,7 @@ export const StudentPerformancePage = () => {
               hovercol={"default"}
               onClick={() => navigate(`/app/${userrole}/displayStudent`)}
             >
-              Back to view teachers
+              Back to view students
             </ButtonElement>
           </ContentContainers>
         </AllComponentsContainer>
