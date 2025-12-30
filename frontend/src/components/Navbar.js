@@ -151,7 +151,7 @@ export const Navbar = () => {
           </StyledNavbarTabs>
         </div>
       </StyledNavbar>
-      <Outlet></Outlet>
+      <Outlet />
     </div>
   );
 };

@@ -8,6 +8,11 @@ import { ToastContainer, toast } from "react-toastify";
 import { ErrorToast, Toaster } from "../utils/toasterCode";
 import { CookieSetter } from "../utils/setCookie";
 import { fetchApi } from "../utils/fetchApiCode";
+import {
+  GrNoSubIdTeacherIdAdminIdValidation,
+  PasswordValidation,
+  StringValidator,
+} from "../utils/validations";
 
 const SelectInRegister = styled.select`
   border: 1px solid #b9b9b9;
@@ -134,6 +139,8 @@ export const LoginRegisterForm = () => {
         password: data.password,
         roleReq: data.userRole,
       };
+      console.log(body);
+
       const res = await fetchApi(
         "http://localhost:8090/register",
         "POST",
@@ -195,21 +202,16 @@ export const LoginRegisterForm = () => {
   useEffect(() => {
     const isLoginValid =
       showLogin &&
-      data.password !== null &&
-      data.userId !== null &&
+      PasswordValidation(data.password) &&
+      GrNoSubIdTeacherIdAdminIdValidation(data.userId) &&
       data.userRole !== null &&
-      data.userId > 0 &&
-      data.userId <= 99999999 &&
-      data.password.length === 8 &&
       data.userRole.toString() !== "";
 
     const isRegisterValid =
       showRegister &&
-      data.password !== null &&
-      data.userName !== null &&
+      PasswordValidation(data.password) &&
+      StringValidator(data.userName) &&
       data.userRole !== null &&
-      data.userName.length >= 2 &&
-      data.password.length === 8 &&
       data.userRole.toString() !== "";
 
     setValidInp(

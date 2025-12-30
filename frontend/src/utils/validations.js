@@ -11,7 +11,12 @@ export const GrNoSubIdTeacherIdAdminIdValidation = (b) => {
 };
 
 export const PasswordValidation = (c) => {
-  if (c !== undefined && c !== null && c.toString().length !== 8) return false;
+  if (
+    c !== undefined &&
+    c !== null &&
+    (c.toString().length < 8 || c.toString().length > 16)
+  )
+    return false;
   else return true;
 };
 
