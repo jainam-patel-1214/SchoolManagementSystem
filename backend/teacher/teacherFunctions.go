@@ -1121,6 +1121,36 @@ func SelfData(ctx *gin.Context) {
 	}
 }
 
+func DisplayStudentsUnderTeacher(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "teacher") {
+		fmt.Println("no token found")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
+		return
+	} else {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "CANNOT CONNECT TO DB"})
+			return
+		}
+		defer db.Close()
+		std, _ := strconv.Atoi(ctx.Query("std"))
+		section := ctx.Query("section")
+		subId, _ := strconv.Atoi(ctx.Query("subId"))
+		var amount int
+		if err := db.QueryRow("SELECT COUNT(s.grNo) FROM students s LEFT JOIN marks m on m.grNo = s.grNo WHERE (s.std=? AND s.section=?) OR m.subId=?", std, section, subId).Scan(&amount); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		fmt.Println(section, std, subId)
+		if amount > 0 {
+			ctx.JSON(http.StatusOK, gin.H{"output": amount})
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": "no students found"})
+		}
+	}
+}
+
 func gradeCalculator(n int) string {
 	if n > 90 {
 		return "AA"

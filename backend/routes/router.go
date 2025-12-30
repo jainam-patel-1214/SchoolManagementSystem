@@ -56,6 +56,7 @@ func InitializeRouter() *gin.Engine {
 
 			teach.GET("/allStudents", admin.DisplayAllStudents)
 			teach.GET("/allSubjects", admin.DisplayAllSubjects)
+			teach.GET("/selfStudents", teacher.DisplayStudentsUnderTeacher)
 		}
 	}
 	{
