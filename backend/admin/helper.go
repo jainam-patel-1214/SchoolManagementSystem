@@ -316,12 +316,12 @@ func AddStudent(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "student already exist with gr number provided, try updating student details"})
 			return
 		}
-		if len(studentData.StudentPwd) != 8 {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "password length required of 8 characters"})
-			return
-		}
 		if studentData.StudentPwd == "" {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "please provide password"})
+			return
+		}
+		if len(studentData.StudentPwd) < 8 || len(studentData.StudentPwd) > 16 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "password length required of 8 to 16 characters"})
 			return
 		}
 		if studentData.UserRole != "student" {
@@ -405,8 +405,8 @@ func EditStud(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "student doesnt exist with gr number provided, try creating student"})
 			return
 		}
-		if len(editBody.StudentPwd) != 8 && editBody.StudentPwd != "" {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "password length required of 8 characters"})
+		if (len(editBody.StudentPwd) < 8 || len(editBody.StudentPwd) > 16) && editBody.StudentPwd != "" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "password length required of 8 to 16 characters"})
 			return
 		}
 		if editBody.UserRole != "" && editBody.UserRole != "student" {
@@ -1533,7 +1533,7 @@ func FetchSecretKey() string {
 	rootPath, _ := os.Getwd()
 	fmt.Println(rootPath)
 	possiblePaths := []string{
-		filepath.Join(rootPath, "..", ".env"),
+		filepath.Join(rootPath, ".", ".env"),
 	}
 
 	loaded := false

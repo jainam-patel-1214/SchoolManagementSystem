@@ -57,8 +57,8 @@ func CreateSession(ctx *gin.Context) {
 		return
 	}
 
-	if credentials.Password != "" && len(credentials.Password) != 8 {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid pwd"})
+	if credentials.Password != "" && (len(credentials.Password) < 8 || len(credentials.Password) > 16) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid pwd, provide password between 8-16 digits"})
 		return
 	}
 	if credentials.UserRole != "student" && credentials.UserRole != "teacher" && credentials.UserRole != "admin" {

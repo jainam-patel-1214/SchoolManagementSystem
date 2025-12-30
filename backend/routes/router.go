@@ -35,7 +35,7 @@ func InitializeRouter() *gin.Engine {
 
 			teach.GET("/studentreport/:grNo", teacher.Report)
 			teach.GET("/isValidStudent/:grNo", teacher.IsValidStudent)
-			teach.GET("/displayStud", admin.ListStudents)
+			// teach.GET("/displayStud", admin.ListStudents)
 			teach.POST("/createStud", teacher.AddStudent)
 			teach.PUT("/updateStud", teacher.EditStud)
 			teach.DELETE("/delStudent", teacher.DelStud)
@@ -73,11 +73,11 @@ func InitializeRouter() *gin.Engine {
 			admn.PUT("/editTeacher", admin.EditTeacher)
 			admn.GET("/displayTeacherPerformance/:tid", admin.Performance)
 
-			admn.GET("/studentreport", admin.Report)
+			// admn.GET("/studentreport", admin.Report)
 			admn.GET("/studentreport/:grNo", teacher.Report)
 			admn.GET("/isValidStudent/:grNo", teacher.IsValidStudent)
 			admn.POST("/createStud", admin.AddStudent)
-			admn.GET("/displayStud", admin.ListStudents)
+			// admn.GET("/displayStud", admin.ListStudents)
 			admn.PUT("/updateStud", admin.EditStud)
 			admn.DELETE("/delStudent", admin.DelStud)
 

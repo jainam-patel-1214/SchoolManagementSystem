@@ -49,8 +49,8 @@ func CreatePendingReq(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "please provide valid password"})
 		return
 	}
-	if len(PendingDb.Pwd) != 8 {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "8 digit password required"})
+	if len(PendingDb.Pwd) < 8 || len(PendingDb.Pwd) > 16 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "8 to 16 digit password required"})
 		return
 	}
 	if PendingDb.RoleRequested != "student" && PendingDb.RoleRequested != "teacher" && PendingDb.RoleRequested != "admin" {
@@ -146,8 +146,8 @@ func AcceptPendingReq(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
 			return
 		}
-		if len(body.UserPwd) != 8 {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "size limit of passoword is 8"})
+		if len(body.UserPwd) < 8 || len(body.UserPwd) > 16 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "size limit of passoword is 8 to 16"})
 			return
 		}
 		if body.UserRole != "student" && body.UserRole != "teacher" && body.UserRole != "admin" {
@@ -488,8 +488,8 @@ func AddTeacher(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "provide a valid teacher id"})
 			return
 		}
-		if len(tdata.Tpwd) != 8 {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "provide 8 digit pwd"})
+		if len(tdata.Tpwd) < 8 || len(tdata.Tpwd) > 16 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "provide 8 to 16 digit pwd"})
 			return
 		}
 		if tdata.Name == "" {
@@ -631,8 +631,8 @@ func EditTeacher(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid role provided, it shall always be teacher"})
 			return
 		}
-		if tdata.Tpwd != "" && len(tdata.Tpwd) != 8 {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "provide 8 digit pwd"})
+		if tdata.Tpwd != "" && (len(tdata.Tpwd) < 8 || len(tdata.Tpwd) > 16) {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "provide 8 to 16 digit pwd"})
 			return
 		}
 		if tdata.StdAllocated != 0 && (tdata.StdAllocated < 0 || tdata.StdAllocated > 12) {
