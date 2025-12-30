@@ -44,6 +44,8 @@ func InitializeRouter() *gin.Engine {
 			teach.POST("/enterMarks", teacher.EnterMarks)
 
 			teach.POST("/createSub", teacher.CreateSub)
+			teach.GET("/studentData/:grNo", admin.DisplayParticularStudent)
+			teach.GET("/subjectData/:subId", admin.DisplayParticularSubject)
 			teach.GET("/isValidSubject/:subId", teacher.IsValidSubject)
 			teach.GET("/isMarkRecordExist", teacher.DoMarkRecordExists)
 			teach.PUT("/updateMarks", teacher.EditMarks)
@@ -79,6 +81,7 @@ func InitializeRouter() *gin.Engine {
 			admn.DELETE("/delStudent", admin.DelStud)
 
 			admn.GET("/subjectData/:subId", admin.DisplayParticularSubject)
+			admn.GET("/isValidSubject/:subId", teacher.IsValidSubject)
 			admn.GET("/studentData/:grNo", admin.DisplayParticularStudent)
 			admn.GET("/teacherData/:tid", admin.DisplayParticularTeacher)
 
@@ -96,6 +99,7 @@ func InitializeRouter() *gin.Engine {
 			admn.GET("/allStudents", admin.DisplayAllStudents)
 			admn.GET("/allSubjects", admin.DisplayAllSubjects)
 			admn.GET("/allTeachers", admin.DisplayAllTeachers)
+			admn.GET("/allAdmins", admin.DisplayAllAdmin)
 			admn.GET("/isValidTeacher/:tid", admin.IsValidTeacher)
 		}
 	}

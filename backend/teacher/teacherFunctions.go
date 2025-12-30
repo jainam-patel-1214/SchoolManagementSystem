@@ -113,17 +113,20 @@ func DoMarkRecordExists(ctx *gin.Context) {
 	} else {
 		studId, _ := strconv.Atoi(ctx.Query("grNo"))
 		subId, _ := strconv.Atoi(ctx.Query("subId"))
-		var amount int
-		err = db.QueryRow("SELECT COUNT(grNo) FROM marks WHERE subId = ? AND grNo=?", subId, studId).Scan(&amount)
+		var Record struct {
+			TheoryMark    int `json:"theoryMarks"`
+			PracticalMark int `json:"practicalMarks"`
+		}
+		err = db.QueryRow("SELECT theoryM,practicalM FROM marks WHERE subId = ? AND grNo=?", subId, studId).Scan(&Record.TheoryMark, &Record.PracticalMark)
 		if err != nil && err != sql.ErrNoRows {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		if amount <= 0 {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject not exist"})
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "marks record do not exist"})
 			return
 		} else {
-			ctx.JSON(http.StatusOK, gin.H{"output": "valid subject"})
+			ctx.JSON(http.StatusOK, gin.H{"output": Record})
 			return
 		}
 	}

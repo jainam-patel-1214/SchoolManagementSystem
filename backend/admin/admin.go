@@ -603,6 +603,7 @@ func EditTeacher(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "unable to read body"})
 			return
 		}
+		fmt.Println(tdata, "incoming data")
 		if tdata.TId <= 0 || tdata.TId > 99999999 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "provide a teacher id"})
 			return
@@ -664,13 +665,15 @@ func EditTeacher(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "teacher not found to edit"})
 			return
 		}
-		if tdata.SectionAllocated != "" && tdata.StdAllocated == 0 && (defaultData.StdAllocated.Int64 == 0 || !defaultData.StdAllocated.Valid) {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "if you allocate section, standard is needed"})
-			return
-		}
-		if tdata.SectionAllocated == "" && tdata.StdAllocated != 0 && (!defaultData.SectionAllocated.Valid || defaultData.SectionAllocated.String == "") {
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": "if you allocate standard, section is needed"})
-			return
+		if tdata.StdAllocated != 0 || tdata.SectionAllocated != "" {
+			if tdata.SectionAllocated != "" && tdata.StdAllocated == 0 && (defaultData.StdAllocated.Int64 == 0 || !defaultData.StdAllocated.Valid) {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "if you allocate section, standard is needed"})
+				return
+			}
+			if tdata.SectionAllocated == "" && tdata.StdAllocated != 0 && (!defaultData.SectionAllocated.Valid || defaultData.SectionAllocated.String == "") {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "if you allocate standard, section is needed"})
+				return
+			}
 		}
 		if defaultData.SubAllocated.Valid && defaultData.SubAllocated.Int64 == 0 && tdata.SubAllocated != 0 && ((tdata.SectionAllocated == "" && defaultData.SectionAllocated.Valid && defaultData.SectionAllocated.String == "") || (tdata.StdAllocated == 0 && defaultData.StdAllocated.Valid && defaultData.StdAllocated.Int64 == 0)) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "pls assign std and section if you are assigning subject else you wont be able to calculate teacher's performance"})
@@ -708,10 +711,11 @@ func EditTeacher(ctx *gin.Context) {
 		if tdata.SubAllocated != 0 {
 			constraints = append(constraints, ("subId = " + strconv.Itoa(tdata.SubAllocated)))
 		}
+		if tdata.StdAllocated != 0 {
+			constraints = append(constraints, ("stdAllocated = " + strconv.Itoa(tdata.StdAllocated)))
+		}
 		if tdata.SectionAllocated != "" {
-			if tdata.StdAllocated != 0 {
-				constraints = append(constraints, ("stdAllocated = " + strconv.Itoa(tdata.StdAllocated) + ", " + "sectionAllocated = '" + tdata.SectionAllocated + "'"))
-			}
+			constraints = append(constraints, ("sectionAllocated = '" + tdata.SectionAllocated + "'"))
 		}
 		if len(constraints) <= 0 {
 			ctx.JSON(http.StatusOK, gin.H{"output": "you didnot requested any changes"})

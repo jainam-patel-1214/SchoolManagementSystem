@@ -1129,6 +1129,54 @@ func SelfData(ctx *gin.Context) {
 	}
 }
 
+func DisplayAllAdmin(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "admin") {
+		fmt.Println("no token found")
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+		return
+	} else {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "CANNOT CONNECT TO DB"})
+			return
+		}
+		defer db.Close()
+		type StudentList struct {
+			AdminId  int    `json:"adminId"`
+			Password string `json:"password"`
+			Name     string `json:"adminName"`
+		}
+		var AdminsData []StudentList
+		res, err := db.Query("SELECT admin_id,admin_name,admin_pwd FROM admins")
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		defer res.Close()
+
+		for res.Next() {
+			var admin StudentList
+
+			err := res.Scan(
+				&admin.AdminId,
+				&admin.Name,
+				&admin.Password,
+			)
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			AdminsData = append(AdminsData, admin)
+		}
+		if len(AdminsData) > 0 {
+			ctx.JSON(http.StatusOK, gin.H{"output": AdminsData})
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": "no admins found"})
+		}
+	}
+}
+
 func DisplayAllStudents(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || (role != "teacher" && role != "admin") {
