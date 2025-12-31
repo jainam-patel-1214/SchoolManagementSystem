@@ -1,6 +1,6 @@
 import { FaRegUser } from "react-icons/fa";
 import { FaKey } from "react-icons/fa";
-import { Fragment, useState, useEffect, useRef } from "react";
+import { Fragment, useState, useEffect } from "react";
 import styled, { keyframes } from "styled-components";
 import { SignInBtn } from "../styled-components/LoginSigninButton";
 import { useNavigate } from "react-router-dom";

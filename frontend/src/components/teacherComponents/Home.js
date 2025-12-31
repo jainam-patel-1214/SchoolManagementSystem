@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { ErrorToast } from "../../utils/toasterCode";
 import { fetchApi } from "../../utils/fetchApiCode";
 import { LabelValuePair } from "../helperComponents/LabelValuePair";

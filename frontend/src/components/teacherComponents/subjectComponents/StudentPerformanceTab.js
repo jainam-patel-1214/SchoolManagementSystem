@@ -1,4 +1,3 @@
-import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { fetchApi, fetchUrlParams } from "../../../utils/fetchApiCode";
 import { useEffect, useRef, useState } from "react";
@@ -23,22 +22,6 @@ import {
 import { FaRegCommentDots } from "react-icons/fa6";
 import { GeneralTableComponent } from "../../helperComponents/GeneralTable";
 import { roleExtractor } from "../../../utils/roleExtractor";
-
-const DownloadBtn = styled.button`
-  padding: 10px 30px;
-  cursor: pointer;
-  vertical-align: middle;
-  border: none;
-  border-radius: 15px;
-  margin-right: 15px;
-  background-color: #2ad2008a;
-  box-shadow: 10px 10px 20px #9d9d9d82;
-  height: fit-content;
-  transition: 0.3s ease-in-out;
-  &:hover {
-    background-color: #30f0008a;
-  }
-`;
 
 export const StudentPerformancePage = () => {
   const navigate = useNavigate();

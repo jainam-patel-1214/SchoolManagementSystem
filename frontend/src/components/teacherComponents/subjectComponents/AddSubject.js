@@ -81,7 +81,7 @@ export const SubAddTabComp = () => {
         levelStd: Number(data.subjectStd),
       };
       for (const [key, value] of Object.entries(payload)) {
-        if (value !== null && value !== undefined && value !== NaN) {
+        if (value !== null && value !== undefined && !isNaN(value)) {
           bodyObj[key] = value;
         }
       }

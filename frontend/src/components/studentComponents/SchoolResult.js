@@ -149,7 +149,7 @@ export const SchoolResult = () => {
         if (
           params[elem] !== null &&
           params[elem] !== undefined &&
-          params[elem] !== NaN
+          !isNaN(params[elem])
         ) {
           queryParams[elem] = params[elem];
         }

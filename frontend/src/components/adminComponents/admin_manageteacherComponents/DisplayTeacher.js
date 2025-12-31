@@ -28,7 +28,6 @@ import { DataContainer } from "../../teacherComponents/studentComponents/GetStud
 import { MdTableRows, MdWindow } from "react-icons/md";
 import { GeneralTableComponent } from "../../helperComponents/GeneralTable";
 import { GridItemComponent } from "../../helperComponents/GridItem";
-import { debouncedFilterData } from "../../../utils/filterData";
 
 export const DisplayTeacherComponent = () => {
   const userrole = roleExtractor(window.location.pathname);

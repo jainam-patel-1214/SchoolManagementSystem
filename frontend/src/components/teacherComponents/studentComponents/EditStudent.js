@@ -8,7 +8,7 @@ import {
 import { fetchApi } from "../../../utils/fetchApiCode";
 import { ToastContainer } from "react-toastify";
 import { ErrorToast, SuccessToast, Toaster } from "../../../utils/toasterCode";
-import { FaAddressCard, FaCircleUser, FaKey } from "react-icons/fa6";
+import { FaAddressCard, FaKey } from "react-icons/fa6";
 import { MdWindow } from "react-icons/md";
 import { RiBookShelfLine } from "react-icons/ri";
 import { roleExtractor } from "../../../utils/roleExtractor";
@@ -131,7 +131,7 @@ export const StudentEditComponent = () => {
           value !== null &&
           value !== undefined &&
           value !== 0 &&
-          value !== NaN
+          !isNaN(value)
         ) {
           bodyObj[key] = value;
         }

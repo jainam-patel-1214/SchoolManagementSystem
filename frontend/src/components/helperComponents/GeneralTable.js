@@ -32,7 +32,7 @@ const TableTdEntry = styled.td`
   text-align: center;
   padding: 0px 10px;
 `;
-const initiaDala = [];
+
 export const GeneralTableComponent = ({
   data,
   columnDefinition,

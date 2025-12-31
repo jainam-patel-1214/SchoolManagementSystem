@@ -7,7 +7,7 @@ import {
 } from "../../../utils/validations";
 import { fetchApi } from "../../../utils/fetchApiCode";
 import { ErrorToast, Toaster } from "../../../utils/toasterCode";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { FaAddressCard, FaCircleUser, FaKey } from "react-icons/fa6";
 import { MdWindow } from "react-icons/md";
 import { RiBookShelfLine } from "react-icons/ri";
@@ -108,7 +108,7 @@ export const StudentAddComponent = () => {
         if (
           value !== null &&
           value !== undefined &&
-          value !== NaN &&
+          !isNaN(value) &&
           value !== 0
         ) {
           bodyObj[key] = value;

@@ -28,7 +28,6 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { GeneralTableComponent } from "../../helperComponents/GeneralTable";
 import { useNavigate } from "react-router-dom";
 import { roleExtractor } from "../../../utils/roleExtractor";
-import { debouncedFilterData } from "../../../utils/filterData";
 
 export const DataContainer = styled.div`
   display: flex;

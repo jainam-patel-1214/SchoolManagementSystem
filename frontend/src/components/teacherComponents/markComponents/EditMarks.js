@@ -26,11 +26,9 @@ import {
   DropDownContainer,
   DropDownElement,
 } from "../../../styled-components/Dropdown";
-import { useNavigate } from "react-router-dom";
 
 export const EditMarkTab = () => {
   const userrole = roleExtractor(window.location.pathname);
-  const navigate = useNavigate();
   const initState = {
     grNo: "",
     subjectId: "",
@@ -146,7 +144,7 @@ export const EditMarkTab = () => {
       };
       let bodyObj = {};
       for (const [key, value] of Object.entries(payload)) {
-        if (value !== null && value !== undefined && value !== NaN) {
+        if (value !== null && value !== undefined && !isNaN(value)) {
           bodyObj[key] = value;
         }
       }
