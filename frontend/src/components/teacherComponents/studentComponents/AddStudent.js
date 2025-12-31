@@ -105,12 +105,7 @@ export const StudentAddComponent = () => {
         std: Number(data.std),
       };
       for (const [key, value] of Object.entries(payload)) {
-        if (
-          value !== null &&
-          value !== undefined &&
-          !isNaN(value) &&
-          value !== 0
-        ) {
+        if (value !== null && value !== undefined && value !== 0) {
           bodyObj[key] = value;
         }
       }

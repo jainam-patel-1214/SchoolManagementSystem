@@ -101,7 +101,7 @@ export const SubEditTabComp = () => {
         levelStd: Number(data.subjectStd),
       };
       for (const [key, value] of Object.entries(payload)) {
-        if (value !== null && value !== undefined && !isNaN(value)) {
+        if (value !== null && value !== undefined) {
           bodyObj[key] = value;
         }
       }

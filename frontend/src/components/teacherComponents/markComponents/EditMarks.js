@@ -144,7 +144,7 @@ export const EditMarkTab = () => {
       };
       let bodyObj = {};
       for (const [key, value] of Object.entries(payload)) {
-        if (value !== null && value !== undefined && !isNaN(value)) {
+        if (value !== null && value !== undefined) {
           bodyObj[key] = value;
         }
       }

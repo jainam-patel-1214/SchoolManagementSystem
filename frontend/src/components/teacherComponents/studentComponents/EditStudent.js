@@ -125,17 +125,14 @@ export const StudentEditComponent = () => {
         section: data.section,
         std: Number(data.standard),
       };
+      console.log(payload);
 
       for (const [key, value] of Object.entries(payload)) {
-        if (
-          value !== null &&
-          value !== undefined &&
-          value !== 0 &&
-          !isNaN(value)
-        ) {
+        if (value !== null && value !== undefined && value !== 0) {
           bodyObj[key] = value;
         }
       }
+      console.log(bodyObj);
       res = await fetchApi(apiUrl, "PUT", bodyObj);
       if (res.output) {
         originalData.current = { ...data };
