@@ -26,6 +26,7 @@ import { useParams } from "react-router-dom";
 import { LineBreak } from "../../../styled-components/LineBreak";
 import { GridLayers } from "../../helperComponents/GridItem";
 import { SelectComponent } from "../../helperComponents/SelectComponent";
+import { mergeObjects } from "../../../utils/objectsMerger";
 
 export const TeacherEditComponent = () => {
   const userrole = roleExtractor(window.location.pathname);
@@ -157,6 +158,9 @@ export const TeacherEditComponent = () => {
       stdAllocated: Number(data.sandardAllocated),
       sectionAllocated: data.sectionAllocated,
     };
+    payload["subjectName"] = payload.subId
+      ? findSubjectName(payload.subId)
+      : originalData.current.subjectName;
     const errobj = {
       std: {
         condition: false,
@@ -220,6 +224,8 @@ export const TeacherEditComponent = () => {
           value !== undefined &&
           originalData.current[keyValueMap.get(key)] !== value
         ) {
+          console.log(originalData.current[keyValueMap.get(key)], value);
+
           bodyObj[key] = value;
         }
       }
@@ -228,8 +234,17 @@ export const TeacherEditComponent = () => {
 
       res = await fetchApi(apiUrl, "PUT", bodyObj);
       Toaster(res);
+      console.log(originalData.current, "hello");
+      console.log(payload, "pay");
+      console.log(subjectList.current, "sl");
+      console.log(findSubjectName(payload.subId));
+
       if (res.output) {
-        originalData.current = { ...data };
+        originalData.current = mergeObjects(
+          originalData.current,
+          payload,
+          keyValueMap
+        );
       }
     } catch (err) {
       ErrorToast(err);
@@ -239,17 +254,22 @@ export const TeacherEditComponent = () => {
     }
   };
 
+  const findSubjectName = (id) => {
+    const subject = subjectList.current.find((item) => item.value === id);
+
+    return subject ? subject.label : "";
+  };
+
   const selectChangeHandler = (e) => {
     const subId = Number(e.target.value);
-    console.log(subId, "id");
-
+    let subjectName = "";
     subjectList.current.forEach((item) => {
-      if (item.value === subId) {
+      if (item.value === subId)
         setSearchKey(`${item.label} (Subject id: ${item.value})`);
-      }
     });
     dataChangeHandler("subjectId", e.target.value);
     setShowSubjectList(false);
+    return subjectName;
   };
 
   return (
