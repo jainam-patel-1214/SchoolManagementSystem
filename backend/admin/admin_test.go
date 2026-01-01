@@ -344,7 +344,6 @@ func TestAddSubjectByAdmin(t *testing.T) {
 			router.ServeHTTP(w, req)
 			if w.Code != tc.expectedCode {
 				log.Fatalf("%s in this test - expected status %d, got %v", tc.name, tc.expectedCode, w.Body.String())
-				fmt.Println("body of writer", w.Body.String())
 			}
 			t.Logf("%s - testname, Response = %s", tc.name, w.Body.String())
 			for _, task := range tc.postFunc {

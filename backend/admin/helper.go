@@ -36,8 +36,8 @@ func HasOnlyAlphabets(s string) bool {
 func ListStudents(ctx *gin.Context) {
 	role, exists := ctx.Get("userrole")
 	if !exists || (role != "teacher" && role != "admin") {
-		fmt.Println("no token found")
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
 		return
 	} else {
 		type MarkJson struct {
@@ -161,7 +161,7 @@ func ListStudents(ctx *gin.Context) {
 func Report(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || (role != "admin" && role != "teacher") {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
 		return
 	} else {
 		type MarkJson struct {
@@ -304,15 +304,15 @@ func AddStudent(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid gr no provided"})
 			return
 		}
-		var amt int
-		if err = db.QueryRow("SELECT COUNT(grNo) FROM students WHERE grNo=?", studentData.GR_NO).Scan(&amt); err != nil && err != sql.ErrNoRows {
+		var count int
+		if err = db.QueryRow("SELECT COUNT(grNo) FROM students WHERE grNo=?", studentData.GR_NO).Scan(&count); err != nil && err != sql.ErrNoRows {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 		if err == sql.ErrNoRows {
-			amt = 0
+			count = 0
 		}
-		if amt > 0 {
+		if count > 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "student already exist with gr number provided, try updating student details"})
 			return
 		}
@@ -396,12 +396,12 @@ func EditStud(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid gr no provided"})
 			return
 		}
-		var amt int
-		if err = db.QueryRow("SELECT COUNT(grNo) FROM students WHERE grNo=?", editBody.GR_No).Scan(&amt); err != nil && err != sql.ErrNoRows {
+		var count int
+		if err = db.QueryRow("SELECT COUNT(grNo) FROM students WHERE grNo=?", editBody.GR_No).Scan(&count); err != nil && err != sql.ErrNoRows {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		if amt <= 0 {
+		if count <= 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "student doesnt exist with gr number provided, try creating student"})
 			return
 		}
@@ -501,12 +501,12 @@ func CreateSub(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject id, pls enter max 8 digit id"})
 			return
 		}
-		var amt int
-		if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", subInfo.SubId).Scan(&amt); err != nil && err != sql.ErrNoRows {
+		var count int
+		if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", subInfo.SubId).Scan(&count); err != nil && err != sql.ErrNoRows {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		if amt > 0 {
+		if count > 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject already exist with id provided, try updating subject details"})
 			return
 		}
@@ -533,13 +533,13 @@ func CreateSub(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("first set limit of subjects allocated in standard %d", subInfo.LevelStd)})
 			return
 		}
-		var count int
-		err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE levelStd = ?", subInfo.LevelStd).Scan(&count)
+		var count2 int
+		err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE levelStd = ?", subInfo.LevelStd).Scan(&count2)
 		if err != nil && err != sql.ErrNoRows {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error processing data"})
 			return
 		}
-		if count >= limit {
+		if count2 >= limit {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("limit of subject for standard %d reached", subInfo.LevelStd)})
 			return
 		}
@@ -585,21 +585,20 @@ func EditSub(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject id, pls enter max 8 digit id"})
 			return
 		}
-		var amt int
-		if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", editBody.SubId).Scan(&amt); err != nil && err != sql.ErrNoRows {
+		var count int
+		if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", editBody.SubId).Scan(&count); err != nil && err != sql.ErrNoRows {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		if amt <= 0 {
+		if count <= 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject doesnot exist with id provided, try creating subject details"})
 			return
 		}
-		var amt2 int
-		if err = db.QueryRow("SELECT COUNT(subId) FROM marks WHERE subId=?", editBody.SubId).Scan(&amt2); err != nil && err != sql.ErrNoRows {
+		if err = db.QueryRow("SELECT COUNT(subId) FROM marks WHERE subId=?", editBody.SubId).Scan(&count); err != nil && err != sql.ErrNoRows {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		if amt2 > 0 {
+		if count > 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Marks are alloted to students associated to subject you want to edit. Cant edit, only delete is possible"})
 			return
 		}
@@ -919,12 +918,12 @@ func Performance(ctx *gin.Context) {
 		return
 	}
 	if TeacherId.Tid != 0 {
-		var amt int
-		if err = db.QueryRow("SELECT COUNT(tId) FROM teachers WHERE tId = ?", TeacherId.Tid).Scan(&amt); err != nil && err != sql.ErrNoRows {
+		var count int
+		if err = db.QueryRow("SELECT COUNT(tId) FROM teachers WHERE tId = ?", TeacherId.Tid).Scan(&count); err != nil && err != sql.ErrNoRows {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		if amt <= 0 {
+		if count <= 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "no such teacher found with entered teacher id"})
 			return
 		}
@@ -1003,8 +1002,8 @@ func Performance(ctx *gin.Context) {
 func DelStud(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || role != "admin" {
-		fmt.Println("no token found")
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
 		return
 	}
 	if role == "admin" {
@@ -1025,12 +1024,12 @@ func DelStud(ctx *gin.Context) {
 			return
 		}
 		if stdGrno.GRno != 0 {
-			var amt int
-			if err = db.QueryRow("SELECT COUNT(grNo) FROM students WHERE grNo=?", stdGrno.GRno).Scan(&amt); err != nil && err != sql.ErrNoRows {
+			var count int
+			if err = db.QueryRow("SELECT COUNT(grNo) FROM students WHERE grNo=?", stdGrno.GRno).Scan(&count); err != nil && err != sql.ErrNoRows {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			if amt <= 0 {
+			if count <= 0 {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": "student to be deleted doesnot exist, please enter existing gr no"})
 				return
 			}
@@ -1050,8 +1049,8 @@ func DelStud(ctx *gin.Context) {
 func DelSub(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || role != "admin" {
-		fmt.Println("no token found")
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
 		return
 	}
 	if role == "admin" {
@@ -1072,12 +1071,12 @@ func DelSub(ctx *gin.Context) {
 			return
 		}
 		if subid.SubId != 0 {
-			var amt int
-			if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", subid.SubId).Scan(&amt); err != nil && err != sql.ErrNoRows {
+			var count int
+			if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", subid.SubId).Scan(&count); err != nil && err != sql.ErrNoRows {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			if amt <= 0 {
+			if count <= 0 {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject to be deleted doesnot exist, please enter existing subject id"})
 				return
 			}
@@ -1098,7 +1097,7 @@ func DelSub(ctx *gin.Context) {
 func SelfData(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || role != "admin" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
 		return
 	} else {
 		db, err := sql.Open("mysql", dsn)
@@ -1132,8 +1131,8 @@ func SelfData(ctx *gin.Context) {
 func DisplayAllAdmin(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || (role != "admin") {
-		fmt.Println("no token found")
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
 		return
 	} else {
 		db, err := sql.Open("mysql", dsn)
@@ -1180,8 +1179,8 @@ func DisplayAllAdmin(ctx *gin.Context) {
 func DisplayAllStudents(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || (role != "teacher" && role != "admin") {
-		fmt.Println("no token found")
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
 		return
 	} else {
 		db, err := sql.Open("mysql", dsn)
@@ -1232,7 +1231,7 @@ func DisplayAllStudents(ctx *gin.Context) {
 func IsValidTeacher(ctx *gin.Context) {
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
-		fmt.Println(err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "database crashed"})
 		return
 	}
 	defer db.Close()
@@ -1261,8 +1260,8 @@ func IsValidTeacher(ctx *gin.Context) {
 func DisplayAllTeachers(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || (role != "admin") {
-		fmt.Println("no token found")
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
 		return
 	} else {
 		db, err := sql.Open("mysql", dsn)
@@ -1317,8 +1316,8 @@ func DisplayAllTeachers(ctx *gin.Context) {
 func DisplayAllSubjects(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || (role != "teacher" && role != "admin") {
-		fmt.Println("no token found")
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
 		return
 	} else {
 		db, err := sql.Open("mysql", dsn)
@@ -1367,7 +1366,7 @@ func DisplayAllSubjects(ctx *gin.Context) {
 func DisplayParticularTeacher(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || (role != "admin") {
-		fmt.Println("no token found")
+
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorused access"})
 		return
 	} else {
@@ -1378,6 +1377,9 @@ func DisplayParticularTeacher(ctx *gin.Context) {
 		}
 		defer db.Close()
 		tId, _ := strconv.Atoi(ctx.Param("tid"))
+		if tId == 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid teacher id"})
+		}
 		var TeachersData struct {
 			Tid      int            `json:"teacherId"`
 			Password string         `json:"teacherPwd"`
@@ -1410,8 +1412,8 @@ func DisplayParticularTeacher(ctx *gin.Context) {
 func DisplayParticularStudent(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || (role != "admin" && role != "teacher") {
-		fmt.Println("no token found")
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
 		return
 	} else {
 		db, err := sql.Open("mysql", dsn)
@@ -1444,8 +1446,8 @@ func DisplayParticularStudent(ctx *gin.Context) {
 func DisplayParticularSubject(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || (role != "admin" && role != "teacher") {
-		fmt.Println("no token found")
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
 		return
 	} else {
 		db, err := sql.Open("mysql", dsn)
@@ -1477,8 +1479,8 @@ func DisplayParticularSubject(ctx *gin.Context) {
 func DisplayParticularMarks(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || (role != "admin") {
-		fmt.Println("no token found")
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
 		return
 	} else {
 		db, err := sql.Open("mysql", dsn)
@@ -1531,7 +1533,6 @@ func gradeCalculator(n int) string {
 
 func FetchSecretKey() string {
 	rootPath, _ := os.Getwd()
-	fmt.Println(rootPath)
 	possiblePaths := []string{
 		filepath.Join(rootPath, ".", ".env"),
 	}
@@ -1540,7 +1541,6 @@ func FetchSecretKey() string {
 	for _, path := range possiblePaths {
 		err := godotenv.Load(path)
 		if err != nil {
-			fmt.Printf("%+v", err)
 			log.Fatal("Warning: .env not found in any known path")
 		}
 		loaded = true

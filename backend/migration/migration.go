@@ -23,9 +23,8 @@ func RunMigrations(db *sql.DB, dirName string) {
 		log.Fatal(err)
 	}
 	for _, file := range fileName {
-		fmt.Println("filess", file)
+
 		path := filepath.Join(dirName, file)
-		fmt.Println(path)
 		content, err := os.ReadFile(path)
 		if err != nil {
 			log.Fatal(err)
