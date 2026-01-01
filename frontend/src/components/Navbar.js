@@ -59,7 +59,10 @@ export const Navbar = () => {
         </div>
         <div>
           {uName !== "" ? (
-            <StyledNavbarTabs onClick={(e) => signOutHandler(e)}>
+            <StyledNavbarTabs
+              id="signOutButton"
+              onClick={(e) => signOutHandler(e)}
+            >
               SignOut
             </StyledNavbarTabs>
           ) : (

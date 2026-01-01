@@ -180,7 +180,7 @@ export const LoginRegisterForm = () => {
       const res = await fetchApi("http://localhost:8090/login", "POST", body);
       console.log("login body", res);
 
-      Toaster(res);
+      Toaster({ output: "Me HERE with" + JSON.stringify(res.role) });
       CookieSetter(data.userId, res.username, res.output, res.role);
       if (res.role === "student") {
         navigate("/app/student");
