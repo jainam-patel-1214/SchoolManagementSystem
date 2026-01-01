@@ -180,12 +180,12 @@ func ValidateSession() gin.HandlerFunc {
 			return
 		}
 		if token.Valid {
-			var amt int
-			if err = db.QueryRow(`SELECT COUNT(sessionId) FROM activeSessions WHERE sessiontoken=?`, userCookie).Scan(&amt); err != nil {
+			var count int
+			if err = db.QueryRow(`SELECT COUNT(sessionId) FROM activeSessions WHERE sessiontoken=?`, userCookie).Scan(&count); err != nil {
 				ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			if amt < 1 {
+			if count < 1 {
 				ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invaliddd or expired token provided"})
 				return
 			}

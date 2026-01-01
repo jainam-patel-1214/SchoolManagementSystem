@@ -46,7 +46,6 @@ func UserGenerator(role string) ResStruct {
 		fmt.Println("Error marshaling JSON:", err)
 		return empty
 	}
-	fmt.Println("JSONNN DATA", string(jsonData))
 	w := httptest.NewRecorder()
 	v := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(w)

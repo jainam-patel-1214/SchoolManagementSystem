@@ -59,8 +59,7 @@ func HasOnlyAlphabets(s string) bool {
 func DisplayStudents(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || role != "student" {
-		fmt.Println("no token found")
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
 		return
 	} else {
 		var constraints DisplayConditions
@@ -175,8 +174,7 @@ func DisplayStudents(ctx *gin.Context) {
 func DisplaySubject(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || (role != "student" && role != "teacher" && role != "admin") {
-		fmt.Println("no token found")
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
 		return
 	}
 	if role == "student" || role == "teacher" || role == "admin" {
@@ -198,12 +196,12 @@ func DisplaySubject(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "only standards ranging from 1 to 12 are available"})
 			return
 		}
-		var amt int
-		if err := db.QueryRow("SELECT COUNT(std) FROM subjectAllocation WHERE std=?", constraints.Std).Scan(&amt); err != nil && err != sql.ErrNoRows {
+		var count int
+		if err := db.QueryRow("SELECT COUNT(std) FROM subjectAllocation WHERE std=?", constraints.Std).Scan(&count); err != nil && err != sql.ErrNoRows {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		if amt <= 0 {
+		if count <= 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "no limit have been set for this std thus there are no subjects"})
 			return
 		}
@@ -243,7 +241,7 @@ func DisplaySubject(ctx *gin.Context) {
 func Report(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || role != "student" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
 		return
 	} else {
 		type MarkJson struct {
@@ -331,7 +329,7 @@ func Report(ctx *gin.Context) {
 func SelfData(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || role != "student" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthirused access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
 		return
 	} else {
 		db, err := sql.Open("mysql", dsn)
