@@ -2,7 +2,6 @@ package admin_test
 
 import (
 	"bytes"
-	"fmt"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -127,7 +126,7 @@ func TestAddStudentsByAdmin(t *testing.T) {
 			req.Header.Set("Cookie", tc.token)
 			router.ServeHTTP(w, req)
 			if w.Code != tc.expectedCode {
-				fmt.Printf("%s in this test - expected status %d, got %v", tc.name, tc.expectedCode, w.Body.String())
+				log.Printf("%s in this test - expected status %d, got %v", tc.name, tc.expectedCode, w.Body.String())
 			}
 			t.Logf("%s - testname, Response = %s", tc.name, w.Body.String())
 			for _, task := range tc.postFunc {

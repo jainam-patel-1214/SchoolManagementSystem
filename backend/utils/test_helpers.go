@@ -3,7 +3,6 @@ package utils
 import (
 	"bytes"
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -74,7 +73,7 @@ func AddTempSubMarksStudent(studentbody string, subjectAllocationBody string, su
 			log.Fatal("in stud test create- got status ", p.Code, p.Body.String())
 			return
 		} else {
-			fmt.Println("creating student")
+			log.Println("creating student")
 		}
 	}
 	if subjectAllocationBody != "" {
@@ -93,7 +92,7 @@ func AddTempSubMarksStudent(studentbody string, subjectAllocationBody string, su
 			log.Fatal("in sublim test create- got status ", p.Code, p.Body.String())
 			return
 		} else {
-			fmt.Println("creating sublim")
+			log.Println("creating sublim")
 		}
 	}
 	if subjectbody != "" {
@@ -112,7 +111,7 @@ func AddTempSubMarksStudent(studentbody string, subjectAllocationBody string, su
 			log.Fatal("in sub test create- got status ", p.Code, p.Body.String())
 			return
 		} else {
-			fmt.Println("creating sub")
+			log.Println("creating sub")
 		}
 	}
 	if markbody != "" {
@@ -131,7 +130,7 @@ func AddTempSubMarksStudent(studentbody string, subjectAllocationBody string, su
 			log.Fatal("in marks test create- got status ", p.Code, p.Body.String())
 			return
 		} else {
-			fmt.Println("creating mark")
+			log.Println("creating mark")
 		}
 	}
 }
@@ -154,7 +153,7 @@ func DeleteTempSubStudent(studentbody string, subjectAllocationBody string, subj
 			log.Fatal("in stud test - got status ", w.Code, w.Body.String())
 			return
 		} else {
-			fmt.Println("here deleted stud")
+			log.Println("here deleted stud")
 		}
 	}
 	if subjectAllocationBody != "" {
@@ -165,7 +164,7 @@ func DeleteTempSubStudent(studentbody string, subjectAllocationBody string, subj
 		if _, err := db.Exec(subjectAllocationBody); err != nil {
 			log.Fatal("in sublim", err)
 		} else {
-			fmt.Println("here deleted sublim")
+			log.Println("here deleted sublim")
 		}
 	}
 	if subjectbody != "" {
@@ -184,7 +183,7 @@ func DeleteTempSubStudent(studentbody string, subjectAllocationBody string, subj
 			log.Fatal("in sub test - got status ", w.Body.String())
 			return
 		} else {
-			fmt.Println("here deleted sub")
+			log.Println("here deleted sub")
 		}
 	}
 }
@@ -207,7 +206,7 @@ func DeletePendingreq(pendingBody string) {
 			log.Fatal("in stud test - got status ", w.Code, w.Body.String())
 			return
 		} else {
-			fmt.Println("here deleted stud")
+			log.Println("here deleted stud")
 		}
 	}
 }
@@ -220,7 +219,7 @@ func DeleteReviews(reviewBody string) {
 		if _, err := db.Exec(reviewBody); err != nil {
 			log.Fatal("in sublim", err)
 		} else {
-			fmt.Println("here deleted sublim")
+			log.Println("here deleted sublim")
 		}
 	}
 }
@@ -233,7 +232,7 @@ func AddReviews(reviewBody string) {
 		if _, err := db.Exec(reviewBody); err != nil {
 			log.Fatal("in sublim", err)
 		} else {
-			fmt.Println("here deleted sublim")
+			log.Println("here deleted sublim")
 		}
 	}
 }

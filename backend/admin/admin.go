@@ -2,7 +2,7 @@ package admin
 
 import (
 	"database/sql"
-	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -155,7 +155,7 @@ func AcceptPendingReq(ctx *gin.Context) {
 			return
 		}
 		var count int
-		if err = db.QueryRow(fmt.Sprintf("SELECT COUNT(id) FROM pendingApplications WHERE username='%s' AND role_requested='%s' AND user_pwd='%s' AND id='%d'", body.UserName, body.UserRole, body.UserPwd, body.PendingId)).Scan(&count); err != nil && err != sql.ErrNoRows {
+		if err = db.QueryRow("SELECT COUNT(id) FROM pendingApplications WHERE username=? AND role_requested=? AND user_pwd=? AND id=?", body.UserName, body.UserRole, body.UserPwd, body.PendingId).Scan(&count); err != nil && err != sql.ErrNoRows {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -217,7 +217,7 @@ func AcceptPendingReq(ctx *gin.Context) {
 					return
 				}
 			} else if body.SubId == 0 {
-				fmt.Println("no subject")
+				log.Println("no subject")
 			} else {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject id"})
 				return
