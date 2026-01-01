@@ -4,6 +4,25 @@
 //   });
 // });
 describe("Login Form - Scholar App", () => {
+  it("fills form and logs in failure as input fields are invalid", () => {
+    cy.intercept("POST", "http://localhost:8090/login").as("loginRequest");
+
+    cy.visit("http://localhost:3000/");
+
+    cy.get("#userid").type("12345").should("have.value", "12345");
+
+    cy.get("#password").type("Tt@123").should("have.value", "Tt@123");
+
+    cy.get('select[name="userRole"]')
+      .select("student")
+      .should("have.value", "student");
+
+    cy.get('button[type="submit"]').click();
+
+    cy.get(".Toastify__toast")
+      .should("be.visible")
+      .and("contain", "please enter an 8 digit password");
+  });
   it("fills form and logs in failure for student", () => {
     cy.intercept("POST", "http://localhost:8090/login").as("loginRequest");
 
