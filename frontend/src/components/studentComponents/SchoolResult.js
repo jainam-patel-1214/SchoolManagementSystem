@@ -77,8 +77,8 @@ export const SchoolResult = () => {
   const initState = {
     section: "",
     grade: "",
-    minMark: null,
-    maxMark: null,
+    minMark: 0,
+    maxMark: 100,
   };
   const [data, setData] = useState(initState);
   const dataChangeHandler = (key, value) => {
@@ -250,6 +250,7 @@ export const SchoolResult = () => {
             textcol={"default"}
             hovercol={"default"}
             type="submit"
+            id="fetchResultButton"
             onClick={(e) => submitHandler(e)}
           >
             Search result

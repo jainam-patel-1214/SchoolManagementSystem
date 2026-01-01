@@ -69,7 +69,10 @@ export const Navbar = () => {
             <></>
           )}
           {role === "student" ? (
-            <StyledNavbarTabs onClick={() => handleNavigation("schoolResult")}>
+            <StyledNavbarTabs
+              id="schoolResulyBtn"
+              onClick={() => handleNavigation("schoolResult")}
+            >
               School result
             </StyledNavbarTabs>
           ) : (
@@ -112,11 +115,14 @@ export const Navbar = () => {
             <></>
           )}
 
-          <StyledNavbarTabs>
+          <StyledNavbarTabs id="profileTab">
             Profile <FaAngleUp style={{ verticalAlign: "middle" }} />
             {role === "student" ? (
-              <StyledNavbarSubTabs>
-                <NavbarTabs onClick={() => handleNavigation("/app/student")}>
+              <StyledNavbarSubTabs id="subTabsContainer">
+                <NavbarTabs
+                  id="navigateToAccountBtn"
+                  onClick={() => handleNavigation("/app/student")}
+                >
                   Account
                 </NavbarTabs>
               </StyledNavbarSubTabs>

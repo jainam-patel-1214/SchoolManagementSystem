@@ -27,6 +27,7 @@ export const InputContainerComponent = ({
         <FloatingInput
           type="text"
           name={name}
+          id={name}
           value={value || ""}
           placeholder=" "
           onChange={(e) => {
