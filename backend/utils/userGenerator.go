@@ -3,7 +3,6 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -43,7 +42,7 @@ func UserGenerator(role string) ResStruct {
 	}
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		fmt.Println("Error marshaling JSON:", err)
+		log.Println("Error marshaling JSON:", err)
 		return empty
 	}
 	w := httptest.NewRecorder()
@@ -58,7 +57,7 @@ func UserGenerator(role string) ResStruct {
 	router.ServeHTTP(w, req)
 	body, err := io.ReadAll(w.Body)
 	if err != nil {
-		fmt.Println("Error reading response body:", err)
+		log.Println("Error reading response body:", err)
 		return empty
 	}
 	var TempData struct {
@@ -78,7 +77,7 @@ func UserGenerator(role string) ResStruct {
 	CurrentData.UserId = TempData.UID
 	jsonData, err = json.Marshal(logindata)
 	if err != nil {
-		fmt.Println("Error marshaling JSON:", err)
+		log.Println("Error marshaling JSON:", err)
 		return empty
 	}
 	req, err = http.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(jsonData))
@@ -90,7 +89,7 @@ func UserGenerator(role string) ResStruct {
 	router.ServeHTTP(v, req)
 	body, err = io.ReadAll(v.Body)
 	if err != nil {
-		fmt.Println("Error reading response body:", err)
+		log.Println("Error reading response body:", err)
 		return empty
 	}
 	var LoginOp LoginResponse

@@ -860,7 +860,7 @@ func Performance(ctx *gin.Context) {
 		var temp int
 		err = res2.Scan(&temp)
 		if err != nil {
-			fmt.Println("cannot scan", err)
+			log.Println("cannot scan", err)
 		} else {
 			res3, err := db.Query("SELECT t.tId, t.tName, t.stdAllocated, s.subName, SUM(m.theoryM) AS totalTheory, SUM(m.practicalM) AS totalPractical FROM marks m LEFT JOIN teachers t ON m.subId = t.subId INNER JOIN subjects s ON t.subId = s.subId WHERE t.tId = ? GROUP BY t.tId, t.tName, t.stdAllocated, s.subName", temp)
 			if err != nil {
