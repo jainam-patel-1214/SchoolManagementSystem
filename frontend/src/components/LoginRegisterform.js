@@ -4,7 +4,7 @@ import { Fragment, useState, useEffect } from "react";
 import styled, { keyframes } from "styled-components";
 import { SignInBtn } from "../styled-components/LoginSigninButton";
 import { useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { ErrorToast, Toaster } from "../utils/toasterCode";
 import { CookieSetter } from "../utils/setCookie";
 import { fetchApi } from "../utils/fetchApiCode";
@@ -148,7 +148,7 @@ export const LoginRegisterForm = () => {
       );
       Toaster(res);
     } catch (error) {
-      ErrorToast(error, toast);
+      ErrorToast(error);
       console.log(error);
     } finally {
       setData(initState);
@@ -193,7 +193,7 @@ export const LoginRegisterForm = () => {
       }
     } catch (error) {
       console.log(error);
-      ErrorToast(error, toast);
+      ErrorToast(error);
     } finally {
       setData(initState);
       setValidInp(false);
@@ -221,7 +221,7 @@ export const LoginRegisterForm = () => {
 
   return (
     <SignInForm>
-      <ToastContainer />
+      <ToastContainer containerId={"toastContainer"} />
       {showLogin ? (
         <Fragment>
           <SignUpAndLoginForm
@@ -271,7 +271,9 @@ export const LoginRegisterForm = () => {
             <SignInBtn type="submit">Login</SignInBtn>
           </SignUpAndLoginForm>
           <p>Or sign up using</p>
-          <h3 onClick={registerChangeHandler}>Sign Up</h3>
+          <h3 id="switchToSignup" onClick={registerChangeHandler}>
+            Sign Up
+          </h3>
         </Fragment>
       ) : (
         <></>

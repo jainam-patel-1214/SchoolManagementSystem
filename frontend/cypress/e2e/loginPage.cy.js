@@ -3,15 +3,6 @@
 //     cy.visit("http://localhost:3000/");
 //   });
 // });
-// describe("Login Form - Scholar App", () => {
-//
-// });
-// describe("Login Form - Scholar App", () => {
-//
-// });
-// describe("Login Form - Scholar App", () => {
-//
-// });
 describe("Login Form - Scholar App", () => {
   it("fills form and logs in failure for student", () => {
     cy.intercept("POST", "http://localhost:8090/login").as("loginRequest");
@@ -118,7 +109,7 @@ describe("Login Form - Scholar App", () => {
 
     cy.url().should("include", "/signIn");
   });
-  it("fills form and logs in failure for admin", () => {
+  it("fills form and logs in success for admin", () => {
     cy.intercept("POST", "http://localhost:8090/login").as("loginRequest");
 
     cy.visit("http://localhost:3000/");
