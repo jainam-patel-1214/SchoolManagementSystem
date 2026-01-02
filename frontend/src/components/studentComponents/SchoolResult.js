@@ -48,30 +48,37 @@ export const SchoolResult = () => {
     {
       header: "Student Name",
       accessorKey: "studentName",
+      id: "studentName",
     },
     {
       header: "Standard",
       accessorKey: "standard",
+      id: "studentStd",
     },
     {
       header: "Section",
       accessorKey: "section",
+      id: "studentSection",
     },
     {
       header: "Subject Name",
       accessorKey: "subject",
+      id: "subjectName",
     },
     {
       header: "Practical Marks",
       accessorKey: "practicalMarks",
+      id: "studentPracticalMarks",
     },
     {
       header: "Theory Marks",
       accessorKey: "theoryMarks",
+      id: "studentTheoryMarks",
     },
     {
       header: "Grade",
       accessorKey: "grade",
+      id: "marksGrade",
     },
   ];
   const initState = {
