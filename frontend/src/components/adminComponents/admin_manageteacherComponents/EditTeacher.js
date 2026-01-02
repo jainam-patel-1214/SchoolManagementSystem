@@ -219,21 +219,13 @@ export const TeacherEditComponent = () => {
           value !== null &&
           value !== undefined &&
           originalData.current[keyValueMap.get(key)] !== value
-        ) {
-          console.log(originalData.current[keyValueMap.get(key)], value);
-
+        )
           bodyObj[key] = value;
-        }
       }
       bodyObj["teacherId"] = payload.teacherId;
-      console.log(bodyObj, "body of api");
 
       res = await fetchApi(apiUrl, "PUT", bodyObj);
       Toaster(res);
-      console.log(originalData.current, "hello");
-      console.log(payload, "pay");
-      console.log(subjectList.current, "sl");
-      console.log(findSubjectName(payload.subId));
 
       if (res.output) {
         originalData.current = mergeObjects(

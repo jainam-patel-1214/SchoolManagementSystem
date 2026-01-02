@@ -78,7 +78,6 @@ export const ReviewTab = () => {
     } catch (error) {
       ErrorToast("Student doesnot exists you wish to edit, try again!!");
       setIsValid(false);
-      console.log("no student found");
     }
   };
   const setInitialData = () => {
