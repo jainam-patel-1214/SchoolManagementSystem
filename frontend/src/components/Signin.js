@@ -36,7 +36,6 @@ export const SignIn = () => {
   let isLogin = true;
 
   const currentUrl = window.location.href.split("/");
-  console.log(isLogin, "islogin", currentUrl);
   if (currentUrl[currentUrl.length - 1] === "signup") {
     isLogin = false;
   } else isLogin = true;

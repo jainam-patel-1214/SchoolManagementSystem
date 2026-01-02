@@ -63,7 +63,6 @@ export const SubEditTabComp = () => {
       }
     } catch (error) {
       ErrorToast("Subject doesnot exists you wish to edit, try again!!");
-      console.log("no sub found");
     }
   };
 

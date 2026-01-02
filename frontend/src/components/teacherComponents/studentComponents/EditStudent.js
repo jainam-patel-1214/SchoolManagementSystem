@@ -66,7 +66,6 @@ export const StudentEditComponent = () => {
       }
     } catch (error) {
       ErrorToast("Student doesnot exists you wish to edit, try again!!");
-      console.log("no student found");
     }
   };
 

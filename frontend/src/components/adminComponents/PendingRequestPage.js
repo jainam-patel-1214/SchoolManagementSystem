@@ -136,7 +136,6 @@ export const AdminPendingReqTab = () => {
     if (isStudent) {
       payload = { ...payload, std: Number(data.std), section: data.section };
       const isValid = adminRequestFieldValidator(payload);
-      console.log("is valid", isValid);
 
       if (!isValid) {
         return;

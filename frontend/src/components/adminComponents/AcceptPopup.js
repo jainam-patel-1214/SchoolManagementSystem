@@ -35,11 +35,9 @@ const CloseBtn = styled.button`
     cursor: pointer;
   }
 `;
-const generate8DigitInt = () => {
-  console.log("crypto");
+const generate8DigitInt = () =>
+  (crypto.getRandomValues(new Uint32Array(1))[0] % 90000000) + 10000000;
 
-  return (crypto.getRandomValues(new Uint32Array(1))[0] % 90000000) + 10000000;
-};
 export const PopoupComponent = ({
   styleDisplay,
   close,
