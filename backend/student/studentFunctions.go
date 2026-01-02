@@ -212,6 +212,7 @@ func DisplaySubject(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cannot fetch from db"})
 			return
 		}
+		defer res.Close()
 		type output struct {
 			SubId   int    `json:"subjectId"`
 			SubName string `json:"subjectName"`
@@ -280,6 +281,7 @@ func Report(ctx *gin.Context) {
 			log.Fatal(err)
 			return
 		}
+		defer res1.Close()
 		_, err = tc.Exec("SAVEPOINT query1done")
 		if err != nil {
 			tc.Rollback()
@@ -293,6 +295,7 @@ func Report(ctx *gin.Context) {
 				return
 			}
 		}
+		defer res2.Close()
 		if err = tc.Commit(); err != nil {
 			log.Fatal("Failed to commit transaction:", err)
 		}
@@ -370,6 +373,7 @@ func SelfData(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error processing query"})
 			return
 		}
+		defer res2.Close()
 		var allSubDta []SubjectData
 		for res2.Next() {
 			var tp SubjectData

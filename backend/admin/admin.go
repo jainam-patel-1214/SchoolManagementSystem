@@ -351,6 +351,7 @@ func ShowPendingReq(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error while fetching data"})
 			return
 		}
+		defer res.Close()
 		for res.Next() {
 			var temp PendingDb
 			err = res.Scan(&temp.PendingId, &temp.Username, &temp.RoleRequested, &temp.Pwd)

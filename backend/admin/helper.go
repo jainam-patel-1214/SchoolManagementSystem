@@ -732,6 +732,7 @@ func Performance(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong hwile fetching db"})
 		return
 	}
+	defer res2.Close()
 	for res2.Next() {
 		var tempres Teachers
 		var temp int
@@ -744,6 +745,7 @@ func Performance(ctx *gin.Context) {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
+			defer res3.Close()
 			if res3.Next() {
 				err = res3.Scan(&tempres.Tid, &tempres.TName, &tempres.StdAllocated, &tempres.SubName, &tempres.TotalTheoryMarks, &tempres.TotalPracticalMarks)
 				if err != nil {

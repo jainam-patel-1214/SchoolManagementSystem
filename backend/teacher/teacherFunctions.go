@@ -855,6 +855,7 @@ func Performance(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong hwile fetching db"})
 		return
 	}
+	defer res2.Close()
 	var tempres Teachers
 	for res2.Next() {
 		var temp int
@@ -867,6 +868,7 @@ func Performance(ctx *gin.Context) {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
+			defer res3.Close()
 			if res3.Next() {
 				err = res3.Scan(&tempres.Tid, &tempres.TName, &tempres.StdAllocated, &tempres.SubName, &tempres.TotalTheoryMarks, &tempres.TotalPracticalMarks)
 				if err != nil {
@@ -1034,6 +1036,7 @@ func Report(ctx *gin.Context) {
 			log.Fatal(err)
 			return
 		}
+		defer res1.Close()
 		_, err = tc.Exec("SAVEPOINT query1done")
 		if err != nil {
 			tc.Rollback()
@@ -1047,6 +1050,7 @@ func Report(ctx *gin.Context) {
 				return
 			}
 		}
+		defer res2.Close()
 		if err = tc.Commit(); err != nil {
 			log.Fatal("Failed to commit transaction:", err)
 		}
