@@ -75,6 +75,7 @@ func CreateSession(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err})
 			return
 		}
+		defer res.Close()
 		if res.Next() {
 			var grNo int
 			err = res.Scan(&grNo, &role, &name)
@@ -94,6 +95,7 @@ func CreateSession(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err})
 			return
 		}
+		defer res.Close()
 		if res.Next() {
 			var tId int
 			err = res.Scan(&tId, &role, &name)
