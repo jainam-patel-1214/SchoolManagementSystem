@@ -178,27 +178,27 @@ export const AdminPendingReqTab = () => {
 
   const columnHelper = createColumnHelper();
   const columns = [
-    columnHelper.accessor("roleReq", {
-      header: "Role requested",
-      cell: (info) => info.getValue(),
+    {
+      header: "Role Requested",
+      accessorKey: "roleReq",
+      id: "roleReq",
       enableSorting: false,
-    }),
-
-    columnHelper.accessor("userName", {
-      header: "Name",
-      cell: (info) => info.getValue(),
-      enableSorting: true,
-    }),
-
-    columnHelper.accessor("pwd", {
-      header: "Password",
-      cell: (info) => info.getValue(),
+    },
+    {
+      header: "User Name",
+      accessorKey: "userName",
+      id: "userName",
       enableSorting: false,
-    }),
-
-    columnHelper.display({
+    },
+    {
+      header: "User Password",
+      accessorKey: "pwd",
+      id: "pwd",
+      enableSorting: false,
+    },
+    {
       id: "accept",
-      header: "Accept",
+      header: "",
       cell: ({ row }) => {
         const v = row.original;
         return (
@@ -211,11 +211,10 @@ export const AdminPendingReqTab = () => {
           </PendingBtnComp>
         );
       },
-    }),
-
-    columnHelper.display({
+    },
+    {
       id: "reject",
-      header: "Reject",
+      header: "",
       cell: ({ row }) => {
         const v = row.original;
         return (
@@ -228,7 +227,46 @@ export const AdminPendingReqTab = () => {
           </PendingBtnComp>
         );
       },
-    }),
+    },
+    // columnHelper.accessor("roleReq", {
+    //   header: "Role requested",
+    //   cell: (info) => info.getValue(),
+    //   enableSorting: false,
+    // }),
+
+    // columnHelper.accessor("userName", {
+    //   header: "Name",
+    //   cell: (info) => info.getValue(),
+    //   enableSorting: true,
+    // }),
+
+    // columnHelper.accessor("pwd", {
+    //   header: "Password",
+    //   cell: (info) => info.getValue(),
+    //   enableSorting: false,
+    // }),
+
+    // columnHelper.display({
+    //   id: "accept",
+    //   header: "Accept",
+    //   cell: ({ row }) => {
+    //     const v = row.original;
+    //     return (
+
+    //     );
+    //   },
+    // }),
+
+    // columnHelper.display({
+    //   id: "reject",
+    //   header: "Reject",
+    //   cell: ({ row }) => {
+    //     const v = row.original;
+    //     return (
+
+    //     );
+    //   },
+    // }),
   ];
 
   return (

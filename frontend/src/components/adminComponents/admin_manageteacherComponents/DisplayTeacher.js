@@ -88,38 +88,44 @@ export const DisplayTeacherComponent = () => {
   const navigate = useNavigate();
   const columnHelper = createColumnHelper();
   const columns = [
-    columnHelper.accessor("teacherId", {
+    {
       header: "Teacher ID",
-      cell: (info) => info.getValue(),
+      accessorKey: "teacherId",
+      id: "teacherId",
       enableSorting: false,
-    }),
-    columnHelper.accessor("teacherName", {
+    },
+    {
       header: "Name",
-      cell: (info) => info.getValue(),
-      enableSorting: true,
-    }),
-    columnHelper.accessor("teacherPwd", {
+      accessorKey: "teacherName",
+      id: "teacherName",
+      enableSorting: false,
+    },
+    {
       header: "Password",
-      cell: (info) => info.getValue(),
+      accessorKey: "teacherPwd",
+      id: "teacherPwd",
       enableSorting: false,
-    }),
-    columnHelper.accessor("gradeAllocated", {
-      header: "Grade allocated",
-      cell: (info) => info.getValue(),
+    },
+    {
+      header: "Standard Allocated",
+      accessorKey: "gradeAllocated",
+      id: "gradeAllocated",
       enableSorting: false,
-    }),
-    columnHelper.accessor("sectionAllocated", {
+    },
+    {
       header: "Section Allocated",
-      cell: (info) => info.getValue(),
+      accessorKey: "sectionAllocated",
+      id: "sectionAllocated",
       enableSorting: false,
-    }),
-    columnHelper.accessor("subjectAllocated", {
+    },
+    {
       header: "Subject Allocated",
-      cell: (info) => info.getValue(),
+      accessorKey: "subjectAllocated",
+      id: "subjectAllocated",
       enableSorting: false,
-    }),
-    columnHelper.display({
-      id: "edit",
+    },
+    {
+      id: "accept",
       header: "",
       cell: ({ row }) => {
         const v = row.original;
@@ -138,10 +144,9 @@ export const DisplayTeacherComponent = () => {
           </ButtonElement>
         );
       },
-    }),
-
-    columnHelper.display({
-      id: "reject",
+    },
+    {
+      id: "accept",
       header: "",
       cell: ({ row }) => {
         const v = row.original;
@@ -163,7 +168,7 @@ export const DisplayTeacherComponent = () => {
           </ButtonElement>
         );
       },
-    }),
+    },
   ];
 
   useEffect(() => {

@@ -97,7 +97,7 @@ export const DisplaySubTabComp = () => {
     },
     {
       id: "accept",
-      Header: "",
+      header: "",
       cell: ({ row }) => {
         const v = row.original;
         return (
@@ -118,7 +118,7 @@ export const DisplaySubTabComp = () => {
     },
     {
       id: "reject",
-      Header: "",
+      header: "",
       cell: ({ row }) => {
         const v = row.original;
         return (
