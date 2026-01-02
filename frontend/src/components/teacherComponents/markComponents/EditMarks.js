@@ -67,18 +67,10 @@ export const EditMarkTab = () => {
     try {
       const [resultForSubject, resultForStudent, markRecordExist] =
         await Promise.all([
+          fetchApi(`/${userrole}/isValidSubject/${data.subjectId}`, "GET", {}),
+          fetchApi(`/${userrole}/isValidStudent/${data.grNo}`, "GET", {}),
           fetchApi(
-            `http://localhost:8090/${userrole}/isValidSubject/${data.subjectId}`,
-            "GET",
-            {}
-          ),
-          fetchApi(
-            `http://localhost:8090/${userrole}/isValidStudent/${data.grNo}`,
-            "GET",
-            {}
-          ),
-          fetchApi(
-            `http://localhost:8090/${userrole}/isMarkRecordExist?grNo=${data.grNo}&subId=${data.subjectId}`,
+            `/${userrole}/isMarkRecordExist?grNo=${data.grNo}&subId=${data.subjectId}`,
             "GET",
             {}
           ),
@@ -168,14 +160,20 @@ export const EditMarkTab = () => {
 
   const fetchData = async () => {
     const [resultForStudent, resultForSubject] = await Promise.all([
-      fetchApi(`http://localhost:8090/${userrole}/allStudents`, "GET", {}),
-      fetchApi(`http://localhost:8090/${userrole}/allSubjects`, "GET", {}),
+      fetchApi(`/${userrole}/allStudents`, "GET", {}),
+      fetchApi(`/${userrole}/allSubjects`, "GET", {}),
     ]);
-    if (resultForStudent.output) {
+    if (
+      resultForStudent.output &&
+      typeof resultForStudent.output !== "string"
+    ) {
       studentList.current = resultForStudent.output;
       setFilteredStudent(resultForStudent.output);
     }
-    if (resultForSubject.output) {
+    if (
+      resultForSubject.output &&
+      typeof resultForSubject.output !== "string"
+    ) {
       subjectList.current = resultForSubject.output;
       setFilteredSubject(resultForSubject.output);
     }
@@ -361,7 +359,7 @@ export const EditMarkTab = () => {
             </HeadingComponent>
             <GridContainer>
               <InputContainerComponent
-                value={data.theoryMarks}
+                value={data.theoryMarks || ""}
                 objKey={"theoryMarks"}
                 width={"auto"}
                 handler={dataChangeHandler}
@@ -370,7 +368,7 @@ export const EditMarkTab = () => {
                 labelText={"Enter theory marks (out of 80):"}
               ></InputContainerComponent>
               <InputContainerComponent
-                value={data.practicalMarks}
+                value={data.practicalMarks || ""}
                 objKey={"practicalMarks"}
                 width={"auto"}
                 handler={dataChangeHandler}
@@ -392,12 +390,7 @@ export const EditMarkTab = () => {
                 textcol={"default"}
                 hovercol={"default"}
                 type="submit"
-                onClick={(e) =>
-                  submitHandler(
-                    e,
-                    `http://localhost:8090/${userrole}/updateMarks`
-                  )
-                }
+                onClick={(e) => submitHandler(e, `/${userrole}/updateMarks`)}
               >
                 Update Marks
               </ButtonElement>

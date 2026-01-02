@@ -32,7 +32,7 @@ import { GridItemComponent } from "../../helperComponents/GridItem";
 export const DisplayTeacherComponent = () => {
   const userrole = roleExtractor(window.location.pathname);
   const [searchKey, setSearchKey] = useState("");
-  const [filterData, setFilterData] = useState(null);
+  const [filterData, setFilterData] = useState([]);
   const originalData = useRef([]);
   const [isTable, setIsTable] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -40,12 +40,8 @@ export const DisplayTeacherComponent = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const res = await fetchApi(
-        `http://localhost:8090/${userrole}/allTeachers`,
-        "GET",
-        {}
-      );
-      if (res.output) {
+      const res = await fetchApi(`/${userrole}/allTeachers`, "GET", {});
+      if (res.output && typeof res.output !== "string") {
         const output = [];
         res.output.forEach((e) => {
           const data = {};
@@ -158,7 +154,7 @@ export const DisplayTeacherComponent = () => {
             hovercol={"#ffd3d3af"}
             onClick={() =>
               deleteTeacherHandler(
-                `http://localhost:8090/${userrole}/delTeacher`,
+                `/${userrole}/delTeacher`,
                 Number(v.teacherId)
               )
             }
@@ -252,7 +248,7 @@ export const DisplayTeacherComponent = () => {
             ></GeneralTableComponent>
           ) : (
             <GridContainer>
-              {filterData?.map(
+              {filterData.map(
                 (
                   {
                     teacherId,

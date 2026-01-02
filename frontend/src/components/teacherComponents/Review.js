@@ -51,7 +51,7 @@ export const ReviewTab = () => {
       return;
     }
     try {
-      const apiUrl = `http://localhost:8090/${userrole}/addReview`;
+      const apiUrl = `/${userrole}/addReview`;
       const res = await fetchApi(apiUrl, "POST", {
         grNo: Number(data.grNo),
         comment: data.comment,
@@ -67,7 +67,7 @@ export const ReviewTab = () => {
   const searchStudent = async () => {
     try {
       const isValidRes = await fetchApi(
-        `http://localhost:8090/${userrole}/isValidStudent/${data.grNo}`,
+        `/${userrole}/isValidStudent/${data.grNo}`,
         "GET",
         {}
       );
@@ -102,7 +102,6 @@ export const ReviewTab = () => {
           width={"100%"}
           handler={dataChangeHandler}
           name={"grNo"}
-          isRequired={true}
           icon={FaCircleUser}
           labelText={"Provide Gr NO for student you wish to give review:"}
         ></InputContainerComponent>
@@ -136,7 +135,6 @@ export const ReviewTab = () => {
               name={"comment"}
               labelText={"Enter a review (250 characters max):"}
               icon={MdRateReview}
-              isRequired={true}
             ></InputContainerComponent>
           </ContentContainers>
           <ContentContainers
@@ -151,12 +149,7 @@ export const ReviewTab = () => {
                 textcol={"default"}
                 hovercol={"default"}
                 type="submit"
-                onClick={(e) =>
-                  submitHandler(
-                    e,
-                    `http://localhost:8090/${userrole}/updateStud`
-                  )
-                }
+                onClick={(e) => submitHandler(e, `/${userrole}/updateStud`)}
               >
                 Add Review
               </ButtonElement>

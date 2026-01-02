@@ -99,12 +99,8 @@ export const SubAddTabComp = () => {
 
   const fetchSubjects = async () => {
     try {
-      const res = await fetchApi(
-        `http://localhost:8090/${userrole}/allSubjects`,
-        "GET",
-        {}
-      );
-      if (res.output) {
+      const res = await fetchApi(`/${userrole}/allSubjects`, "GET", {});
+      if (res.output && typeof res.output !== "string") {
         subjectList.current = res.output;
         return;
       } else {
@@ -166,7 +162,6 @@ export const SubAddTabComp = () => {
           width={"100%"}
           handler={dataChangeHandler}
           name={"subId"}
-          isRequired={true}
           icon={FaOrcid}
           labelText={
             idErrorMessage ||
@@ -191,7 +186,6 @@ export const SubAddTabComp = () => {
             width={"auto"}
             handler={dataChangeHandler}
             name={"subName"}
-            isRequired={true}
             icon={LuBookA}
             labelText={"Assign name to subject:"}
           ></InputContainerComponent>
@@ -200,17 +194,15 @@ export const SubAddTabComp = () => {
             objKey={"subjectStd"}
             width={"auto"}
             handler={dataChangeHandler}
-            isRequired={true}
             name={"grade"}
             icon={RiBookShelfLine}
             labelText={"Provide subject's level:"}
           ></InputContainerComponent>
           <InputContainerComponent
-            value={data.subjectCredit}
+            value={data.subjectCredit || ""}
             objKey={"subjectCredit"}
             width={"auto"}
             handler={dataChangeHandler}
-            isRequired={true}
             name={"credits"}
             icon={IoIosRibbon}
             labelText={"Assign subject's credits:"}
@@ -226,12 +218,7 @@ export const SubAddTabComp = () => {
             textcol={"default"}
             hovercol={"default"}
             type="submit"
-            onClick={(e) =>
-              createSubjectHandler(
-                e,
-                `http://localhost:8090/${userrole}/createSub`
-              )
-            }
+            onClick={(e) => createSubjectHandler(e, `/${userrole}/createSub`)}
           >
             Create Subject
           </ButtonElement>

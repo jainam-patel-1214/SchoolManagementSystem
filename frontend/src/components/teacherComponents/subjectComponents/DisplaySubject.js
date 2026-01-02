@@ -39,12 +39,8 @@ export const DisplaySubTabComp = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const res = await fetchApi(
-        `http://localhost:8090/${userrole}/allSubjects`,
-        "GET",
-        {}
-      );
-      if (res.output) {
+      const res = await fetchApi(`/${userrole}/allSubjects`, "GET", {});
+      if (res.output && typeof res.output !== "string") {
         originalData.current = res.output;
         setData(res.output);
         return;
@@ -157,7 +153,7 @@ export const DisplaySubTabComp = () => {
             hovercol={"#ffd3d3af"}
             onClick={() =>
               deleteSubjectHandler(
-                `http://localhost:8090/${userrole}/delSubject`,
+                `/${userrole}/delSubject`,
                 Number(v.subjectId)
               )
             }
@@ -279,25 +275,25 @@ export const DisplaySubTabComp = () => {
             <div>Fetching all subjects</div>
           ) : isTable ? (
             <GeneralTableComponent data={data} columnDefinition={columns} />
-          ) : (
+          ) : data.length > 0 ? (
             <GridContainer>
               {data.map(({ subjectId, subjectName, level, credits }, i) => (
                 <GridItemComponent
-                  key={i}
+                  key={subjectId} // ✅ better key
                   index={i}
                   objectId={subjectId}
-                  password={""}
+                  password=""
                   name={subjectName}
                   grade={level}
-                  section={""}
+                  section=""
                   credits={credits}
                   isStudent={false}
                   delete={deleteSubjectHandler}
-                  variant={"subject"}
+                  variant="subject"
                 />
               ))}
             </GridContainer>
-          )}
+          ) : null}
         </ContentContainers>
       </DataContainer>
     </AllComponentsContainer>
