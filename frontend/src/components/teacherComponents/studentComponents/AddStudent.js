@@ -123,13 +123,8 @@ export const StudentAddComponent = () => {
 
   const fetchStudents = async () => {
     try {
-      const res = await fetchApi(
-        `http://localhost:8090/${userrole}/allStudents`,
-        "GET",
-        {}
-      );
-      if (res.output) {
-        console.log(res);
+      const res = await fetchApi(`/${userrole}/allStudents`, "GET", {});
+      if (res.output && typeof res.output !== "string") {
         userList.current = res.output;
         return;
       } else {
@@ -190,7 +185,6 @@ export const StudentAddComponent = () => {
           width={"100%"}
           handler={dataChangeHandler}
           name={"grNo"}
-          isRequired={true}
           icon={FaCircleUser}
           labelText={
             idErrorMessage ||
@@ -215,7 +209,6 @@ export const StudentAddComponent = () => {
             width={"auto"}
             handler={dataChangeHandler}
             name={"password"}
-            isRequired={true}
             icon={FaKey}
             labelText={"Assign new 8 digit password:"}
           ></InputContainerComponent>
@@ -224,7 +217,6 @@ export const StudentAddComponent = () => {
             objKey={"name"}
             width={"auto"}
             handler={dataChangeHandler}
-            isRequired={true}
             name={"name"}
             icon={FaAddressCard}
             labelText={"Provide student's name:"}
@@ -234,7 +226,6 @@ export const StudentAddComponent = () => {
             objKey={"section"}
             width={"auto"}
             handler={dataChangeHandler}
-            isRequired={true}
             name={"section"}
             icon={MdWindow}
             labelText={"Assign new section:"}
@@ -244,7 +235,6 @@ export const StudentAddComponent = () => {
             objKey={"std"}
             width={"auto"}
             handler={dataChangeHandler}
-            isRequired={true}
             name={"std"}
             icon={RiBookShelfLine}
             labelText={"Assign new std:"}
@@ -260,9 +250,7 @@ export const StudentAddComponent = () => {
             textcol={"default"}
             hovercol={"default"}
             type="submit"
-            onClick={(e) =>
-              submitHandler(e, `http://localhost:8090/${userrole}/createStud`)
-            }
+            onClick={(e) => submitHandler(e, `/${userrole}/createStud`)}
           >
             Create Student
           </ButtonElement>

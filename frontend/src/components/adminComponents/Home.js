@@ -37,12 +37,10 @@ export const AdminHome = () => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const res = await fetchApi(
-          `http://localhost:8090/${role}/data`,
-          "GET",
-          {}
-        );
-        setDisplayData(res.output);
+        const res = await fetchApi(`/${role}/data`, "GET", {});
+        if (typeof res.output !== "string") {
+          setDisplayData(res.output);
+        }
       } catch (err) {
         ErrorToast(err);
       } finally {

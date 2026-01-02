@@ -57,27 +57,15 @@ export const PopoupComponent = ({
     let res;
     try {
       if (isStudent) {
-        res = await fetchApi(
-          `http://localhost:8090/admin/allStudents`,
-          "GET",
-          {}
-        );
+        res = await fetchApi(`/admin/allStudents`, "GET", {});
       }
       if (isTeacher) {
-        res = await fetchApi(
-          `http://localhost:8090/admin/allTeachers`,
-          "GET",
-          {}
-        );
+        res = await fetchApi(`/admin/allTeachers`, "GET", {});
       }
       if (!isStudent && !isTeacher) {
-        res = await fetchApi(
-          `http://localhost:8090/admin/allAdmins`,
-          "GET",
-          {}
-        );
+        res = await fetchApi(`/admin/allAdmins`, "GET", {});
       }
-      if (res.output) {
+      if (res.output && typeof res.output !== "string") {
         userList.current = res.output;
         return;
       } else {
@@ -125,7 +113,7 @@ export const PopoupComponent = ({
             width={"65%"}
             icon={RiBookShelfLine}
             name={"uid"}
-            value={data.id}
+            value={data.id || ""}
             handler={newHandler}
             objKey={"id"}
             labelText={
@@ -154,7 +142,7 @@ export const PopoupComponent = ({
               width={"100%"}
               icon={TiSortAlphabetically}
               name={"sub"}
-              value={data.subjectId}
+              value={data.subjectId || ""}
               handler={newHandler}
               objKey={"subjectId"}
               labelText={`Provide sub id if teacher is assigned one:`}
@@ -170,7 +158,7 @@ export const PopoupComponent = ({
                 width={"100%"}
                 icon={TiSortAlphabetically}
                 name={"std"}
-                value={data.std}
+                value={data.std || ""}
                 handler={newHandler}
                 objKey={"std"}
                 labelText={`Provide standard:`}
@@ -181,7 +169,7 @@ export const PopoupComponent = ({
                 width={"100%"}
                 icon={TiSortAlphabetically}
                 name={"section"}
-                value={data.section}
+                value={data.section || ""}
                 handler={newHandler}
                 objKey={"section"}
                 labelText={`Provide section:`}

@@ -136,7 +136,7 @@ export const SchoolResult = () => {
     }
 
     try {
-      const apiUrl = `http://localhost:8090/${userrole}/display`;
+      const apiUrl = `/${userrole}/display`;
       const params = {
         viewByStd: Number(data.grade),
         viewBySection: data.section,
@@ -160,7 +160,7 @@ export const SchoolResult = () => {
         {}
       );
       Toaster(res);
-      if (res.output) {
+      if (res.output && typeof res.output !== "string") {
         setDisplayData(res.output);
       } else {
         setDisplayData(res.error);
@@ -204,7 +204,6 @@ export const SchoolResult = () => {
           <InputContainerComponent
             width={"auto"}
             icon={RiBookShelfLine}
-            isRequired={true}
             handler={dataChangeHandler}
             objKey={"grade"}
             labelText={"Provide grade of class you wish result of:"}
@@ -213,7 +212,6 @@ export const SchoolResult = () => {
           ></InputContainerComponent>
           <InputContainerComponent
             width={"auto"}
-            isRequired={false}
             icon={TiSortAlphabetically}
             handler={dataChangeHandler}
             objKey={"section"}
@@ -226,20 +224,18 @@ export const SchoolResult = () => {
             icon={HiArrowTrendingDown}
             handler={dataChangeHandler}
             objKey={"minMark"}
-            isRequired={false}
             labelText={"Min marks:"}
             name={"minPercent"}
-            value={data.minMark}
+            value={data.minMark || ""}
           ></InputContainerComponent>
           <InputContainerComponent
             width={"auto"}
             handler={dataChangeHandler}
             icon={HiArrowTrendingUp}
             objKey={"maxMark"}
-            isRequired={false}
             labelText={"Max marks:"}
             name={"maxPercent"}
-            value={data.maxMark}
+            value={data.maxMark || ""}
           ></InputContainerComponent>
         </GridContainer>
         <GridLayers style={{ width: "100%" }}>

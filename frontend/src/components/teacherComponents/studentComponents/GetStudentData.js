@@ -44,7 +44,7 @@ export const DataContainer = styled.div`
 `;
 
 export const StudentDataComponent = () => {
-  const [filterData, setFilterData] = useState(null);
+  const [filterData, setFilterData] = useState([]);
   const [searchKey, setSearchKey] = useState("");
   const originalData = useRef([]);
   const userrole = roleExtractor(window.location.pathname);
@@ -54,12 +54,8 @@ export const StudentDataComponent = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const res = await fetchApi(
-        `http://localhost:8090/${userrole}/allStudents`,
-        "GET",
-        {}
-      );
-      if (res.output) {
+      const res = await fetchApi(`/${userrole}/allStudents`, "GET", {});
+      if (res.output && typeof res.output !== "string") {
         originalData.current = res.output;
         setFilterData(res.output);
         return;
@@ -150,10 +146,7 @@ export const StudentDataComponent = () => {
             textcol={"red"}
             hovercol={"#ffd3d3af"}
             onClick={() =>
-              deleteStudentHandler(
-                `http://localhost:8090/${userrole}/delStudent`,
-                Number(v.grNo)
-              )
+              deleteStudentHandler(`/${userrole}/delStudent`, Number(v.grNo))
             }
           >
             Delete
@@ -240,7 +233,7 @@ export const StudentDataComponent = () => {
             ></GeneralTableComponent>
           ) : (
             <GridContainer>
-              {filterData?.map(
+              {filterData.map(
                 ({ grNo, password, studentName, grade, section }, i) => (
                   <GridItemComponent
                     key={i}

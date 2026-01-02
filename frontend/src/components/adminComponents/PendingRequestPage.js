@@ -61,14 +61,8 @@ export const AdminPendingReqTab = () => {
 
   const fetchPendingApps = async () => {
     try {
-      const res = await fetchApi(
-        `http://localhost:8090/${userrole}/pendingRequest`,
-        "GET",
-        {}
-      );
-      if (typeof res.output === "string") {
-        SuccessToast(res.output);
-      } else {
+      const res = await fetchApi(`/${userrole}/pendingRequest`, "GET", {});
+      if (typeof res.output !== "string") {
         setDisplayData(res.output);
       }
     } catch (err) {
@@ -100,7 +94,7 @@ export const AdminPendingReqTab = () => {
         uRole: v.roleReq,
       };
       const res = await fetchApi(
-        `http://localhost:8090/${userrole}/rejectRequest`,
+        `/${userrole}/rejectRequest`,
         "DELETE",
         payload
       );
@@ -166,11 +160,7 @@ export const AdminPendingReqTab = () => {
     }
 
     try {
-      const res = await fetchApi(
-        `http://localhost:8090/${userrole}/acceptRequest`,
-        "POST",
-        payload
-      );
+      const res = await fetchApi(`/${userrole}/acceptRequest`, "POST", payload);
       Toaster(res);
     } catch (error) {
       ErrorToast(error);
@@ -265,7 +255,7 @@ export const AdminPendingReqTab = () => {
           data={data}
           newHandler={dataChangeHandler}
         ></PopoupComponent>
-        {displayData?.length > 0 ? (
+        {displayData.length > 0 ? (
           <ContentContainers
             elements={"single"}
             usage={"nongrid"}

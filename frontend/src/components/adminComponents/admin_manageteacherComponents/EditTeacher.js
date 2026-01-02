@@ -66,12 +66,8 @@ export const TeacherEditComponent = () => {
   const fetchSubjects = async () => {
     const tempArr = [];
     try {
-      const res = await fetchApi(
-        `http://localhost:8090/${userrole}/allSubjects`,
-        "GET",
-        {}
-      );
-      if (res.output) {
+      const res = await fetchApi(`/${userrole}/allSubjects`, "GET", {});
+      if (res.output && typeof res.output !== "string") {
         res.output.forEach((e) => {
           const tempObj = {};
           tempObj["value"] = e.subjectId;
@@ -88,11 +84,11 @@ export const TeacherEditComponent = () => {
   };
   const searchTeacher = async (id) => {
     const teacherData = await fetchApi(
-      `http://localhost:8090/${userrole}/teacherData/${id}`,
+      `/${userrole}/teacherData/${id}`,
       "GET",
       {}
     );
-    if (teacherData.output) {
+    if (teacherData.output && typeof teacherData.output !== "string") {
       const initState = {
         teacherId: "",
         teacherPassword: "",
@@ -305,7 +301,7 @@ export const TeacherEditComponent = () => {
           <InputContainerComponent
             width={"auto"}
             name={"tname"}
-            value={data.teacherName}
+            value={data.teacherName || ""}
             handler={dataChangeHandler}
             objKey={"teacherName"}
             icon={FaAddressCard}
@@ -314,7 +310,7 @@ export const TeacherEditComponent = () => {
           <InputContainerComponent
             width={"auto"}
             name={"pwd"}
-            value={data.teacherPassword}
+            value={data.teacherPassword || ""}
             handler={dataChangeHandler}
             objKey={"teacherPassword"}
             icon={FaKey}
@@ -351,7 +347,7 @@ export const TeacherEditComponent = () => {
           <InputContainerComponent
             width={"auto"}
             name={"std"}
-            value={data.sandardAllocated}
+            value={data.sandardAllocated || ""}
             handler={dataChangeHandler}
             objKey={"sandardAllocated"}
             icon={RiBookShelfLine}
@@ -360,7 +356,7 @@ export const TeacherEditComponent = () => {
           <InputContainerComponent
             width={"auto"}
             name={"section"}
-            value={data.sectionAllocated}
+            value={data.sectionAllocated || ""}
             handler={dataChangeHandler}
             objKey={"sectionAllocated"}
             icon={MdWindow}
@@ -377,9 +373,7 @@ export const TeacherEditComponent = () => {
             textcol={"default"}
             hovercol={"default"}
             type="submit"
-            onClick={(e) =>
-              submitHandler(e, `http://localhost:8090/${userrole}/editTeacher`)
-            }
+            onClick={(e) => submitHandler(e, `/${userrole}/editTeacher`)}
           >
             Update Teacher
           </ButtonElement>
