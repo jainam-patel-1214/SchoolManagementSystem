@@ -27,7 +27,8 @@ function ProjectRouter() {
   return (
     <Routes>
       <Route index element={<SignIn />}></Route>
-      <Route path="signIn" element={<SignIn />}></Route>
+      <Route path="login" element={<SignIn />}></Route>
+      <Route path="signup" element={<SignIn />}></Route>
       <Route path="app/student" element={<Navbar />}>
         <Route index element={<StudentHomePage />} />
         <Route path="schoolResult" element={<SchoolResult />}></Route>

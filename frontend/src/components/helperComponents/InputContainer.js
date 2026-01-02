@@ -6,40 +6,33 @@ import {
 import { InputContainer } from "../teacherComponents/StudentsTab";
 
 export const InputContainerComponent = ({
-  width,
   icon: Icon,
-  name,
-  value,
   handler,
   objKey,
   labelText,
-  isRequired = false,
-  onInput,
-  onFocus,
-  onBlur,
   searchKeyHandler,
-  errorColor,
+  width,
+  ...rest
 }) => {
   return (
-    <InputContainer style={{ width: width }}>
+    <InputContainer style={{ width }}>
       {Icon && <Icon style={{ fontSize: "xx-large" }} />}
       <InputWrapper>
         <FloatingInput
           type="text"
+<<<<<<< HEAD
           name={name}
           id={name}
           value={value || ""}
+=======
+>>>>>>> a97d937 (frontend changes in seperate login register component, seperator operator in common component, navbar object added, options mapped, fetapi url made common)
           placeholder=" "
           onChange={(e) => {
             const val = e.target.value;
             handler(objKey, val);
             searchKeyHandler?.(val);
           }}
-          required={isRequired}
-          onInput={onInput}
-          onFocus={onFocus}
-          onBlur={onBlur}
-          errorColor={errorColor}
+          {...rest}
         />
         <FloatingLabel>{labelText}</FloatingLabel>
       </InputWrapper>

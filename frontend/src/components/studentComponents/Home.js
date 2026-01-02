@@ -85,7 +85,7 @@ export const StudentHomePage = () => {
     },
   ];
   useEffect(() => {
-    const baseUrl = "http://localhost:8090/student";
+    const baseUrl = "/student";
     const fetchReport = async () => {
       try {
         const name = getCookie("username");
@@ -98,8 +98,10 @@ export const StudentHomePage = () => {
           fetchApi(`${baseUrl}/report`, "GET", {}),
           fetchApi(`${baseUrl}/data`, "GET", {}),
         ]);
-        setDisplayReport(report.output);
-        setDisplayData(data.output);
+        setDisplayReport(
+          typeof report.output !== "string" ? report.output : {}
+        );
+        setDisplayData(typeof data.output !== "string" ? data.output : {});
 
         let sum = 0;
         report.output?.MarkInfo?.forEach((e) => {

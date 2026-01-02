@@ -41,11 +41,7 @@ export const SubjectLimit = () => {
 
     try {
       const payload = { std: Number(data.grade), limit: Number(data.limit) };
-      const res = await fetchApi(
-        `http://localhost:8090/${userrole}/setSubLimit`,
-        "POST",
-        payload
-      );
+      const res = await fetchApi(`/${userrole}/setSubLimit`, "POST", payload);
       Toaster(res);
     } catch (error) {
       ErrorToast(error);
@@ -89,7 +85,6 @@ export const SubjectLimit = () => {
         </HeadingComponent>
         <GridContainer>
           <InputContainerComponent
-            isRequired={true}
             width={"auto"}
             icon={RiBookShelfLine}
             name={"std"}
@@ -99,7 +94,6 @@ export const SubjectLimit = () => {
             value={data.grade}
           ></InputContainerComponent>
           <InputContainerComponent
-            isRequired={true}
             width={"auto"}
             icon={GiBookPile}
             name={"limit"}

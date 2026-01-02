@@ -1,8 +1,9 @@
-export const fetchApi = async (url, methodtype, bodyObj) => {
+export const fetchApi = async (urlroute, methodtype, bodyObj) => {
   const fetchParams = {
     method: methodtype,
     credentials: "include",
   };
+  const url = "http://localhost:8090" + urlroute;
 
   if (methodtype !== "GET") {
     fetchParams.headers = { "Content-Type": "application/json" };
