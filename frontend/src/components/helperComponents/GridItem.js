@@ -72,8 +72,12 @@ export const GridItemComponent = ({
   const navigate = useNavigate();
   const userrole = roleExtractor(window.location.pathname);
   return (
-    <GridItemBox>
-      <ContentContainers elements={"single"} usage={"ingrid"}>
+    <GridItemBox className="gridListContainer">
+      <ContentContainers
+        className="gridListHeading"
+        elements={"single"}
+        usage={"ingrid"}
+      >
         <IndexComp>{index + 1}</IndexComp>
         <HeaderData>
           <h4>{name}</h4>
@@ -97,7 +101,7 @@ export const GridItemComponent = ({
         </HeaderData>
       </ContentContainers>
       {isTeacher ? (
-        <GridLayers>
+        <GridLayers className="gridListDescription">
           <ContentContainers>
             <HeaderData>
               <div>
@@ -116,7 +120,7 @@ export const GridItemComponent = ({
           </ContentContainers>
         </GridLayers>
       ) : (
-        <GridLayers>
+        <GridLayers className="gridListDescription">
           <ContentContainers>
             <HeaderData>
               <div>
@@ -146,9 +150,10 @@ export const GridItemComponent = ({
           )}
         </GridLayers>
       )}
-      <GridLayers>
+      <GridLayers className="gridListActions">
         {variant !== "subject" ? (
           <ButtonElement
+            className="performanceButton"
             style={{ width: "45%" }}
             bgcol={"default"}
             border={"default"}
@@ -182,7 +187,10 @@ export const GridItemComponent = ({
         ) : (
           <></>
         )}
-        <GridLayers style={{ width: "53%", margin: "0" }}>
+        <GridLayers
+          className="editDelActionButtons"
+          style={{ width: "53%", margin: "0" }}
+        >
           <ButtonElement
             style={{ width: "40%" }}
             bgcol={"transparent"}

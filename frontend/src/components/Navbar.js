@@ -58,66 +58,59 @@ export const Navbar = () => {
           </p>
         </div>
         <div>
-          {uName !== "" ? (
+          {uName !== "" && (
             <StyledNavbarTabs
               id="signOutButton"
               onClick={(e) => signOutHandler(e)}
             >
               SignOut
             </StyledNavbarTabs>
-          ) : (
-            <></>
           )}
-          {role === "student" ? (
+          {role === "student" && (
             <StyledNavbarTabs
-              id="schoolResulyBtn"
+              id="schoolResultBtn"
               onClick={() => handleNavigation("schoolResult")}
             >
               School result
             </StyledNavbarTabs>
-          ) : (
-            <></>
           )}
 
-          {role === "teacher" || role === "admin" ? (
+          {(role === "teacher" || role === "admin") && (
             <StyledNavbarTabs
               onClick={() => handleNavigation("displayStudent")}
+              id="studentsTabBtn"
             >
               Students
               <FaAngleUp style={{ verticalAlign: "middle" }} />
             </StyledNavbarTabs>
-          ) : (
-            <></>
           )}
-          {role === "admin" ? (
+          {role === "admin" && (
             <StyledNavbarTabs
               onClick={() => handleNavigation("displayTeacher")}
             >
               Teachers <FaAngleUp style={{ verticalAlign: "middle" }} />
             </StyledNavbarTabs>
-          ) : (
-            <></>
           )}
-          {role === "teacher" || role === "admin" ? (
+          {(role === "teacher" || role === "admin") && (
             <StyledNavbarTabs
               onClick={() => handleNavigation("displaySubject")}
+              id="subjectsTabBtn"
             >
               Subjects <FaAngleUp style={{ verticalAlign: "middle" }} />
             </StyledNavbarTabs>
-          ) : (
-            <></>
           )}
-          {role === "teacher" || role === "admin" ? (
-            <StyledNavbarTabs onClick={() => handleNavigation("enterMarks")}>
+          {(role === "teacher" || role === "admin") && (
+            <StyledNavbarTabs
+              onClick={() => handleNavigation("enterMarks")}
+              id="marksTabBtn"
+            >
               Marks <FaAngleUp style={{ verticalAlign: "middle" }} />
             </StyledNavbarTabs>
-          ) : (
-            <></>
           )}
 
           <StyledNavbarTabs id="profileTab">
             Profile <FaAngleUp style={{ verticalAlign: "middle" }} />
-            {role === "student" ? (
+            {role === "student" && (
               <StyledNavbarSubTabs id="subTabsContainer">
                 <NavbarTabs
                   id="navigateToAccountBtn"
@@ -126,23 +119,25 @@ export const Navbar = () => {
                   Account
                 </NavbarTabs>
               </StyledNavbarSubTabs>
-            ) : (
-              <></>
             )}
-            {role === "teacher" ? (
+            {role === "teacher" && (
               <StyledNavbarSubTabs>
-                <NavbarTabs onClick={() => handleNavigation(`/app/teacher`)}>
+                <NavbarTabs
+                  onClick={() => handleNavigation(`/app/teacher`)}
+                  id="navigateToAccountBtn"
+                >
                   Account
                 </NavbarTabs>
 
-                <NavbarTabs onClick={() => handleNavigation("reviews")}>
+                <NavbarTabs
+                  onClick={() => handleNavigation("reviews")}
+                  id="reviewTabBtn"
+                >
                   Add Review
                 </NavbarTabs>
               </StyledNavbarSubTabs>
-            ) : (
-              <></>
             )}
-            {role === "admin" ? (
+            {role === "admin" && (
               <StyledNavbarSubTabs>
                 <NavbarTabs onClick={() => handleNavigation(`/app/admin`)}>
                   Account
@@ -154,8 +149,6 @@ export const Navbar = () => {
                   Pending req
                 </NavbarTabs>
               </StyledNavbarSubTabs>
-            ) : (
-              <></>
             )}
           </StyledNavbarTabs>
         </div>

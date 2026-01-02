@@ -204,6 +204,7 @@ export const StudentDataComponent = () => {
               type="text"
               value={searchKey || ""}
               name="searchQuery"
+              id="searchInputComponent"
               required
               placeholder=" "
               onChange={(e) => handleFilterStudent(e)}

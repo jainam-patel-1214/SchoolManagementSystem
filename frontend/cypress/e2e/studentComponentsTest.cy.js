@@ -23,7 +23,7 @@ describe("Student components test", () => {
 
     cy.url().should("match", /\/app\/student/);
 
-    cy.get("#schoolResulyBtn").click();
+    cy.get("#schoolResultBtn").click();
 
     cy.url().should("match", /\/app\/student\/schoolResult/);
 
@@ -58,7 +58,7 @@ describe("Student components test", () => {
 
     cy.url().should("match", /\/app\/student/);
 
-    cy.get("#schoolResulyBtn").click();
+    cy.get("#schoolResultBtn").click();
 
     cy.url().should("match", /\/app\/student\/schoolResult/);
 
@@ -94,7 +94,7 @@ describe("Student components test", () => {
 
     cy.url().should("match", /\/app\/student/);
 
-    cy.get("#schoolResulyBtn").click();
+    cy.get("#schoolResultBtn").click();
 
     cy.url().should("match", /\/app\/student\/schoolResult/);
 
@@ -131,7 +131,7 @@ describe("Student components test", () => {
 
     cy.url().should("match", /\/app\/student/);
 
-    cy.get("#schoolResulyBtn").click();
+    cy.get("#schoolResultBtn").click();
 
     cy.url().should("match", /\/app\/student\/schoolResult/);
 
@@ -168,7 +168,7 @@ describe("Student components test", () => {
 
     cy.location("pathname").should("eq", "/app/student");
 
-    cy.get("#schoolResulyBtn").click();
+    cy.get("#schoolResultBtn").click();
 
     cy.location("pathname").should("eq", "/app/student/schoolResult");
 
