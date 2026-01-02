@@ -27,7 +27,6 @@ import { MdTableRows, MdWindow } from "react-icons/md";
 import { GeneralTableComponent } from "../../helperComponents/GeneralTable";
 import { GridItemComponent } from "../../helperComponents/GridItem";
 import { useNavigate } from "react-router-dom";
-import { createColumnHelper } from "@tanstack/react-table";
 
 export const DisplaySubTabComp = () => {
   const userrole = roleExtractor(window.location.pathname);
@@ -71,55 +70,34 @@ export const DisplaySubTabComp = () => {
     fetchData();
   }, []);
   const navigate = useNavigate();
-  const columnHelper = createColumnHelper();
   const columns = useMemo(() => [
-    // {
-    //   header: "Subject ID",
-    //   accessor: "subjectId",
-    //   id: "subjectId",
-    //   enableSorting: false,
-    // },
-    // {
-    //   header: "Subject Name",
-    //   accessor: "subjectName",
-    //   id: "subjectName",
-    //   enableSorting: true,
-    // },
-    // {
-    //   header: "Grade",
-    //   accessor: "level",
-    //   id: "level",
-    //   enableSorting: false,
-    // },
-    // {
-    //   header: "Credits",
-    //   accessor: "credits",
-    //   id: "credits",
-    //   enableSorting: false,
-    // },
-    columnHelper.accessor("subjectId", {
+    {
       header: "Subject ID",
-      cell: (info) => info.getValue(),
+      accessorKey: "subjectId",
+      id: "subjectId",
       enableSorting: false,
-    }),
-    columnHelper.accessor("subjectName", {
-      header: "Name",
-      cell: (info) => info.getValue(),
+    },
+    {
+      header: "Subject Name",
+      accessorKey: "subjectName",
+      id: "subjectName",
       enableSorting: true,
-    }),
-    columnHelper.accessor("level", {
+    },
+    {
       header: "Grade",
-      cell: (info) => info.getValue(),
+      accessorKey: "level",
+      id: "level",
       enableSorting: false,
-    }),
-    columnHelper.accessor("credits", {
+    },
+    {
       header: "Credits",
-      cell: (info) => info.getValue(),
+      accessorKey: "credits",
+      id: "credits",
       enableSorting: false,
-    }),
-    columnHelper.display({
+    },
+    {
       id: "accept",
-      header: "",
+      Header: "",
       cell: ({ row }) => {
         const v = row.original;
         return (
@@ -137,11 +115,10 @@ export const DisplaySubTabComp = () => {
           </ButtonElement>
         );
       },
-    }),
-
-    columnHelper.display({
+    },
+    {
       id: "reject",
-      header: "",
+      Header: "",
       cell: ({ row }) => {
         const v = row.original;
         return (
@@ -162,31 +139,7 @@ export const DisplaySubTabComp = () => {
           </ButtonElement>
         );
       },
-    }),
-    // {
-    //   id: "accept",
-    //   Header: "",
-    //   Cell: ({ row }) => {
-    //     const v = row.original;
-    //     return (
-    //       <ButtonElement onClick={() => navigate(`/edit/${v.subjectId}`)}>
-    //         Edit
-    //       </ButtonElement>
-    //     );
-    //   },
-    // },
-    // {
-    //   id: "reject",
-    //   Header: "",
-    //   Cell: ({ row }) => {
-    //     const v = row.original;
-    //     return (
-    //       <ButtonElement onClick={() => deleteSubjectHandler(v.subjectId)}>
-    //         Delete
-    //       </ButtonElement>
-    //     );
-    //   },
-    // },
+    },
   ]);
 
   const handleFilterSubject = (e) => {

@@ -52,36 +52,44 @@ export const StudentHomePage = () => {
     {
       header: "Subject Id",
       accessorKey: "subId",
+      id: "subjectId",
     },
     {
       header: "Subject Name",
       accessorKey: "subjectName",
+      id: "subjectName",
     },
     {
       header: "Practical Marks",
       accessorKey: "practicalMM",
+      id: "practicalMarks",
     },
     {
       header: "Theory Marks",
       accessorKey: "theoryMM",
+      id: "theoryMarks",
     },
     {
       header: "Grade",
       accessorKey: "grade",
+      id: "marksGrade",
     },
   ];
   const subjectColumnDef = [
     {
       header: "Subject Id",
       accessorKey: "Subid",
+      id: "subjectId",
     },
     {
       header: "Name",
       accessorKey: "Subname",
+      id: "subjectName",
     },
     {
       header: "Credits",
       accessorKey: "Credit",
+      id: "subjectCredit",
     },
   ];
   useEffect(() => {

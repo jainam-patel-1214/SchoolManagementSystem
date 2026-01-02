@@ -49,26 +49,32 @@ export const TeacherPerformanceTab = () => {
     {
       header: "Teacher Id",
       accessorKey: "Tid",
+      id: "teacherId",
     },
     {
       header: "Teacher Name",
       accessorKey: "TName",
+      id: "teacherName",
     },
     {
       header: "Standard Allocated",
       accessorKey: "StdAllocated",
+      id: "teacherStd",
     },
     {
       header: "Subject Allocated",
       accessorKey: "SubName",
+      id: "teacherSubjetc",
     },
     {
       header: "Total Practical Marks",
       accessorKey: "TotalPracticalMarks",
+      id: "teacherTotalPracticalMM",
     },
     {
       header: "Total Theory Marks",
       accessorKey: "TotalTheoryMarks",
+      id: "teacherTotalTheoryMM",
     },
   ];
 

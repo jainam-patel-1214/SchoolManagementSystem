@@ -88,32 +88,37 @@ export const StudentDataComponent = () => {
   const navigate = useNavigate();
   const columnHelper = createColumnHelper();
   const columns = [
-    columnHelper.accessor("grNo", {
+    {
       header: "Student ID",
-      cell: (info) => info.getValue(),
+      accessorKey: "grNo",
+      id: "grNo",
       enableSorting: false,
-    }),
-    columnHelper.accessor("studentName", {
+    },
+    {
       header: "Name",
-      cell: (info) => info.getValue(),
-      enableSorting: true,
-    }),
-    columnHelper.accessor("password", {
+      accessorKey: "studentName",
+      id: "studentName",
+      enableSorting: false,
+    },
+    {
       header: "Password",
-      cell: (info) => info.getValue(),
+      accessorKey: "password",
+      id: "password",
       enableSorting: false,
-    }),
-    columnHelper.accessor("grade", {
+    },
+    {
       header: "Grade",
-      cell: (info) => info.getValue(),
+      accessorKey: "grade",
+      id: "grade",
       enableSorting: false,
-    }),
-    columnHelper.accessor("section", {
+    },
+    {
       header: "Section",
-      cell: (info) => info.getValue(),
+      accessorKey: "section",
+      id: "section",
       enableSorting: false,
-    }),
-    columnHelper.display({
+    },
+    {
       id: "accept",
       header: "",
       cell: ({ row }) => {
@@ -131,9 +136,8 @@ export const StudentDataComponent = () => {
           </ButtonElement>
         );
       },
-    }),
-
-    columnHelper.display({
+    },
+    {
       id: "reject",
       header: "",
       cell: ({ row }) => {
@@ -153,7 +157,7 @@ export const StudentDataComponent = () => {
           </ButtonElement>
         );
       },
-    }),
+    },
   ];
 
   const handleFilterStudent = (e) => {

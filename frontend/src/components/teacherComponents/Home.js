@@ -67,26 +67,32 @@ export const TeacherHome = () => {
     {
       header: "Teacher Id",
       accessorKey: "Tid",
+      id: "teacherId",
     },
     {
       header: "Teacher Name",
       accessorKey: "TName",
+      id: "teacherName",
     },
     {
       header: "Standard Allocated",
       accessorKey: "StdAllocated",
+      id: "teacherStandard",
     },
     {
       header: "Subject Allocated",
       accessorKey: "SubName",
+      id: "teacherSubject",
     },
     {
       header: "Total Practical Marks",
       accessorKey: "TotalPracticalMarks",
+      id: "teacherTatalPracticalMM",
     },
     {
       header: "Total Theory Marks",
       accessorKey: "TotalTheoryMarks",
+      id: "teacherTatalTheoryMM",
     },
   ];
 
