@@ -143,6 +143,8 @@ export const SchoolResult = () => {
     }
 
     try {
+      console.log(data, "filter data ehre");
+
       const apiUrl = `/${userrole}/display`;
       const params = {
         viewByStd: Number(data.grade),
@@ -153,14 +155,20 @@ export const SchoolResult = () => {
       const queryParams = {};
       let elem;
       for (elem of Object.keys(params)) {
+        console.log(elem, params[elem], typeof params[elem]);
+
         if (
           params[elem] !== null &&
           params[elem] !== undefined &&
+          typeof params[elem] !== "string" &&
           !isNaN(params[elem])
         ) {
           queryParams[elem] = params[elem];
+        } else {
+          if (StringValidator(params[elem])) queryParams[elem] = params[elem];
         }
       }
+
       const res = await fetchApi(
         apiUrl + "?" + new URLSearchParams(queryParams),
         "GET",
