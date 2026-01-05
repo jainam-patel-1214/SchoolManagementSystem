@@ -20,12 +20,7 @@ export const InputContainerComponent = ({
       <InputWrapper>
         <FloatingInput
           type="text"
-<<<<<<< HEAD
-          name={name}
-          id={name}
           value={value || ""}
-=======
->>>>>>> a97d937 (frontend changes in seperate login register component, seperator operator in common component, navbar object added, options mapped, fetapi url made common)
           placeholder=" "
           onChange={(e) => {
             const val = e.target.value;
