@@ -21,12 +21,12 @@ import { DisplaySubTabComp } from "./components/teacherComponents/subjectCompone
 import { SubEditTabComp } from "./components/teacherComponents/subjectComponents/EditSubject";
 import { StudentPerformancePage } from "./components/teacherComponents/subjectComponents/StudentPerformanceTab";
 import "./index.css";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 function ProjectRouter() {
   return (
     <Routes>
-      <Route index element={<SignIn />}></Route>
+      <Route index element={<Navigate to="login" replace />}></Route>
       <Route path="login" element={<SignIn />}></Route>
       <Route path="signup" element={<SignIn />}></Route>
       <Route path="app/student" element={<Navbar />}>
