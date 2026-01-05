@@ -136,7 +136,9 @@ export const LoginForm = () => {
         <SignInBtn type="submit">Login</SignInBtn>
       </SignUpAndLoginForm>
       <p>Or sign up using</p>
-      <h3 onClick={() => navigate("/signup")}>Sign Up</h3>
+      <h3 id="switchToSignup" onClick={() => navigate("/signup")}>
+        Sign Up
+      </h3>
     </SignInForm>
   );
 };
