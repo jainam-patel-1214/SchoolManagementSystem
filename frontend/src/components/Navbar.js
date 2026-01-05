@@ -126,6 +126,7 @@ export const Navbar = () => {
       staticTabs: [
         {
           name: "SignOut",
+          id: "signOutButton",
           action: signOutHandler,
         },
       ],
@@ -145,8 +146,8 @@ export const Navbar = () => {
         <div>
           {uName !== "" &&
             navigationMenuContent.common.staticTabs?.map(
-              ({ name, action }, i) => (
-                <StyledNavbarTabs key={i} onClick={action}>
+              ({ name, id, action }, i) => (
+                <StyledNavbarTabs key={i} id={id} onClick={action}>
                   {name}
                 </StyledNavbarTabs>
               )
