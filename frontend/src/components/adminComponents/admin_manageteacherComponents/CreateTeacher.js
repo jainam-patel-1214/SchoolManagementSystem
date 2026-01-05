@@ -135,7 +135,6 @@ export const CreateTeacherComponent = () => {
         }
       }
       bodyObj["role"] = "teacher";
-      console.log(payload, "payload", bodyObj, "body");
 
       res = await fetchApi(apiUrl, "POST", bodyObj);
       Toaster(res);

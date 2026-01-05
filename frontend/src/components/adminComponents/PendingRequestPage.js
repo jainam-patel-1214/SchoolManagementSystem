@@ -16,6 +16,7 @@ import {
 } from "../../styled-components/HelperStyledComponents";
 import { ToastContainer } from "react-toastify";
 import { GeneralTableComponent } from "../helperComponents/GeneralTable";
+import { isNotEmptyPair } from "../../utils/validations";
 
 const Overlay = styled.div`
   position: fixed;
@@ -37,9 +38,9 @@ export const AdminPendingReqTab = () => {
     password: "",
     role: "",
     pendingId: null,
-    subjectId: "",
-    std: "",
-    section: "",
+    subjectId: null,
+    std: null,
+    section: null,
   };
   const [data, setData] = useState(initState);
   const [isStudent, setIsStudent] = useState(false);
@@ -135,12 +136,6 @@ export const AdminPendingReqTab = () => {
     };
     if (isStudent) {
       payload = { ...payload, std: Number(data.std), section: data.section };
-      const isValid = adminRequestFieldValidator(payload);
-      console.log("is valid", isValid);
-
-      if (!isValid) {
-        return;
-      }
     } else if (isTeacher) {
       payload = {
         ...payload,
@@ -148,16 +143,35 @@ export const AdminPendingReqTab = () => {
         section: data.section,
         subId: Number(data.subjectId),
       };
-      const isValid = adminRequestFieldValidator(payload);
-      if (!isValid) {
+      // const isValid = adminRequestFieldValidator(payload);
+      // if (!isValid) {
+      //   return;
+      // }
+    }
+    // else if (!isStudent && !isTeacher) {
+    // const isValid = adminRequestFieldValidator(payload);
+    // if (!isValid) {
+    //   return;
+    // }
+    // }
+    let bodyObj = {};
+    const numberKeys = ["std", "subId", "Uid"];
+    for (const [key, value] of Object.entries(payload)) {
+      if (isNaN(value) && numberKeys.includes(key)) {
+        ErrorToast(`${key}'s value must be a number`);
         return;
       }
-    } else if (!isStudent && !isTeacher) {
-      const isValid = adminRequestFieldValidator(payload);
-      if (!isValid) {
-        return;
+      if (isNotEmptyPair(value)) {
+        bodyObj[key] = value;
       }
     }
+    const isValid = adminRequestFieldValidator(bodyObj);
+    console.log("is valid", isValid);
+
+    if (!isValid) {
+      return;
+    }
+    console.log(bodyObj);
 
     try {
       const res = await fetchApi(`/${userrole}/acceptRequest`, "POST", payload);
