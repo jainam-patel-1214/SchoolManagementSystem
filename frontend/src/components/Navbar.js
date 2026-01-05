@@ -9,7 +9,7 @@ import getCookie from "../utils/getCookie";
 import { Outlet } from "react-router-dom";
 import delCookie from "../utils/delCookie";
 import { useNavigate } from "react-router-dom";
-import { toast, ToastContainer } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { FaAngleUp } from "react-icons/fa6";
 import { SuccessToast } from "../utils/toasterCode";
 
@@ -30,22 +30,107 @@ export const Navbar = () => {
     const msg = await delCookie("userid", "username", "token", "role");
     setTimeout(() => {
       if (msg.output !== null || msg.output !== undefined) {
-        toast(msg.output, {
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-        });
-        navigate("/signIn");
+        SuccessToast(msg.output);
+        navigate("/login");
       }
     }, 1000);
   };
   const handleNavigation = (loc) => {
     navigate(loc);
+  };
+  const navigationMenuContent = {
+    student: {
+      staticTabs: [
+        {
+          name: "School result",
+          location: "schoolResult",
+          action: handleNavigation,
+        },
+      ],
+      dropDownTabs: [
+        {
+          name: "Account",
+          location: "/app/student",
+          action: handleNavigation,
+        },
+      ],
+    },
+    teacher: {
+      staticTabs: [
+        {
+          name: "Students",
+          location: "displayStudent",
+          action: handleNavigation,
+        },
+        {
+          name: "Subjects",
+          location: "displaySubject",
+          action: handleNavigation,
+        },
+        {
+          name: "Marks",
+          location: "enterMarks",
+          action: handleNavigation,
+        },
+      ],
+      dropDownTabs: [
+        {
+          name: "Account",
+          location: "/app/teacher",
+          action: handleNavigation,
+        },
+        {
+          name: "Add review",
+          location: "reviews",
+          action: handleNavigation,
+        },
+      ],
+    },
+    admin: {
+      staticTabs: [
+        {
+          name: "Students",
+          location: "displayStudent",
+          action: handleNavigation,
+        },
+        {
+          name: "Teachers",
+          location: "displayTeacher",
+          action: handleNavigation,
+        },
+        {
+          name: "Subjects",
+          location: "displaySubject",
+          action: handleNavigation,
+        },
+        {
+          name: "Marks",
+          location: "enterMarks",
+          action: handleNavigation,
+        },
+      ],
+      dropDownTabs: [
+        {
+          name: "Account",
+          location: "/app/admin",
+          action: handleNavigation,
+        },
+        {
+          name: "Pending Req",
+          location: "pendingApplications",
+          action: handleNavigation,
+        },
+      ],
+    },
+    common: {
+      staticTabs: [
+        {
+          name: "SignOut",
+          action: signOutHandler,
+        },
+      ],
+      dropDownTabs: [],
+    },
   };
 
   return (
@@ -58,105 +143,37 @@ export const Navbar = () => {
           </p>
         </div>
         <div>
-          {uName !== "" ? (
-            <StyledNavbarTabs
-              id="signOutButton"
-              onClick={(e) => signOutHandler(e)}
-            >
-              SignOut
-            </StyledNavbarTabs>
-          ) : (
-            <></>
+          {uName !== "" &&
+            navigationMenuContent.common.staticTabs?.map(
+              ({ name, action }, i) => (
+                <StyledNavbarTabs key={i} onClick={action}>
+                  {name}
+                </StyledNavbarTabs>
+              )
+            )}
+          {navigationMenuContent[role]?.staticTabs?.map(
+            ({ name, location, action }, i) => {
+              return (
+                <StyledNavbarTabs key={i} onClick={() => action(location)}>
+                  {name}
+                  <FaAngleUp style={{ verticalAlign: "middle" }} />
+                </StyledNavbarTabs>
+              );
+            }
           )}
-          {role === "student" ? (
-            <StyledNavbarTabs
-              id="schoolResulyBtn"
-              onClick={() => handleNavigation("schoolResult")}
-            >
-              School result
-            </StyledNavbarTabs>
-          ) : (
-            <></>
-          )}
-
-          {role === "teacher" || role === "admin" ? (
-            <StyledNavbarTabs
-              onClick={() => handleNavigation("displayStudent")}
-            >
-              Students
-              <FaAngleUp style={{ verticalAlign: "middle" }} />
-            </StyledNavbarTabs>
-          ) : (
-            <></>
-          )}
-          {role === "admin" ? (
-            <StyledNavbarTabs
-              onClick={() => handleNavigation("displayTeacher")}
-            >
-              Teachers <FaAngleUp style={{ verticalAlign: "middle" }} />
-            </StyledNavbarTabs>
-          ) : (
-            <></>
-          )}
-          {role === "teacher" || role === "admin" ? (
-            <StyledNavbarTabs
-              onClick={() => handleNavigation("displaySubject")}
-            >
-              Subjects <FaAngleUp style={{ verticalAlign: "middle" }} />
-            </StyledNavbarTabs>
-          ) : (
-            <></>
-          )}
-          {role === "teacher" || role === "admin" ? (
-            <StyledNavbarTabs onClick={() => handleNavigation("enterMarks")}>
-              Marks <FaAngleUp style={{ verticalAlign: "middle" }} />
-            </StyledNavbarTabs>
-          ) : (
-            <></>
-          )}
-
-          <StyledNavbarTabs id="profileTab">
+          <StyledNavbarTabs>
             Profile <FaAngleUp style={{ verticalAlign: "middle" }} />
-            {role === "student" ? (
-              <StyledNavbarSubTabs id="subTabsContainer">
-                <NavbarTabs
-                  id="navigateToAccountBtn"
-                  onClick={() => handleNavigation("/app/student")}
-                >
-                  Account
-                </NavbarTabs>
-              </StyledNavbarSubTabs>
-            ) : (
-              <></>
-            )}
-            {role === "teacher" ? (
-              <StyledNavbarSubTabs>
-                <NavbarTabs onClick={() => handleNavigation(`/app/teacher`)}>
-                  Account
-                </NavbarTabs>
-
-                <NavbarTabs onClick={() => handleNavigation("reviews")}>
-                  Add Review
-                </NavbarTabs>
-              </StyledNavbarSubTabs>
-            ) : (
-              <></>
-            )}
-            {role === "admin" ? (
-              <StyledNavbarSubTabs>
-                <NavbarTabs onClick={() => handleNavigation(`/app/admin`)}>
-                  Account
-                </NavbarTabs>
-
-                <NavbarTabs
-                  onClick={() => handleNavigation(`pendingApplications`)}
-                >
-                  Pending req
-                </NavbarTabs>
-              </StyledNavbarSubTabs>
-            ) : (
-              <></>
-            )}
+            <StyledNavbarSubTabs>
+              {navigationMenuContent[role]?.dropDownTabs?.map(
+                ({ name, location, action }, i) => {
+                  return (
+                    <NavbarTabs key={i} onClick={() => action(location)}>
+                      {name}
+                    </NavbarTabs>
+                  );
+                }
+              )}
+            </StyledNavbarSubTabs>
           </StyledNavbarTabs>
         </div>
       </StyledNavbar>
