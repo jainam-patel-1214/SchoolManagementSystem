@@ -21,7 +21,7 @@ describe("Login Form - Scholar App", () => {
 
     cy.get(".Toastify__toast")
       .should("be.visible")
-      .and("contain", "please enter an 8 digit password");
+      .and("contain", "please enter an 8-16 digit password");
   });
   it("fills form and logs in failure for student", () => {
     cy.intercept("POST", "http://localhost:8090/login").as("loginRequest");
@@ -103,7 +103,7 @@ describe("Login Form - Scholar App", () => {
     cy.url().should("match", /\/app\/(student|teacher|admin)/);
 
     cy.get("#signOutButton").click();
-    cy.url().should("include", "/signIn");
+    cy.url().should("include", "/login");
   });
   it("fills form and logs in success for teacher", () => {
     cy.visit("http://localhost:3000/");
@@ -126,7 +126,7 @@ describe("Login Form - Scholar App", () => {
 
     cy.get("#signOutButton").click();
 
-    cy.url().should("include", "/signIn");
+    cy.url().should("include", "/login");
   });
   it("fills form and logs in success for admin", () => {
     cy.intercept("POST", "http://localhost:8090/login").as("loginRequest");
@@ -151,6 +151,6 @@ describe("Login Form - Scholar App", () => {
 
     cy.get("#signOutButton").click();
 
-    cy.url().should("include", "/signIn");
+    cy.url().should("include", "/login");
   });
 });

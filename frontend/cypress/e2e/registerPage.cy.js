@@ -4,6 +4,8 @@ describe("Register Form - Scholar App", () => {
 
     cy.get("#switchToSignup").click();
 
+    cy.location("pathname").should("eq", "/signup");
+
     cy.get("#username").type("hello").should("have.value", "hello");
 
     cy.get("#password").type("Te@123").should("have.value", "Te@123");
@@ -16,7 +18,7 @@ describe("Register Form - Scholar App", () => {
 
     cy.get(".Toastify__toast")
       .should("be.visible")
-      .and("contain", "please enter an 8 digit password");
+      .and("contain", "please enter an 8-16 digit password");
   });
   it("fills form and signup failure for teacher", () => {
     cy.intercept("POST", "**/register*").as("registerRequest");
@@ -24,6 +26,7 @@ describe("Register Form - Scholar App", () => {
     cy.visit("http://localhost:3000/");
 
     cy.get("#switchToSignup").click();
+    cy.location("pathname").should("eq", "/signup");
 
     cy.get("#username").type("hello").should("have.value", "hello");
 
@@ -36,7 +39,7 @@ describe("Register Form - Scholar App", () => {
     cy.get('button[type="submit"]').click();
     cy.get(".Toastify__toast")
       .should("be.visible")
-      .and("contain", "please enter an 8 digit password");
+      .and("contain", "please enter an 8-16 digit password");
   });
   it("fills form and signup failure for admin", () => {
     cy.intercept("POST", "**/register*").as("registerRequest");
@@ -44,6 +47,7 @@ describe("Register Form - Scholar App", () => {
     cy.visit("http://localhost:3000/");
 
     cy.get("#switchToSignup").click();
+    cy.location("pathname").should("eq", "/signup");
 
     cy.get("#username").type("hello").should("have.value", "hello");
 
@@ -61,6 +65,7 @@ describe("Register Form - Scholar App", () => {
     cy.visit("http://localhost:3000/");
 
     cy.get("#switchToSignup").click();
+    cy.location("pathname").should("eq", "/signup");
 
     cy.get("#username")
       .type("cypressstudent")
@@ -87,6 +92,7 @@ describe("Register Form - Scholar App", () => {
     cy.intercept("POST", "**/register*").as("registerRequest");
 
     cy.get("#switchToSignup").click();
+    cy.location("pathname").should("eq", "/signup");
 
     cy.get("#username")
       .type("cypressteacher")
@@ -114,6 +120,7 @@ describe("Register Form - Scholar App", () => {
     cy.visit("http://localhost:3000/");
 
     cy.get("#switchToSignup").click();
+    cy.location("pathname").should("eq", "/signup");
 
     cy.get("#username")
       .type("cypressadmin")
