@@ -232,7 +232,7 @@ export const DisplaySubTabComp = () => {
             <GridContainer>
               {data.map(({ subjectId, subjectName, level, credits }, i) => (
                 <GridItemComponent
-                  key={subjectId} // ✅ better key
+                  key={subjectId}
                   index={i}
                   objectId={subjectId}
                   password=""

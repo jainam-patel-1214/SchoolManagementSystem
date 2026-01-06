@@ -21,6 +21,7 @@ export const InputContainerComponent = ({
         <FloatingInput
           type="text"
           placeholder=" "
+          id={rest.name}
           onChange={(e) => {
             const val = e.target.value;
             handler(objKey, val);
