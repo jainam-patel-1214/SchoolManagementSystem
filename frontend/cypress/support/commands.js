@@ -23,3 +23,48 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+Cypress.Commands.add("registerWithApiCredentials", (role) => {
+  cy.task("readUser").then((storedUser) => {
+    if (!storedUser || !storedUser.id) {
+      cy.request({
+        method: "POST",
+        url: "http://localhost:8090/register",
+        body: {
+          yourName: "testUser",
+          password: "password",
+          roleReq: role,
+          secretK: "wwww8AxndfnaA82JWAxr2.apFmJkU.1ROK10HmFBf69KxSCtW7S",
+        },
+      }).then((res) => {
+        expect(res.status).to.eq(200);
+
+        const user = {
+          id: res.body.uid,
+          password: res.body.upwd,
+          role,
+        };
+
+        cy.task("saveUser", user);
+        Cypress.env("user", user);
+        cy.loginViaUI(user);
+      });
+    } else {
+      Cypress.env("user", storedUser);
+      cy.loginViaUI(storedUser);
+    }
+  });
+});
+
+Cypress.Commands.add("loginViaUI", ({ id, password, role }) => {
+  cy.intercept("POST", "/login*").as("loginRequest");
+
+  cy.visit("http://localhost:3000/");
+
+  cy.get("#userid").type(String(id));
+  cy.get("#password").type(password);
+  cy.get('select[name="userRole"]').select(role);
+
+  cy.get('button[type="submit"]').click();
+
+  cy.wait("@loginRequest").its("response.statusCode").should("eq", 200);
+});
