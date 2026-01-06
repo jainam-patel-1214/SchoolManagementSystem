@@ -44,6 +44,7 @@ describe("teacher components testing", () => {
     cy.intercept("DELETE", "**/teacher/delStudent*").as("deleteStudentRequest");
 
     cy.get("#studentsTabBtn").click();
+    cy.location("pathname").should("eq", "/app/teacher/displayStudent");
 
     cy.contains("a", "Create a new student here").click();
     cy.location("pathname").should("eq", "/app/teacher/addStudent");
@@ -90,8 +91,7 @@ describe("teacher components testing", () => {
     cy.wait("@deleteStudentRequest")
       .its("response.statusCode")
       .should("eq", 200);
-
-    cy.get(".Toastify__toast").should("contain", "DELETED SUCCESSFULLY");
+    cy.expectAndCloseToast("DELETED SUCCESSFULLY");
   });
 
   it("subject create, edit, delete - success", () => {
@@ -114,7 +114,7 @@ describe("teacher components testing", () => {
     cy.wait("@createSubjectRequest")
       .its("response.statusCode")
       .should("eq", 200);
-    cy.get(".Toastify__toast").should("contain", "inserted successfully");
+    cy.expectAndCloseToast("inserted successfully");
 
     cy.contains("a", "Go back to veiw subject list").click();
     cy.location("pathname").should("eq", "/app/teacher/displaySubject");
@@ -133,10 +133,7 @@ describe("teacher components testing", () => {
     cy.wait("@updateSubjectRequest")
       .its("response.statusCode")
       .should("eq", 200);
-    cy.get(".Toastify__toast").should(
-      "contain",
-      "subject updated successfully"
-    );
+    cy.expectAndCloseToast("subject updated successfully");
 
     cy.contains("a", "Go back to veiw subject list").click();
     cy.location("pathname").should("eq", "/app/teacher/displaySubject");
@@ -151,7 +148,7 @@ describe("teacher components testing", () => {
     cy.wait("@deleteSubjectRequest")
       .its("response.statusCode")
       .should("eq", 200);
-    cy.get(".Toastify__toast").should("contain", "DELETED SUCCESSFULLY");
+    cy.expectAndCloseToast("DELETED SUCCESSFULLY");
   });
 
   it("student  edit - failure - wrong field", () => {
@@ -174,7 +171,7 @@ describe("teacher components testing", () => {
     cy.wait("@createStudentRequest")
       .its("response.statusCode")
       .should("eq", 200);
-    cy.get(".Toastify__toast").should("contain", "student created");
+    cy.expectAndCloseToast("student created");
 
     cy.contains("a", "Go back to veiw student list").click();
     cy.location("pathname").should("eq", "/app/teacher/displayStudent");
@@ -188,28 +185,22 @@ describe("teacher components testing", () => {
 
     cy.get("#password").clear().type("passwor");
     cy.contains("button", "Update Student").click();
-    cy.get(".Toastify__toast").should(
-      "contain",
-      "passwords are needed to be atleast 8 digits"
-    );
+    cy.expectAndCloseToast("passwords are needed to be atleast 8 digits");
 
     cy.get("#password").clear().type("password");
     cy.get("#name").clear().type("gandhi 12");
     cy.contains("button", "Update Student").click();
-    cy.get(".Toastify__toast").should("contain", "invalid name");
+    cy.expectAndCloseToast("invalid name");
 
     cy.get("#name").clear().type("gandhi");
     cy.get("#std").clear().type("13");
     cy.contains("button", "Update Student").click();
-    cy.get(".Toastify__toast").should(
-      "contain",
-      "standard shall have range of 1 - 12"
-    );
+    cy.expectAndCloseToast("standard shall have range of 1 - 12");
 
     cy.get("#std").clear().type("12");
     cy.get("#section").clear().type("A3");
     cy.contains("button", "Update Student").click();
-    cy.get(".Toastify__toast").should("contain", "invalid section");
+    cy.expectAndCloseToast("invalid section");
 
     cy.contains("a", "Go back to veiw student list").click();
     cy.location("pathname").should("eq", "/app/teacher/displayStudent");
@@ -224,8 +215,7 @@ describe("teacher components testing", () => {
     cy.wait("@deleteStudentRequest")
       .its("response.statusCode")
       .should("eq", 200);
-
-    cy.get(".Toastify__toast").should("contain", "DELETED SUCCESSFULLY");
+    cy.expectAndCloseToast("DELETED SUCCESSFULLY");
   });
 
   it("subject edit - failure - invalid fields", () => {
@@ -247,7 +237,7 @@ describe("teacher components testing", () => {
     cy.wait("@createSubjectRequest")
       .its("response.statusCode")
       .should("eq", 200);
-    cy.get(".Toastify__toast").should("contain", "inserted successfully");
+    cy.expectAndCloseToast("inserted successfully");
 
     cy.contains("a", "Go back to veiw subject list").click();
     cy.location("pathname").should("eq", "/app/teacher/displaySubject");
@@ -261,10 +251,7 @@ describe("teacher components testing", () => {
 
     cy.get("#subLevel").clear().type("90");
     cy.contains("button", "Update Subject").click();
-    cy.get(".Toastify__toast").should(
-      "contain",
-      "invalid grade. Allowed range is 1 - 12"
-    );
+    cy.expectAndCloseToast("invalid grade. Allowed range is 1 - 12");
 
     cy.contains("a", "Go back to veiw subject list").click();
     cy.location("pathname").should("eq", "/app/teacher/displaySubject");
@@ -279,7 +266,7 @@ describe("teacher components testing", () => {
     cy.wait("@deleteSubjectRequest")
       .its("response.statusCode")
       .should("eq", 200);
-    cy.get(".Toastify__toast").should("contain", "DELETED SUCCESSFULLY");
+    cy.expectAndCloseToast("DELETED SUCCESSFULLY");
   });
 
   it("student  create - failure - wrong field - already present - field empty", () => {
@@ -297,48 +284,41 @@ describe("teacher components testing", () => {
     cy.get("#name").type("gandhi");
 
     cy.contains("button", "Create Student").click();
-    cy.get(".Toastify__toast").should("contain", "Fill all the values below");
+    cy.expectAndCloseToast("Fill all the values below");
 
     cy.get("#section").type("A");
     cy.get("#std").type("1");
     cy.get("#password").clear().type("passwor");
 
     cy.contains("button", "Create Student").click();
-    cy.get(".Toastify__toast").should(
-      "contain",
-      "passwords are needed to be atleast 8 digits"
-    );
+    cy.expectAndCloseToast("passwords are needed to be atleast 8 digits");
 
     cy.get("#password").type("d");
     cy.get("#grNo").type("9999999");
     cy.contains("button", "Create Student").click();
-    cy.get(".Toastify__toast").should("contain", "invalid gr no");
+    cy.expectAndCloseToast("invalid gr no");
 
     cy.get("#grNo").clear().type("999");
-    cy.get("#std").type("5");
+    cy.get("#std").clear().type("15");
     cy.contains("button", "Create Student").click();
-    cy.get(".Toastify__toast").should(
-      "contain",
-      "standard shall have range of 1 - 12"
-    );
+    cy.expectAndCloseToast("standard shall have range of 1 - 12");
 
     cy.get("#std").clear().type("5");
     cy.get("#name").type("12");
     cy.contains("button", "Create Student").click();
-    cy.get(".Toastify__toast").should("contain", "invalid name");
+    cy.expectAndCloseToast("invalid name");
 
     cy.get("#name").clear().type("gandhi");
     cy.get("#section").type("1");
     cy.contains("button", "Create Student").click();
-    cy.get(".Toastify__toast").should("contain", "invalid section");
-
+    cy.expectAndCloseToast("invalid section");
     cy.get("#section").clear().type("A");
 
     cy.contains("button", "Create Student").click();
     cy.wait("@createStudentRequest")
       .its("response.statusCode")
       .should("eq", 200);
-    cy.get(".Toastify__toast").should("contain", "student created");
+    cy.expectAndCloseToast("student created");
 
     cy.get("#grNo").type("999");
     cy.get("#password").type("password");
@@ -350,11 +330,9 @@ describe("teacher components testing", () => {
     cy.wait("@createStudentRequest")
       .its("response.statusCode")
       .should("eq", 400);
-    cy.get(".Toastify__toast").should(
-      "contain",
+    cy.expectAndCloseToast(
       "student already exist with gr number provided, try updating student details"
     );
-
     cy.contains("a", "Go back to veiw student list").click();
     cy.location("pathname").should("eq", "/app/teacher/displayStudent");
 
@@ -368,8 +346,7 @@ describe("teacher components testing", () => {
     cy.wait("@deleteStudentRequest")
       .its("response.statusCode")
       .should("eq", 200);
-
-    cy.get(".Toastify__toast").should("contain", "DELETED SUCCESSFULLY");
+    cy.expectAndCloseToast("DELETED SUCCESSFULLY");
   });
 
   it("subject create - failure - invalid fields  - already present - limit unset", () => {
@@ -386,16 +363,13 @@ describe("teacher components testing", () => {
     cy.get("#subName").type("Drawing");
 
     cy.contains("button", "Create Subject").click();
-    cy.get(".Toastify__toast").should("contain", "Please fill all the fields");
+    cy.expectAndCloseToast("Please fill all the fields");
 
     cy.get("#grade").type("14");
     cy.get("#credits").type("10");
 
     cy.contains("button", "Create Subject").click();
-    cy.get(".Toastify__toast").should(
-      "contain",
-      "invalid grade. Allowed range is 1 - 12"
-    );
+    cy.expectAndCloseToast("invalid grade. Allowed range is 1 - 12");
 
     cy.get("#grade").clear().type("5");
 
@@ -403,8 +377,7 @@ describe("teacher components testing", () => {
     cy.wait("@createSubjectRequest")
       .its("response.statusCode")
       .should("eq", 400);
-    cy.get(".Toastify__toast").should(
-      "contain",
+    cy.expectAndCloseToast(
       "first set limit of subjects allocated in 5 standard"
     );
 
@@ -417,7 +390,7 @@ describe("teacher components testing", () => {
     cy.wait("@createSubjectRequest")
       .its("response.statusCode")
       .should("eq", 200);
-    cy.get(".Toastify__toast").should("contain", "inserted successfully");
+    cy.expectAndCloseToast("inserted successfully");
 
     cy.get("#subId").type("99");
     cy.get("#subName").type("DrawingSketch");
@@ -428,8 +401,7 @@ describe("teacher components testing", () => {
     cy.wait("@createSubjectRequest")
       .its("response.statusCode")
       .should("eq", 400);
-    cy.get(".Toastify__toast").should(
-      "contain",
+    cy.expectAndCloseToast(
       "subject already exist with id provided, try updating subject details"
     );
 
@@ -446,6 +418,237 @@ describe("teacher components testing", () => {
     cy.wait("@deleteSubjectRequest")
       .its("response.statusCode")
       .should("eq", 200);
-    cy.get(".Toastify__toast").should("contain", "DELETED SUCCESSFULLY");
+    cy.expectAndCloseToast("DELETED SUCCESSFULLY");
+  });
+
+  it("enter marks record for student - success", () => {
+    cy.intercept("POST", "**/teacher/enterMarks*").as(
+      "createMarkRecordRequest"
+    );
+
+    cy.createDemoStudentUser();
+    cy.createDemoSubject();
+
+    cy.get("#marksTabBtn").click();
+    cy.location("pathname").should("eq", "/app/teacher/enterMarks");
+
+    cy.get("#subId").type("99");
+    cy.get("#grNo").type("999");
+    cy.get("#theory").type("70");
+    cy.get("#practical").type("10");
+
+    cy.contains("button", "Submit Marks").click();
+    cy.wait("@createMarkRecordRequest")
+      .its("response.statusCode")
+      .should("eq", 200);
+    cy.expectAndCloseToast("inserted successfully");
+
+    cy.deleteDemoStudentUser();
+    cy.deleteDemoSubject();
+  });
+
+  it("edit marks record for student - success", () => {
+    cy.intercept("POST", "**/teacher/enterMarks*").as(
+      "createMarkRecordRequest"
+    );
+    cy.intercept("PUT", "**/teacher/updateMarks*").as(
+      "updateMarkRecordRequest"
+    );
+
+    cy.createDemoStudentUser();
+    cy.createDemoSubject();
+
+    cy.get("#marksTabBtn").click();
+    cy.location("pathname").should("eq", "/app/teacher/enterMarks");
+
+    cy.get("#subId").type("99");
+    cy.get("#grNo").type("999");
+    cy.get("#theory").type("50");
+    cy.get("#practical").type("10");
+
+    cy.contains("button", "Submit Marks").click();
+    cy.wait("@createMarkRecordRequest")
+      .its("response.statusCode")
+      .should("eq", 200);
+    cy.expectAndCloseToast("inserted successfully");
+
+    cy.contains("a", "Update student marks record here").click();
+    cy.location("pathname").should("eq", "/app/teacher/editMarks");
+
+    cy.get("#subId").type("99");
+    cy.get("#grNo").type("999");
+
+    cy.contains(
+      "button",
+      "Click here first to verify if student and subject record exists"
+    ).click();
+    cy.expectAndCloseToast("Record exists, you can edit it successfully");
+
+    cy.get("#theory").clear().type("70");
+    cy.get("#practical").clear().type("20");
+
+    cy.contains("button", "Update Marks").click();
+    cy.wait("@updateMarkRecordRequest")
+      .its("response.statusCode")
+      .should("eq", 200);
+    cy.expectAndCloseToast("student updated successfully");
+
+    cy.deleteDemoStudentUser();
+    cy.deleteDemoSubject();
+  });
+
+  it("enter marks record for student - failure - invalid fields", () => {
+    cy.intercept("POST", "**/teacher/enterMarks*").as(
+      "createMarkRecordRequest"
+    );
+
+    cy.createDemoStudentUser();
+    cy.createDemoSubject();
+
+    cy.get("#marksTabBtn").click();
+    cy.location("pathname").should("eq", "/app/teacher/enterMarks");
+
+    cy.get("#subId").type("99");
+    cy.get("#grNo").type("999");
+    cy.get("#theory").type("-70");
+    cy.get("#practical").type("10");
+
+    cy.contains("button", "Submit Marks").click();
+    cy.expectAndCloseToast("theory marks range shall be from 0 to 80");
+
+    cy.get("#theory").clear().type("70");
+    cy.get("#practical").clear().type("-10");
+    cy.contains("button", "Submit Marks").click();
+    cy.expectAndCloseToast("practical marks range shall be from 0 to 20");
+
+    cy.deleteDemoStudentUser();
+    cy.deleteDemoSubject();
+  });
+
+  it("edit marks record for student - failure - invalid fields", () => {
+    cy.intercept("POST", "**/teacher/enterMarks*").as(
+      "createMarkRecordRequest"
+    );
+    cy.intercept("PUT", "**/teacher/updateMarks*").as(
+      "updateMarkRecordRequest"
+    );
+
+    cy.createDemoStudentUser();
+    cy.createDemoSubject();
+
+    cy.get("#marksTabBtn").click();
+    cy.location("pathname").should("eq", "/app/teacher/enterMarks");
+
+    cy.get("#subId").type("99");
+    cy.get("#grNo").type("999");
+    cy.get("#theory").type("50");
+    cy.get("#practical").type("10");
+
+    cy.contains("button", "Submit Marks").click();
+    cy.wait("@createMarkRecordRequest")
+      .its("response.statusCode")
+      .should("eq", 200);
+    cy.expectAndCloseToast("inserted successfully");
+
+    cy.contains("a", "Update student marks record here").click();
+    cy.location("pathname").should("eq", "/app/teacher/editMarks");
+
+    cy.get("#subId").type("99");
+    cy.get("#grNo").type("999");
+
+    cy.contains(
+      "button",
+      "Click here first to verify if student and subject record exists"
+    ).click();
+    cy.expectAndCloseToast("Record exists, you can edit it successfully");
+
+    cy.get("#theory").clear().type("-70");
+
+    cy.contains("button", "Update Marks").click();
+    cy.expectAndCloseToast("theory marks range shall be from 0 to 80");
+
+    cy.get("#theory").clear().type("70");
+    cy.get("#practical").clear().type("-10");
+
+    cy.contains("button", "Update Marks").click();
+    cy.expectAndCloseToast("practical marks range shall be from 0 to 20");
+
+    cy.get("#marksTabBtn").click();
+    cy.location("pathname").should("eq", "/app/teacher/enterMarks");
+    cy.contains("a", "Update student marks record here").click();
+    cy.location("pathname").should("eq", "/app/teacher/editMarks");
+
+    cy.get("#subId").type("1");
+    cy.get("#grNo").type("999");
+
+    cy.contains(
+      "button",
+      "Click here first to verify if student and subject record exists"
+    ).click();
+    cy.expectAndCloseToast(
+      "Record doensot exist, please try creating one by clicking second link below"
+    );
+
+    cy.deleteDemoStudentUser();
+    cy.deleteDemoSubject();
+  });
+
+  it("enter review - success", () => {
+    cy.createDemoReview();
+  });
+
+  it("enter review - failure", () => {
+    cy.intercept("POST", "**/teacher/addReview*").as("createReviewRequest");
+    cy.createDemoStudentUser();
+
+    cy.get("#profileTab").realHover();
+    cy.get("#reviewTabBtn").click();
+    cy.location("pathname").should("eq", "/app/teacher/reviews");
+
+    cy.get("#grNo").type("999");
+    cy.contains("button", "Search").click();
+    cy.expectAndCloseToast("Student Exists you wish to give review, go on!!");
+
+    cy.get("#comment").type("good boy che aa manas");
+
+    cy.contains("button", "Add Review").click();
+    cy.wait("@createReviewRequest")
+      .its("response.statusCode")
+      .should("eq", 200);
+    cy.expectAndCloseToast("added successfully");
+
+    cy.get("#profileTab").realHover();
+    cy.get("#reviewTabBtn").click();
+    cy.location("pathname").should("eq", "/app/teacher/reviews");
+
+    cy.get("#grNo").type("999887555467");
+    cy.contains("button", "Search").click();
+    cy.expectAndCloseToast("invalid gr no");
+
+    cy.get("#grNo").clear().type("283923");
+    cy.contains("button", "Search").click();
+    cy.expectAndCloseToast(
+      "Student doesnot exists you wish to edit, try again!!"
+    );
+
+    cy.get("#grNo").clear().type("999");
+    cy.contains("button", "Search").click();
+    cy.expectAndCloseToast("Student Exists you wish to give review, go on!!");
+
+    cy.get("#comment").type("good");
+
+    cy.contains("button", "Add Review").click();
+    cy.expectAndCloseToast(
+      "Please provide a comment within minimum 8 to maximum 250 characters"
+    );
+
+    cy.get("#comment").clear().type("most outstandign student of the class");
+    cy.contains("button", "Add Review").click();
+    cy.wait("@createReviewRequest")
+      .its("response.statusCode")
+      .should("eq", 400);
+    cy.expectAndCloseToast("you can only enter comment once");
+
+    cy.deleteDemoStudentUser();
   });
 });
