@@ -1107,10 +1107,10 @@ func SelfData(ctx *gin.Context) {
 			Id       int
 			Password string
 			Name     string
-			SubId    int
-			SubName  string
-			Std      int
-			Section  string
+			SubId    sql.NullInt64
+			SubName  sql.NullString
+			Std      sql.NullInt64
+			Section  sql.NullString
 		}
 		err = db.QueryRow("SELECT t.tId,t.tPwd,t.tName,t.subId,t.stdAllocated,t.sectionAllocated FROM teachers t WHERE t.tId=?", tid).Scan(&otpt.Id, &otpt.Password, &otpt.Name, &otpt.SubId, &otpt.Std, &otpt.Section)
 		if err != nil && err != sql.ErrNoRows {
