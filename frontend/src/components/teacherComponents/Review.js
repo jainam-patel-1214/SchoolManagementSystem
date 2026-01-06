@@ -34,20 +34,10 @@ export const ReviewTab = () => {
   };
   const submitHandler = async (e) => {
     e.preventDefault();
-    const errobj = {
-      grno: { condition: false, message: "invalid gr no" },
-      comment: {
-        condition: false,
-        message:
-          "Please provide a comment within minimum 8 to maximum 250 characters",
-      },
-    };
     if (data.comment.length <= 8 || data.comment.length > 255) {
-      ErrorToast(errobj.comment.message);
-      return;
-    }
-    if (!GrNoSubIdTeacherIdAdminIdValidation(data?.grNo)) {
-      ErrorToast(errobj.grno.message);
+      ErrorToast(
+        "Please provide a comment within minimum 8 to maximum 250 characters"
+      );
       return;
     }
     try {
@@ -65,6 +55,10 @@ export const ReviewTab = () => {
   };
 
   const searchStudent = async () => {
+    if (!GrNoSubIdTeacherIdAdminIdValidation(data?.grNo)) {
+      ErrorToast("invalid gr no");
+      return;
+    }
     try {
       const isValidRes = await fetchApi(
         `/${userrole}/isValidStudent/${data.grNo}`,
@@ -149,7 +143,7 @@ export const ReviewTab = () => {
                 textcol={"default"}
                 hovercol={"default"}
                 type="submit"
-                onClick={(e) => submitHandler(e, `/${userrole}/updateStud`)}
+                onClick={(e) => submitHandler(e)}
               >
                 Add Review
               </ButtonElement>
