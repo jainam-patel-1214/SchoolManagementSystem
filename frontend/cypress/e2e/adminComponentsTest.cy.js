@@ -13,12 +13,13 @@ describe("admin components testing", () => {
     cy.session(String(user.id), () => {
       cy.loginViaUI(user);
     });
-    cy.intercept("GET", "**/admin/displayPerformance").as("displayPerformance");
     cy.visit("http://localhost:3000/app/admin");
-    cy.wait("@displayPerformance").its("response.statusCode").should("eq", 404);
   });
 
   it("navigation of admin's components", () => {
+    cy.get("#teacherTabBtn").click();
+    cy.location("pathname").should("eq", "/app/admin/displayTeacher");
+
     cy.get("#studentsTabBtn").click();
     cy.location("pathname").should("eq", "/app/admin/displayStudent");
 
@@ -33,8 +34,8 @@ describe("admin components testing", () => {
     cy.location("pathname").should("eq", "/app/admin");
 
     cy.get("#profileTab").realHover();
-    cy.get("#reviewTabBtn").click();
-    cy.location("pathname").should("eq", "/app/admin/reviews");
+    cy.get("#pendingRequestTabBtn").click();
+    cy.location("pathname").should("eq", "/app/admin/pendingApplications");
   });
 
   it("student create, edit, delete - success", () => {
@@ -42,22 +43,7 @@ describe("admin components testing", () => {
     cy.intercept("PUT", "**/admin/updateStud*").as("updateStudentRequest");
     cy.intercept("DELETE", "**/admin/delStudent*").as("deleteStudentRequest");
 
-    cy.get("#studentsTabBtn").click();
-    cy.location("pathname").should("eq", "/app/admin/displayStudent");
-
-    cy.contains("a", "Create a new student here").click();
-    cy.location("pathname").should("eq", "/app/admin/addStudent");
-
-    cy.get("#grNo").type("999");
-    cy.get("#password").type("password");
-    cy.get("#name").type("gandhi");
-    cy.get("#section").type("A");
-    cy.get("#std").type("1");
-
-    cy.contains("button", "Create Student").click();
-    cy.wait("@createStudentRequest")
-      .its("response.statusCode")
-      .should("eq", 200);
+    cy.createDemoStudentUser("admin");
 
     cy.contains("a", "Go back to veiw student list").click();
     cy.location("pathname").should("eq", "/app/admin/displayStudent");
@@ -94,26 +80,10 @@ describe("admin components testing", () => {
   });
 
   it("subject create, edit, delete - success", () => {
-    cy.intercept("POST", "**/admin/createSub*").as("createSubjectRequest");
     cy.intercept("PUT", "**/admin/updateSub*").as("updateSubjectRequest");
     cy.intercept("DELETE", "**/admin/delSubject*").as("deleteSubjectRequest");
 
-    cy.get("#subjectsTabBtn").click();
-    cy.location("pathname").should("eq", "/app/admin/displaySubject");
-
-    cy.contains("a", "Create a new subject here").click();
-    cy.location("pathname").should("eq", "/app/admin/addSubject");
-
-    cy.get("#subId").type("99");
-    cy.get("#subName").type("Drawing");
-    cy.get("#grade").type("1");
-    cy.get("#credits").type("10");
-
-    cy.contains("button", "Create Subject").click();
-    cy.wait("@createSubjectRequest")
-      .its("response.statusCode")
-      .should("eq", 200);
-    cy.expectAndCloseToast("inserted successfully");
+    cy.createDemoSubject("admin");
 
     cy.contains("a", "Go back to veiw subject list").click();
     cy.location("pathname").should("eq", "/app/admin/displaySubject");
@@ -154,23 +124,7 @@ describe("admin components testing", () => {
     cy.intercept("POST", "**/admin/createStud*").as("createStudentRequest");
     cy.intercept("DELETE", "**/admin/delStudent*").as("deleteStudentRequest");
 
-    cy.get("#studentsTabBtn").click();
-    cy.location("pathname").should("eq", "/app/admin/displayStudent");
-
-    cy.contains("a", "Create a new student here").click();
-    cy.location("pathname").should("eq", "/app/admin/addStudent");
-
-    cy.get("#grNo").type("999");
-    cy.get("#password").type("password");
-    cy.get("#name").type("gandhi");
-    cy.get("#section").type("A");
-    cy.get("#std").type("1");
-
-    cy.contains("button", "Create Student").click();
-    cy.wait("@createStudentRequest")
-      .its("response.statusCode")
-      .should("eq", 200);
-    cy.expectAndCloseToast("student created");
+    cy.createDemoStudentUser("admin");
 
     cy.contains("a", "Go back to veiw student list").click();
     cy.location("pathname").should("eq", "/app/admin/displayStudent");
@@ -201,42 +155,14 @@ describe("admin components testing", () => {
     cy.contains("button", "Update Student").click();
     cy.expectAndCloseToast("invalid section");
 
-    cy.contains("a", "Go back to veiw student list").click();
-    cy.location("pathname").should("eq", "/app/admin/displayStudent");
-
-    cy.contains("h4", "gandhi")
-      .parents(".gridListContainer")
-      .find(".editDelActionButtons")
-      .children()
-      .last()
-      .click();
-
-    cy.wait("@deleteStudentRequest")
-      .its("response.statusCode")
-      .should("eq", 200);
-    cy.expectAndCloseToast("DELETED SUCCESSFULLY");
+    cy.deleteDemoStudentUser("admin");
   });
 
   it("subject edit - failure - invalid fields", () => {
     cy.intercept("POST", "**/admin/createSub*").as("createSubjectRequest");
     cy.intercept("DELETE", "**/admin/delSubject*").as("deleteSubjectRequest");
 
-    cy.get("#subjectsTabBtn").click();
-    cy.location("pathname").should("eq", "/app/admin/displaySubject");
-
-    cy.contains("a", "Create a new subject here").click();
-    cy.location("pathname").should("eq", "/app/admin/addSubject");
-
-    cy.get("#subId").type("99");
-    cy.get("#subName").type("Drawing");
-    cy.get("#grade").type("1");
-    cy.get("#credits").type("10");
-
-    cy.contains("button", "Create Subject").click();
-    cy.wait("@createSubjectRequest")
-      .its("response.statusCode")
-      .should("eq", 200);
-    cy.expectAndCloseToast("inserted successfully");
+    cy.createDemoSubject("admin");
 
     cy.contains("a", "Go back to veiw subject list").click();
     cy.location("pathname").should("eq", "/app/admin/displaySubject");
@@ -252,20 +178,7 @@ describe("admin components testing", () => {
     cy.contains("button", "Update Subject").click();
     cy.expectAndCloseToast("invalid grade. Allowed range is 1 - 12");
 
-    cy.contains("a", "Go back to veiw subject list").click();
-    cy.location("pathname").should("eq", "/app/admin/displaySubject");
-
-    cy.contains("h4", "Drawing")
-      .parents(".gridListContainer")
-      .find(".editDelActionButtons")
-      .children()
-      .last()
-      .click();
-
-    cy.wait("@deleteSubjectRequest")
-      .its("response.statusCode")
-      .should("eq", 200);
-    cy.expectAndCloseToast("DELETED SUCCESSFULLY");
+    cy.deleteDemoSubject("admin");
   });
 
   it("student  create - failure - wrong field - already present - field empty", () => {
@@ -332,20 +245,7 @@ describe("admin components testing", () => {
     cy.expectAndCloseToast(
       "student already exist with gr number provided, try updating student details"
     );
-    cy.contains("a", "Go back to veiw student list").click();
-    cy.location("pathname").should("eq", "/app/admin/displayStudent");
-
-    cy.contains("h4", "gandhi")
-      .parents(".gridListContainer")
-      .find(".editDelActionButtons")
-      .children()
-      .last()
-      .click();
-
-    cy.wait("@deleteStudentRequest")
-      .its("response.statusCode")
-      .should("eq", 200);
-    cy.expectAndCloseToast("DELETED SUCCESSFULLY");
+    cy.deleteDemoStudentUser("admin");
   });
 
   it("subject create - failure - invalid fields  - already present - limit unset", () => {
@@ -404,27 +304,14 @@ describe("admin components testing", () => {
       "subject already exist with id provided, try updating subject details"
     );
 
-    cy.contains("a", "Go back to veiw subject list").click();
-    cy.location("pathname").should("eq", "/app/admin/displaySubject");
-
-    cy.contains("h4", "Drawing")
-      .parents(".gridListContainer")
-      .find(".editDelActionButtons")
-      .children()
-      .last()
-      .click();
-
-    cy.wait("@deleteSubjectRequest")
-      .its("response.statusCode")
-      .should("eq", 200);
-    cy.expectAndCloseToast("DELETED SUCCESSFULLY");
+    cy.deleteDemoSubject("admin");
   });
 
   it("enter marks record for student - success", () => {
     cy.intercept("POST", "**/admin/enterMarks*").as("createMarkRecordRequest");
 
-    cy.createDemoStudentUser();
-    cy.createDemoSubject();
+    cy.createDemoStudentUser("admin");
+    cy.createDemoSubject("admin");
 
     cy.get("#marksTabBtn").click();
     cy.location("pathname").should("eq", "/app/admin/enterMarks");
@@ -440,16 +327,16 @@ describe("admin components testing", () => {
       .should("eq", 200);
     cy.expectAndCloseToast("inserted successfully");
 
-    cy.deleteDemoStudentUser();
-    cy.deleteDemoSubject();
+    cy.deleteDemoStudentUser("admin");
+    cy.deleteDemoSubject("admin");
   });
 
   it("edit marks record for student - success", () => {
     cy.intercept("POST", "**/admin/enterMarks*").as("createMarkRecordRequest");
     cy.intercept("PUT", "**/admin/updateMarks*").as("updateMarkRecordRequest");
 
-    cy.createDemoStudentUser();
-    cy.createDemoSubject();
+    cy.createDemoStudentUser("admin");
+    cy.createDemoSubject("admin");
 
     cy.get("#marksTabBtn").click();
     cy.location("pathname").should("eq", "/app/admin/enterMarks");
@@ -486,15 +373,15 @@ describe("admin components testing", () => {
       .should("eq", 200);
     cy.expectAndCloseToast("student updated successfully");
 
-    cy.deleteDemoStudentUser();
-    cy.deleteDemoSubject();
+    cy.deleteDemoStudentUser("admin");
+    cy.deleteDemoSubject("admin");
   });
 
   it("enter marks record for student - failure - invalid fields", () => {
     cy.intercept("POST", "**/admin/enterMarks*").as("createMarkRecordRequest");
 
-    cy.createDemoStudentUser();
-    cy.createDemoSubject();
+    cy.createDemoStudentUser("admin");
+    cy.createDemoSubject("admin");
 
     cy.get("#marksTabBtn").click();
     cy.location("pathname").should("eq", "/app/admin/enterMarks");
@@ -512,16 +399,16 @@ describe("admin components testing", () => {
     cy.contains("button", "Submit Marks").click();
     cy.expectAndCloseToast("practical marks range shall be from 0 to 20");
 
-    cy.deleteDemoStudentUser();
-    cy.deleteDemoSubject();
+    cy.deleteDemoStudentUser("admin");
+    cy.deleteDemoSubject("admin");
   });
 
   it("edit marks record for student - failure - invalid fields", () => {
     cy.intercept("POST", "**/admin/enterMarks*").as("createMarkRecordRequest");
     cy.intercept("PUT", "**/admin/updateMarks*").as("updateMarkRecordRequest");
 
-    cy.createDemoStudentUser();
-    cy.createDemoSubject();
+    cy.createDemoStudentUser("admin");
+    cy.createDemoSubject("admin");
 
     cy.get("#marksTabBtn").click();
     cy.location("pathname").should("eq", "/app/admin/enterMarks");
@@ -576,66 +463,41 @@ describe("admin components testing", () => {
       "Record doensot exist, please try creating one by clicking second link below"
     );
 
-    cy.deleteDemoStudentUser();
-    cy.deleteDemoSubject();
+    cy.deleteDemoStudentUser("admin");
+    cy.deleteDemoSubject("admin");
   });
 
-  it("enter review - success", () => {
-    cy.createDemoReview();
+  it("create teacher - success", () => {
+    cy.createDemoTeacherUser("admin");
+    cy.deleteDemoTeacherUser("admin");
   });
 
-  it("enter review - failure", () => {
-    cy.intercept("POST", "**/admin/addReview*").as("createReviewRequest");
-    cy.createDemoStudentUser();
+  it("edit teacher - success", () => {
+    cy.intercept("PUT", `**/admin/editTeacher*`).as("editTeacherRequest");
 
-    cy.get("#profileTab").realHover();
-    cy.get("#reviewTabBtn").click();
-    cy.location("pathname").should("eq", "/app/admin/reviews");
+    cy.createDemoTeacherUser("admin");
+    cy.createDemoSubject("admin");
 
-    cy.get("#grNo").type("999");
-    cy.contains("button", "Search").click();
-    cy.expectAndCloseToast("Student Exists you wish to give review, go on!!");
+    cy.contains("a", "Go back to veiw teacher's list").click();
+    cy.location("pathname").should("eq", "/app/admin/displayTeacher");
 
-    cy.get("#comment").type("good boy che aa manas");
+    cy.contains("h4", "TempTeacherUser")
+      .parents(".gridListContainer")
+      .find(".editDelActionButtons")
+      .children()
+      .first()
+      .click();
+    cy.location("pathname").should("include", "/app/admin/editTeacher");
 
-    cy.contains("button", "Add Review").click();
-    cy.wait("@createReviewRequest")
-      .its("response.statusCode")
-      .should("eq", 200);
-    cy.expectAndCloseToast("added successfully");
+    cy.get("#subname").type("99");
+    cy.get("#std").type("5");
+    cy.get("#section").type("C");
 
-    cy.get("#profileTab").realHover();
-    cy.get("#reviewTabBtn").click();
-    cy.location("pathname").should("eq", "/app/admin/reviews");
+    contains("button", "Update Teacher").click();
+    cy.wait("@editTeacherRequest").its("response.statusCode").should("eq", 200);
+    cy.expectAndCloseToast("UPDATED SUCCESSFULLY");
 
-    cy.get("#grNo").type("999887555467");
-    cy.contains("button", "Search").click();
-    cy.expectAndCloseToast("invalid gr no");
-
-    cy.get("#grNo").clear().type("283923");
-    cy.contains("button", "Search").click();
-    cy.expectAndCloseToast(
-      "Student doesnot exists you wish to edit, try again!!"
-    );
-
-    cy.get("#grNo").clear().type("999");
-    cy.contains("button", "Search").click();
-    cy.expectAndCloseToast("Student Exists you wish to give review, go on!!");
-
-    cy.get("#comment").type("good");
-
-    cy.contains("button", "Add Review").click();
-    cy.expectAndCloseToast(
-      "Please provide a comment within minimum 8 to maximum 250 characters"
-    );
-
-    cy.get("#comment").clear().type("most outstandign student of the class");
-    cy.contains("button", "Add Review").click();
-    cy.wait("@createReviewRequest")
-      .its("response.statusCode")
-      .should("eq", 400);
-    cy.expectAndCloseToast("you can only enter comment once");
-
-    cy.deleteDemoStudentUser();
+    cy.deleteDemoTeacherUser("admin");
+    cy.deleteDemoSubject("admin");
   });
 });

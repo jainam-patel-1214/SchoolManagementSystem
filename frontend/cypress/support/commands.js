@@ -80,13 +80,13 @@ Cypress.Commands.add("expectAndCloseToast", (text) => {
   cy.get(".Toastify__toast").should("not.exist");
 });
 
-Cypress.Commands.add("createDemoStudentUser", () => {
-  cy.intercept("POST", "**/teacher/createStud*").as("createStudentRequest");
+Cypress.Commands.add("createDemoStudentUser", (role) => {
+  cy.intercept("POST", `**/${role}/createStud*`).as("createStudentRequest");
   cy.get("#studentsTabBtn").click();
-  cy.location("pathname").should("eq", "/app/teacher/displayStudent");
+  cy.location("pathname").should("eq", `/app/${role}/displayStudent`);
 
   cy.contains("a", "Create a new student here").click();
-  cy.location("pathname").should("eq", "/app/teacher/addStudent");
+  cy.location("pathname").should("eq", `/app/${role}/addStudent`);
   cy.get("#grNo").type("999");
   cy.get("#password").type("password");
   cy.get("#name").type("gandhi");
@@ -98,10 +98,10 @@ Cypress.Commands.add("createDemoStudentUser", () => {
   cy.expectAndCloseToast("student created");
 });
 
-Cypress.Commands.add("deleteDemoStudentUser", () => {
-  cy.intercept("DELETE", "**/teacher/delStudent*").as("deleteStudentRequest");
+Cypress.Commands.add("deleteDemoStudentUser", (role) => {
+  cy.intercept("DELETE", `**/${role}/delStudent*`).as("deleteStudentRequest");
   cy.get("#studentsTabBtn").click();
-  cy.location("pathname").should("eq", "/app/teacher/displayStudent");
+  cy.location("pathname").should("eq", `/app/${role}/displayStudent`);
 
   cy.contains("h4", "gandhi")
     .parents(".gridListContainer")
@@ -115,14 +115,14 @@ Cypress.Commands.add("deleteDemoStudentUser", () => {
   cy.expectAndCloseToast("DELETED SUCCESSFULLY");
 });
 
-Cypress.Commands.add("createDemoSubject", () => {
-  cy.intercept("POST", "**/teacher/createSub*").as("createSubjectRequest");
+Cypress.Commands.add("createDemoSubject", (role) => {
+  cy.intercept("POST", `**/${role}/createSub*`).as("createSubjectRequest");
 
   cy.get("#subjectsTabBtn").click();
-  cy.location("pathname").should("eq", "/app/teacher/displaySubject");
+  cy.location("pathname").should("eq", `/app/${role}/displaySubject`);
 
   cy.contains("a", "Create a new subject here").click();
-  cy.location("pathname").should("eq", "/app/teacher/addSubject");
+  cy.location("pathname").should("eq", `/app/${role}/addSubject`);
 
   cy.get("#subId").type("99");
   cy.get("#subName").type("Drawing");
@@ -134,11 +134,11 @@ Cypress.Commands.add("createDemoSubject", () => {
   cy.expectAndCloseToast("inserted successfully");
 });
 
-Cypress.Commands.add("deleteDemoSubject", () => {
-  cy.intercept("DELETE", "**/teacher/delSubject*").as("deleteSubjectRequest");
+Cypress.Commands.add("deleteDemoSubject", (role) => {
+  cy.intercept("DELETE", `**/${role}/delSubject*`).as("deleteSubjectRequest");
 
   cy.get("#subjectsTabBtn").click();
-  cy.location("pathname").should("eq", "/app/teacher/displaySubject");
+  cy.location("pathname").should("eq", `/app/${role}/displaySubject`);
 
   cy.contains("h4", "Drawing")
     .parents(".gridListContainer")
@@ -151,13 +151,13 @@ Cypress.Commands.add("deleteDemoSubject", () => {
   cy.expectAndCloseToast("DELETED SUCCESSFULLY");
 });
 
-Cypress.Commands.add("createDemoReview", () => {
-  cy.intercept("POST", "**/teacher/addReview*").as("createReviewRequest");
-  cy.createDemoStudentUser();
+Cypress.Commands.add("createDemoReview", (role) => {
+  cy.intercept("POST", `**/${role}/addReview*`).as("createReviewRequest");
+  cy.createDemoStudentUser(role);
 
   cy.get("#profileTab").realHover();
   cy.get("#reviewTabBtn").click();
-  cy.location("pathname").should("eq", "/app/teacher/reviews");
+  cy.location("pathname").should("eq", `/app/${role}/reviews`);
 
   cy.get("#grNo").type("999");
   cy.contains("button", "Search").click();
@@ -169,5 +169,41 @@ Cypress.Commands.add("createDemoReview", () => {
   cy.wait("@createReviewRequest").its("response.statusCode").should("eq", 200);
   cy.expectAndCloseToast("added successfully");
 
-  cy.deleteDemoStudentUser();
+  cy.deleteDemoStudentUser(role);
+});
+
+Cypress.Commands.add("createDemoTeacherUser", (role) => {
+  cy.intercept("POST", `**/${role}/addTeacher*`).as("createTeacher");
+
+  cy.get("#teacherTabBtn").click();
+  cy.location("pathname").should("eq", `/app/${role}/displayTeacher`);
+
+  cy.contains("a", "Create a new teacher here").click();
+  cy.location("pathname").should("eq", `/app/${role}/addTeacher`);
+
+  cy.get("#tid").type("999");
+  cy.get("#tname").type("TempTeacherUser");
+  cy.get("#password").type("tpassword");
+
+  cy.contains("button", "Create Teacher").click();
+  cy.wait("@createTeacher").its("response.statusCode").should("eq", 200);
+  cy.expectAndCloseToast("ADDED SUCCESSFULLY");
+});
+
+Cypress.Commands.add("deleteDemoTeacherUser", (role) => {
+  cy.intercept("POST", `**/${role}/delTeacher*`).as("deleteTeacher");
+
+  cy.get("#teacherTabBtn").click();
+  cy.location("pathname").should("eq", `/app/${role}/displayTeacher`);
+
+  cy.contains("h4", "TempTeacherUser")
+    .parents(".gridListContainer")
+    .find(".editDelActionButtons")
+    .children()
+    .last()
+    .click();
+
+  cy.wait("@deleteTeacher").its("response.statusCode").should("eq", 200);
+
+  cy.expectAndCloseToast("DELETED SUCCESSFULLY");
 });
