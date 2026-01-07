@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import "cypress-real-events/support";
 // ***********************************************
 // This example commands.js shows you how to
