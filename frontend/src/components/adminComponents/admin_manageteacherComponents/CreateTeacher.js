@@ -288,7 +288,7 @@ export const CreateTeacherComponent = () => {
             type="submit"
             onClick={(e) => submitHandler(e, `/${userrole}/addTeacher`)}
           >
-            Create Student
+            Create Teacher
           </ButtonElement>
           <GridLayers style={{ width: "48%", margin: "0" }}>
             <ButtonElement
