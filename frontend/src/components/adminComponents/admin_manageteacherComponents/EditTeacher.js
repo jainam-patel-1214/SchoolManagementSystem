@@ -327,6 +327,7 @@ export const TeacherEditComponent = () => {
               label="Select a subject from dropdown to update"
               value={data.subjectId || ""}
               onChange={selectChangeHandler}
+              name="selectSubject"
             >
               <option value="">Select subject to update</option>
               {filteredSubjects.map((v) => (
