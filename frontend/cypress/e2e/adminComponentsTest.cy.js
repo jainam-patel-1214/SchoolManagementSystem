@@ -277,7 +277,7 @@ describe("admin components testing", () => {
       .its("response.statusCode")
       .should("eq", 400);
     cy.expectAndCloseToast(
-      "first set limit of subjects allocated in 5 standard"
+      "first set limit of subjects allocated in standard 5"
     );
 
     cy.get("#subId").type("99");
@@ -478,7 +478,7 @@ describe("admin components testing", () => {
     cy.createDemoTeacherUser("admin");
     cy.createDemoSubject("admin");
 
-    cy.contains("a", "Go back to veiw teacher's list").click();
+    cy.get("#teacherTabBtn").click();
     cy.location("pathname").should("eq", "/app/admin/displayTeacher");
 
     cy.contains("h4", "TempTeacherUser")
@@ -489,15 +489,95 @@ describe("admin components testing", () => {
       .click();
     cy.location("pathname").should("include", "/app/admin/editTeacher");
 
-    cy.get("#subname").type("99");
+    cy.get("#subname").click();
+    cy.get('select[name="selectSubject"]').select("99");
     cy.get("#std").type("5");
     cy.get("#section").type("C");
 
-    contains("button", "Update Teacher").click();
+    cy.contains("button", "Update Teacher").click();
     cy.wait("@editTeacherRequest").its("response.statusCode").should("eq", 200);
     cy.expectAndCloseToast("UPDATED SUCCESSFULLY");
 
     cy.deleteDemoTeacherUser("admin");
     cy.deleteDemoSubject("admin");
+  });
+
+  it.only("edit teacher - failure", () => {
+    cy.intercept("PUT", `**/admin/editTeacher*`).as("editTeacherRequest");
+
+    cy.createDemoTeacherUser("admin");
+    cy.createDemoSubject("admin");
+
+    cy.get("#teacherTabBtn").click();
+    cy.location("pathname").should("eq", "/app/admin/displayTeacher");
+
+    cy.contains("h4", "TempTeacherUser")
+      .parents(".gridListContainer")
+      .find(".editDelActionButtons")
+      .children()
+      .first()
+      .click();
+    cy.location("pathname").should("include", "/app/admin/editTeacher");
+
+    cy.get("#tname").type("5");
+    cy.contains("button", "Update Teacher").click();
+    cy.expectAndCloseToast("invalid name");
+
+    cy.get("#tname").clear().type("TempTeacherUser");
+    cy.get("#std").type("15");
+    cy.contains("button", "Update Teacher").click();
+    cy.expectAndCloseToast("invalid standard. Allowed range is 1 - 12");
+
+    cy.get("#std").clear().type("5");
+    cy.get("#section").type("C1");
+    cy.contains("button", "Update Teacher").click();
+    cy.expectAndCloseToast("invalid section");
+
+    cy.get("#section").clear().type("C");
+    cy.get("#subname").click();
+    cy.get('select[name="selectSubject"]').select("99");
+
+    cy.contains("button", "Update Teacher").click();
+    cy.wait("@editTeacherRequest").its("response.statusCode").should("eq", 200);
+    cy.expectAndCloseToast("UPDATED SUCCESSFULLY");
+
+    cy.deleteDemoTeacherUser("admin");
+    cy.deleteDemoSubject("admin");
+  });
+
+  it("set subject limit failure and success", () => {
+    cy.intercept("POST", "**/admin/setSubLimit*").as("setSubjectLimitRequest");
+    cy.get("#subjectsTabBtn").click();
+    cy.location("pathname").should("eq", `/app/admin/displaySubject`);
+
+    cy.contains("a", "Set subject limit here").click();
+    cy.location("pathname").should("eq", `/app/admin/setSubjectLimit`);
+
+    cy.get("#std").clear().type("15");
+    cy.get("#limit").clear().type("10");
+    cy.contains("button", "Set Limit").click();
+    cy.expectAndCloseToast("invalid grade given. It shall be between 1-12");
+
+    cy.get("#std").clear().type("5");
+    cy.get("#limit").clear().type("-10");
+    cy.contains("button", "Set Limit").click();
+    cy.expectAndCloseToast("negative limit not allowed");
+
+    cy.get("#std").clear().type("5");
+    cy.get("#limit").clear().type("10");
+
+    cy.contains("button", "Set Limit").click();
+    cy.wait("@setSubjectLimitRequest")
+      .its("response.statusCode")
+      .should("eq", 200);
+    cy.expectAndCloseToast("limit set successfully");
+
+    cy.get("#std").clear().type("5");
+    cy.get("#limit").clear().type("10");
+    cy.contains("button", "Set Limit").click();
+    cy.wait("@setSubjectLimitRequest")
+      .its("response.statusCode")
+      .should("eq", 400);
+    cy.expectAndCloseToast("limit already set, cannot reset it");
   });
 });

@@ -191,7 +191,7 @@ Cypress.Commands.add("createDemoTeacherUser", (role) => {
 });
 
 Cypress.Commands.add("deleteDemoTeacherUser", (role) => {
-  cy.intercept("POST", `**/${role}/delTeacher*`).as("deleteTeacher");
+  cy.intercept("DELETE", `**/${role}/delTeacher*`).as("deleteTeacher");
 
   cy.get("#teacherTabBtn").click();
   cy.location("pathname").should("eq", `/app/${role}/displayTeacher`);
