@@ -8,9 +8,9 @@ describe("Student components test", () => {
 
     cy.visit("http://localhost:3000/");
 
-    cy.get("#userid").type("1").should("have.value", "1");
+    cy.get("#userid").type("99091").should("have.value", "99091");
 
-    cy.get("#password").type("passwordh").should("have.value", "passwordh");
+    cy.get("#password").type("password").should("have.value", "password");
 
     cy.get('select[name="userRole"]')
       .select("student")
@@ -43,9 +43,9 @@ describe("Student components test", () => {
 
     cy.visit("http://localhost:3000/");
 
-    cy.get("#userid").type("1").should("have.value", "1");
+    cy.get("#userid").type("99091").should("have.value", "99091");
 
-    cy.get("#password").type("passwordh").should("have.value", "passwordh");
+    cy.get("#password").type("password").should("have.value", "password");
 
     cy.get('select[name="userRole"]')
       .select("student")
@@ -65,7 +65,7 @@ describe("Student components test", () => {
 
     cy.get("#std").type("1").should("have.value", "1");
     cy.get("#section").type("C").should("have.value", "C");
-    cy.get("#minPercent").type("80").should("have.value", "80");
+    cy.get("#minPercent").type("10").should("have.value", "10");
 
     cy.get("#fetchResultButton").click();
     cy.wait("@fetchResult").then((interception) => {
@@ -79,9 +79,9 @@ describe("Student components test", () => {
 
     cy.visit("http://localhost:3000/");
 
-    cy.get("#userid").type("1").should("have.value", "1");
+    cy.get("#userid").type("99091").should("have.value", "99091");
 
-    cy.get("#password").type("passwordh").should("have.value", "passwordh");
+    cy.get("#password").type("password").should("have.value", "password");
 
     cy.get('select[name="userRole"]')
       .select("student")
@@ -109,6 +109,24 @@ describe("Student components test", () => {
         "contain",
         "Grade/Std not allowed shall be between 1 and 12 inclusive"
       );
+
+    cy.get("#std").clear().type("1").should("have.value", "1");
+    cy.get("#minPercent").clear().type("31").should("have.value", "31");
+    cy.get("#maxPercent").clear().type("20").should("have.value", "20");
+
+    cy.get("#fetchResultButton").click();
+
+    cy.get(".Toastify__toast")
+      .should("be.visible")
+      .and("contain", "Min mark shall be less than max mark");
+
+    cy.get("#section").clear().type("C1").should("have.value", "C1");
+    cy.get("#maxPercent").clear().type("80").should("have.value", "80");
+    cy.get("#fetchResultButton").click();
+
+    cy.get(".Toastify__toast")
+      .should("be.visible")
+      .and("contain", "Invalid section");
   });
   it("checks student result - success but no result", () => {
     cy.intercept("POST", "/login*").as("loginRequest");
@@ -116,9 +134,9 @@ describe("Student components test", () => {
 
     cy.visit("http://localhost:3000/");
 
-    cy.get("#userid").type("1").should("have.value", "1");
+    cy.get("#userid").type("99091").should("have.value", "99091");
 
-    cy.get("#password").type("passwordh").should("have.value", "passwordh");
+    cy.get("#password").type("password").should("have.value", "password");
 
     cy.get('select[name="userRole"]')
       .select("student")
@@ -137,7 +155,8 @@ describe("Student components test", () => {
     cy.url().should("match", /\/app\/student\/schoolResult/);
 
     cy.get("#std").type("1").should("have.value", "1");
-    cy.get("#minPercent").type("99").should("have.value", "99");
+    cy.get("#minPercent").type("1").should("have.value", "1");
+    cy.get("#maxPercent").type("20").should("have.value", "20");
 
     cy.get("#fetchResultButton").click();
     cy.wait("@fetchResult").then((interception) => {
@@ -153,9 +172,9 @@ describe("Student components test", () => {
 
     cy.visit("http://localhost:3000/");
 
-    cy.get("#userid").type("1").should("have.value", "1");
+    cy.get("#userid").type("99091").should("have.value", "99091");
 
-    cy.get("#password").type("passwordh").should("have.value", "passwordh");
+    cy.get("#password").type("password").should("have.value", "password");
 
     cy.get('select[name="userRole"]')
       .select("student")
