@@ -321,3 +321,97 @@ Cypress.Commands.add("deleteParticularStudent", (role, name) => {
 
   cy.expectAndCloseToast("DELETED SUCCESSFULLY");
 });
+
+Cypress.Commands.add("initialDataForStudentAndTeacher", () => {
+  cy.intercept("POST", "**/admin/setSubLimit*").as("setSubjectLimitRequest");
+
+  cy.get("#subjectsTabBtn").click();
+  cy.location("pathname").should("eq", `/app/admin/displaySubject`);
+
+  cy.contains("a", "Set subject limit here").click();
+  cy.location("pathname").should("eq", `/app/admin/setSubjectLimit`);
+
+  cy.get("#std").clear().type("1");
+  cy.get("#limit").clear().type("10");
+
+  cy.contains("button", "Set Limit").click();
+  cy.wait("@setSubjectLimitRequest").then((interception) => {
+    const status = interception.response.statusCode;
+
+    expect([200, 400]).to.include(status);
+
+    if (status === 200) {
+      cy.expectAndCloseToast("limit set successfully");
+    } else {
+      cy.expectAndCloseToast("limit already set, cannot reset it");
+    }
+  });
+
+  cy.createSubject("admin", "99090", "Physics", "1", "10");
+  cy.createStudent("admin", "99091", "password", "StudentA", "1", "A");
+  cy.createStudent("admin", "99092", "password", "StudentB", "1", "B");
+  cy.createStudent("admin", "99093", "password", "StudentC", "1", "C");
+
+  cy.get("#marksTabBtn").click();
+  cy.location("pathname").should("eq", "/app/admin/enterMarks");
+  cy.insertMarks("99091", "99090", "80", "20");
+  cy.insertMarks("99092", "99090", "70", "10");
+  cy.insertMarks("99093", "99090", "20", "2");
+});
+
+Cypress.Commands.add("createSubject", (role, id, name, grade, credits) => {
+  cy.intercept("POST", `**/${role}/createSub*`).as("createSubjectRequest");
+
+  cy.get("#subjectsTabBtn").click();
+  cy.location("pathname").should("eq", `/app/${role}/displaySubject`);
+
+  cy.contains("a", "Create a new subject here").click();
+  cy.location("pathname").should("eq", `/app/${role}/addSubject`);
+
+  cy.get("#subId").type(id);
+  cy.get("#subName").type(name);
+  cy.get("#grade").type(grade);
+  cy.get("#credits").type(credits);
+
+  cy.contains("button", "Create Subject").click();
+  cy.wait("@createSubjectRequest").its("response.statusCode").should("eq", 200);
+  cy.expectAndCloseToast("inserted successfully");
+});
+
+Cypress.Commands.add(
+  "createStudent",
+  (role, id, password, name, grade, section) => {
+    cy.intercept("POST", `**/${role}/createStud*`).as("createStudentRequest");
+    cy.get("#studentsTabBtn").click();
+    cy.location("pathname").should("eq", `/app/${role}/displayStudent`);
+
+    cy.contains("a", "Create a new student here").click();
+    cy.location("pathname").should("eq", `/app/${role}/addStudent`);
+    cy.get("#grNo").type(id);
+    cy.get("#password").type(password);
+    cy.get("#name").type(name);
+    cy.get("#section").type(section);
+    cy.get("#std").type(grade);
+
+    cy.contains("button", "Create Student").click();
+    cy.wait("@createStudentRequest")
+      .its("response.statusCode")
+      .should("eq", 200);
+    cy.expectAndCloseToast("student created");
+  }
+);
+
+Cypress.Commands.add(
+  "insertMarks",
+  (grNo, subId, theoryMark, practicalMark) => {
+    cy.get("#subId").clear().type(subId);
+    cy.get("#grNo").clear().type(grNo);
+    cy.get("#theory").clear().type(theoryMark);
+    cy.get("#practical").clear().type(practicalMark);
+    cy.contains("button", "Submit Marks").click();
+    cy.wait("@createMarkRecordRequest")
+      .its("response.statusCode")
+      .should("eq", 200);
+    cy.expectAndCloseToast("inserted successfully");
+  }
+);

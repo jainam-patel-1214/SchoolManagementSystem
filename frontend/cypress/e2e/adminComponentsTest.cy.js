@@ -580,6 +580,10 @@ describe("admin components testing", () => {
       .should("eq", 400);
     cy.expectAndCloseToast("limit already set, cannot reset it");
   });
+
+  it("initial data for teacher and student tests", () => {
+    cy.initialDataForStudentAndTeacher();
+  });
 });
 
 describe("pending applications seperate test", () => {
