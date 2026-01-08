@@ -207,3 +207,117 @@ Cypress.Commands.add("deleteDemoTeacherUser", (role) => {
 
   cy.expectAndCloseToast("DELETED SUCCESSFULLY");
 });
+
+Cypress.Commands.add("registerTemporaryUser", (role) => {
+  cy.intercept("POST", "**/register*").as("registerRequest");
+
+  cy.visit("http://localhost:3000");
+
+  cy.get("#switchToSignup").click();
+  cy.location("pathname").should("eq", "/signup");
+
+  cy.get("#username").type("TestDemoUser").should("have.value", "TestDemoUser");
+
+  cy.get("#password").type("password12").should("have.value", "password12");
+
+  cy.get('select[name="userRole"]').select(role).should("have.value", role);
+
+  cy.get('button[type="submit"]').click();
+
+  cy.wait("@registerRequest").then((interception) => {
+    expect(interception.response.statusCode).to.eq(200);
+  });
+  cy.expectAndCloseToast("registeration request submitted");
+});
+
+Cypress.Commands.add(
+  "findAcceptRejectButton",
+  (userName, userRole, buttonClass) => {
+    cy.get(".user-name")
+      .contains(userName)
+      .parent()
+      .siblings()
+      .children(".user-role")
+      .contains(userRole)
+      .parent()
+      .siblings()
+      .children(buttonClass)
+      .click();
+  }
+);
+
+Cypress.Commands.add(
+  "fillAcceptPopupDetails",
+  (userId, userStd, userSection, role) => {
+    cy.intercept("POST", "**/admin/acceptRequest*").as("acceptPendingRequest");
+    cy.get("#furtherDetailsPopoupContainer").should("be.visible");
+    switch (role) {
+      case "student":
+        cy.get("#uid").type(userId).should("have.value", userId);
+        cy.get("#std").type(userStd).should("have.value", userStd);
+        cy.get("#section").type(userSection).should("have.value", userSection);
+        cy.contains("button", "Submit").click();
+        cy.wait("@acceptPendingRequest")
+          .its("response.statusCode")
+          .should("eq", 200);
+        cy.expectAndCloseToast("student created");
+        break;
+      case "teacher":
+        cy.get("#uid").type(userId).should("have.value", userId);
+        cy.contains("button", "Submit").click();
+        cy.wait("@acceptPendingRequest")
+          .its("response.statusCode")
+          .should("eq", 200);
+        cy.expectAndCloseToast("teacher created");
+        break;
+      case "admin":
+        cy.get("#uid").type(userId).should("have.value", userId);
+        cy.contains("button", "Submit").click();
+        cy.wait("@acceptPendingRequest")
+          .its("response.statusCode")
+          .should("eq", 200);
+        cy.expectAndCloseToast("admin created");
+        break;
+
+      default:
+        break;
+    }
+  }
+);
+
+Cypress.Commands.add("deleteParticularTeacher", (role, name) => {
+  cy.intercept("DELETE", `**/${role}/delTeacher*`).as("deleteTeacher");
+
+  cy.get("#teacherTabBtn").click();
+  cy.location("pathname").should("eq", `/app/${role}/displayTeacher`);
+
+  cy.contains("h4", name)
+    .first()
+    .parents(".gridListContainer")
+    .find(".editDelActionButtons")
+    .children()
+    .last()
+    .click();
+
+  cy.wait("@deleteTeacher").its("response.statusCode").should("eq", 200);
+
+  cy.expectAndCloseToast("DELETED SUCCESSFULLY");
+});
+
+Cypress.Commands.add("deleteParticularStudent", (role, name) => {
+  cy.intercept("DELETE", `**/${role}/delStudent*`).as("deleteStudentRequest");
+  cy.get("#studentsTabBtn").click();
+  cy.location("pathname").should("eq", `/app/${role}/displayStudent`);
+
+  cy.contains("h4", name)
+    .first()
+    .parents(".gridListContainer")
+    .find(".editDelActionButtons")
+    .children()
+    .last()
+    .click();
+
+  cy.wait("@deleteStudentRequest").its("response.statusCode").should("eq", 200);
+
+  cy.expectAndCloseToast("DELETED SUCCESSFULLY");
+});

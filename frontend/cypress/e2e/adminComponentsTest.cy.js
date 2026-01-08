@@ -502,7 +502,7 @@ describe("admin components testing", () => {
     cy.deleteDemoSubject("admin");
   });
 
-  it.only("edit teacher - failure", () => {
+  it("edit teacher - failure", () => {
     cy.intercept("PUT", `**/admin/editTeacher*`).as("editTeacherRequest");
 
     cy.createDemoTeacherUser("admin");
@@ -579,5 +579,79 @@ describe("admin components testing", () => {
       .its("response.statusCode")
       .should("eq", 400);
     cy.expectAndCloseToast("limit already set, cannot reset it");
+  });
+});
+
+describe("pending applications seperate test", () => {
+  before(() => {
+    cy.registerWithApiCredentials("admin");
+  });
+
+  beforeEach(() => {
+    const user = Cypress.env("user");
+    cy.registerTemporaryUser("student");
+    cy.registerTemporaryUser("teacher");
+    cy.registerTemporaryUser("admin");
+
+    cy.session(String(user.id), () => {
+      cy.loginViaUI(user);
+    });
+    cy.visit("http://localhost:3000/app/admin");
+  });
+
+  it("accept pending request", () => {
+    cy.get("#profileTab").realHover();
+    cy.get("#pendingRequestTabBtn").click();
+    cy.location("pathname").should("eq", "/app/admin/pendingApplications");
+
+    cy.findAcceptRejectButton(
+      "TestDemoUser",
+      "student",
+      ".pendingAcceptButton"
+    );
+    cy.fillAcceptPopupDetails("9090", "1", "A", "student");
+    cy.deleteParticularStudent("admin", "TestDemoUser");
+
+    cy.get("#profileTab").realHover();
+    cy.get("#pendingRequestTabBtn").click();
+    cy.location("pathname").should("eq", "/app/admin/pendingApplications");
+
+    cy.findAcceptRejectButton(
+      "TestDemoUser",
+      "teacher",
+      ".pendingAcceptButton"
+    );
+    cy.fillAcceptPopupDetails("9090", "", "", "teacher");
+    cy.deleteParticularTeacher("admin", "TestDemoUser");
+
+    cy.get("#profileTab").realHover();
+    cy.get("#pendingRequestTabBtn").click();
+    cy.location("pathname").should("eq", "/app/admin/pendingApplications");
+
+    cy.findAcceptRejectButton("TestDemoUser", "admin", ".pendingAcceptButton");
+    cy.fillAcceptPopupDetails("9090", "", "", "admin");
+  });
+
+  it("reject pending request", () => {
+    cy.get("#profileTab").realHover();
+    cy.get("#pendingRequestTabBtn").click();
+    cy.location("pathname").should("eq", "/app/admin/pendingApplications");
+
+    cy.findAcceptRejectButton(
+      "TestDemoUser",
+      "student",
+      ".pendingRejectButton"
+    );
+    cy.expectAndCloseToast("Rejected !!");
+
+    cy.findAcceptRejectButton(
+      "TestDemoUser",
+      "teacher",
+      ".pendingRejectButton"
+    );
+    cy.expectAndCloseToast("Rejected !!");
+
+    cy.findAcceptRejectButton("TestDemoUser", "admin", ".pendingRejectButton");
+    cy.expectAndCloseToast("Rejected !!");
   });
 });
