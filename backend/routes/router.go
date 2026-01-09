@@ -54,6 +54,7 @@ func InitializeRouter() *gin.Engine {
 			teach.POST("/addReview", teacher.AddReviews)
 
 			teach.GET("/allStudents", admin.DisplayAllStudents)
+			teach.GET("/allLimits", admin.DisplayAllSubjectLimit)
 			teach.GET("/allSubjects", admin.DisplayAllSubjects)
 			teach.GET("/selfStudents", teacher.DisplayStudentsUnderTeacher)
 		}
@@ -95,6 +96,7 @@ func InitializeRouter() *gin.Engine {
 			admn.POST("/setSubLimit", admin.SetSubLimit)
 
 			admn.GET("/allStudents", admin.DisplayAllStudents)
+			admn.GET("/allLimits", admin.DisplayAllSubjectLimit)
 			admn.GET("/allSubjects", admin.DisplayAllSubjects)
 			admn.GET("/allTeachers", admin.DisplayAllTeachers)
 			admn.GET("/allAdmins", admin.DisplayAllAdmin)
