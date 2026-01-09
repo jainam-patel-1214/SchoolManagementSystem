@@ -69,6 +69,14 @@ export const SubjectLimit = () => {
             {" "}
             Go back to veiw subject list
           </a>
+          |{" "}
+          <a
+            href={`/app/${userrole}/showSubjectLimit`}
+            style={{ color: "#007d25ff" }}
+          >
+            {" "}
+            View Limits
+          </a>
         </p>
       </HeadingComponent>
 

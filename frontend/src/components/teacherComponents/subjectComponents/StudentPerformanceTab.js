@@ -58,7 +58,11 @@ export const StudentPerformancePage = () => {
       id: "actions",
       header: "Actions",
       cell: ({ row }) => (
-        <button
+        <ButtonElement
+          bgcol={"#9395ff"}
+          border={"default"}
+          textcol={"default"}
+          hovercol={"default"}
           onClick={() =>
             navigate(
               `/app/${userrole}/editMarks?subId=${row.original.subId}&grNo=${id}&tm=${row.original.theoryMM}&pm=${row.original.practicalMM}`
@@ -66,7 +70,7 @@ export const StudentPerformancePage = () => {
           }
         >
           Edit marks
-        </button>
+        </ButtonElement>
       ),
     },
   ];

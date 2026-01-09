@@ -21,6 +21,7 @@ export const InputContainerComponent = ({
         <FloatingInput
           type="text"
           placeholder=" "
+          autoComplete="off"
           id={rest.name}
           onChange={(e) => {
             const val = e.target.value;

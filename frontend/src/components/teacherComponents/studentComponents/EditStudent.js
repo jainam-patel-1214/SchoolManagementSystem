@@ -164,7 +164,7 @@ export const StudentEditComponent = () => {
             style={{ color: "#008cffff" }}
           >
             {" "}
-            Go back to veiw student list
+            Go back to view student list
           </a>
         </p>
       </HeadingComponent>

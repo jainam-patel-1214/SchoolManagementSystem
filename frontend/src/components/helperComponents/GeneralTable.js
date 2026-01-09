@@ -7,19 +7,19 @@ import {
 import { useMemo, useState } from "react";
 import { FaArrowUpZA, FaArrowUpAZ } from "react-icons/fa6";
 import styled from "styled-components";
-const TableComp = styled.table`
+export const TableComp = styled.table`
   width: 45%;
   height: fit-content;
   border: none;
   margin-top: ${({ marginTopRequired }) =>
     marginTopRequired !== "" ? marginTopRequired : "0"};
 `;
-const TableTrEntry = styled.tr`
+export const TableTrEntry = styled.tr`
   background-color: ${(props) =>
     props.iseven === 0 ? "#d7d8fe9c" : "#f7e7fc81"};
   text-align: center;
 `;
-const TableThEntry = styled.th`
+export const TableThEntry = styled.th`
   background-color: #6366f1;
   color: white;
   height: 30px;
@@ -28,7 +28,7 @@ const TableThEntry = styled.th`
     font-size: small;
   }
 `;
-const TableTdEntry = styled.td`
+export const TableTdEntry = styled.td`
   text-align: center;
   padding: 0px 10px;
 `;

@@ -201,7 +201,7 @@ export const CreateTeacherComponent = () => {
             style={{ color: "#008cffff" }}
           >
             {" "}
-            Go back to veiw teacher's list
+            Go back to view teacher's list
           </a>
         </p>
       </HeadingComponent>

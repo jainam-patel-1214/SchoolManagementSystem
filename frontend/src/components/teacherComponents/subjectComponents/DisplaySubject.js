@@ -184,6 +184,18 @@ export const DisplaySubTabComp = () => {
               </a>
             </>
           )}
+          {userrole === "teacher" && (
+            <>
+              |{" "}
+              <a
+                href={`/app/${userrole}/showSubjectLimit`}
+                style={{ color: "#007d25ff" }}
+              >
+                {" "}
+                View Limits
+              </a>
+            </>
+          )}
         </p>
       </HeadingComponent>
 
