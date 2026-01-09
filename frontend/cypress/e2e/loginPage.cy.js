@@ -87,9 +87,9 @@ describe("Login Form - Scholar App", () => {
 
     cy.visit("http://localhost:3000/");
 
-    cy.get("#userid").type("1").should("have.value", "1");
+    cy.get("#userid").type("99092").should("have.value", "99092");
 
-    cy.get("#password").type("passwordh").should("have.value", "passwordh");
+    cy.get("#password").type("password").should("have.value", "password");
 
     cy.get('select[name="userRole"]')
       .select("student")
@@ -109,7 +109,7 @@ describe("Login Form - Scholar App", () => {
   it("fills form and logs in success for teacher", () => {
     cy.visit("http://localhost:3000/");
     cy.intercept("POST", "/login*").as("loginRequest");
-    cy.get("#userid").type("1").should("have.value", "1");
+    cy.get("#userid").type("9090").should("have.value", "9090");
 
     cy.get("#password").type("password").should("have.value", "password");
 
@@ -134,7 +134,7 @@ describe("Login Form - Scholar App", () => {
 
     cy.visit("http://localhost:3000/");
 
-    cy.get("#userid").type("1").should("have.value", "1");
+    cy.get("#userid").type("999").should("have.value", "999");
 
     cy.get("#password").type("password").should("have.value", "password");
 
