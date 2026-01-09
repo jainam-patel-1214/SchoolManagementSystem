@@ -26,6 +26,7 @@ import "cypress-real-events/support";
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 Cypress.Commands.add("registerWithApiCredentials", (role) => {
+  cy.task("clearUser");
   cy.task("readUser").then((storedUser) => {
     if (!storedUser || !storedUser.id) {
       cy.request({
@@ -404,6 +405,7 @@ Cypress.Commands.add(
 Cypress.Commands.add(
   "insertMarks",
   (grNo, subId, theoryMark, practicalMark) => {
+    cy.intercept("POST", "**/admin/enterMarks*").as("createMarkRecordRequest");
     cy.get("#subId").clear().type(subId);
     cy.get("#grNo").clear().type(grNo);
     cy.get("#theory").clear().type(theoryMark);

@@ -27,6 +27,17 @@ export default defineConfig({
           writeFileSync(filePath, JSON.stringify(user, null, 2));
           return null;
         },
+        clearUser() {
+          const filePath = resolve(
+            __dirname,
+            "cypress/fixtures/adminTestUser.json"
+          );
+
+          if (!existsSync(filePath)) return false;
+
+          writeFileSync(filePath, JSON.stringify({}, null, 2), "utf8");
+          return true;
+        },
       });
     },
   },

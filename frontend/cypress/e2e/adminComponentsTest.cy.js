@@ -16,6 +16,10 @@ describe("admin components testing", () => {
     cy.visit("http://localhost:3000/app/admin");
   });
 
+  it("initial data for teacher and student tests", () => {
+    cy.initialDataForStudentAndTeacher();
+  });
+
   it("navigation of admin's components", () => {
     cy.get("#teacherTabBtn").click();
     cy.location("pathname").should("eq", "/app/admin/displayTeacher");
@@ -45,7 +49,7 @@ describe("admin components testing", () => {
 
     cy.createDemoStudentUser("admin");
 
-    cy.contains("a", "Go back to veiw student list").click();
+    cy.contains("a", "Go back to view student list").click();
     cy.location("pathname").should("eq", "/app/admin/displayStudent");
 
     cy.contains("h4", "gandhi")
@@ -63,7 +67,7 @@ describe("admin components testing", () => {
       .its("response.statusCode")
       .should("eq", 200);
 
-    cy.contains("a", "Go back to veiw student list").click();
+    cy.contains("a", "Go back to view student list").click();
     cy.location("pathname").should("eq", "/app/admin/displayStudent");
 
     cy.contains("h4", "mahatmagandhi")
@@ -85,7 +89,7 @@ describe("admin components testing", () => {
 
     cy.createDemoSubject("admin");
 
-    cy.contains("a", "Go back to veiw subject list").click();
+    cy.contains("a", "Go back to view subject list").click();
     cy.location("pathname").should("eq", "/app/admin/displaySubject");
 
     cy.contains("h4", "Drawing")
@@ -104,7 +108,7 @@ describe("admin components testing", () => {
       .should("eq", 200);
     cy.expectAndCloseToast("subject updated successfully");
 
-    cy.contains("a", "Go back to veiw subject list").click();
+    cy.contains("a", "Go back to view subject list").click();
     cy.location("pathname").should("eq", "/app/admin/displaySubject");
 
     cy.contains("h4", "drawingg")
@@ -126,7 +130,7 @@ describe("admin components testing", () => {
 
     cy.createDemoStudentUser("admin");
 
-    cy.contains("a", "Go back to veiw student list").click();
+    cy.contains("a", "Go back to view student list").click();
     cy.location("pathname").should("eq", "/app/admin/displayStudent");
 
     cy.contains("h4", "gandhi")
@@ -164,7 +168,7 @@ describe("admin components testing", () => {
 
     cy.createDemoSubject("admin");
 
-    cy.contains("a", "Go back to veiw subject list").click();
+    cy.contains("a", "Go back to view subject list").click();
     cy.location("pathname").should("eq", "/app/admin/displaySubject");
 
     cy.contains("h4", "Drawing")
@@ -489,7 +493,6 @@ describe("admin components testing", () => {
       .click();
     cy.location("pathname").should("include", "/app/admin/editTeacher");
 
-    cy.get("#subname").click();
     cy.get('select[name="selectSubject"]').select("99");
     cy.get("#std").type("5");
     cy.get("#section").type("C");
@@ -534,7 +537,6 @@ describe("admin components testing", () => {
     cy.expectAndCloseToast("invalid section");
 
     cy.get("#section").clear().type("C");
-    cy.get("#subname").click();
     cy.get('select[name="selectSubject"]').select("99");
 
     cy.contains("button", "Update Teacher").click();
@@ -579,10 +581,6 @@ describe("admin components testing", () => {
       .its("response.statusCode")
       .should("eq", 400);
     cy.expectAndCloseToast("limit already set, cannot reset it");
-  });
-
-  it("initial data for teacher and student tests", () => {
-    cy.initialDataForStudentAndTeacher();
   });
 });
 
