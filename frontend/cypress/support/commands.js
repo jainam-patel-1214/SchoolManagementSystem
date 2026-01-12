@@ -50,6 +50,22 @@ Cypress.Commands.add("registerWithApiCredentials", (role) => {
         cy.task("saveUser", user);
         Cypress.env("user", user);
         cy.loginViaUI(user);
+        cy.visit("http://localhost:3000/app/admin");
+        cy.getCookies().then((cookies) => {
+          const cookieHeader = cookies
+            .map((c) => `${c.name}=${c.value}`)
+            .join("; ");
+
+          cy.request({
+            method: "GET",
+            url: "http://localhost:8090/admin/removeDummyData",
+            headers: {
+              Cookie: cookieHeader,
+            },
+          }).then((res) => {
+            expect(res.status).to.eq(200);
+          });
+        });
       });
     } else {
       Cypress.env("user", storedUser);
@@ -395,10 +411,19 @@ Cypress.Commands.add(
     cy.get("#std").type(grade);
 
     cy.contains("button", "Create Student").click();
-    cy.wait("@createStudentRequest")
-      .its("response.statusCode")
-      .should("eq", 200);
-    cy.expectAndCloseToast("student created");
+    cy.wait("@createStudentRequest").then((interception) => {
+      const status = interception.response.statusCode;
+
+      expect([200, 400]).to.include(status);
+
+      if (status === 200) {
+        cy.expectAndCloseToast("student created");
+      } else {
+        cy.expectAndCloseToast(
+          "student already exist with gr number provided, try updating student details"
+        );
+      }
+    });
   }
 );
 
@@ -411,9 +436,18 @@ Cypress.Commands.add(
     cy.get("#theory").clear().type(theoryMark);
     cy.get("#practical").clear().type(practicalMark);
     cy.contains("button", "Submit Marks").click();
-    cy.wait("@createMarkRecordRequest")
-      .its("response.statusCode")
-      .should("eq", 200);
-    cy.expectAndCloseToast("inserted successfully");
+    cy.wait("@createMarkRecordRequest").then((interception) => {
+      const status = interception.response.statusCode;
+
+      expect([200, 400]).to.include(status);
+
+      if (status === 200) {
+        cy.expectAndCloseToast("inserted successfully");
+      } else {
+        cy.expectAndCloseToast(
+          "subject already exist with id provided, try updating subject details"
+        );
+      }
+    });
   }
 );

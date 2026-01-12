@@ -8,11 +8,26 @@ describe("admin components testing", () => {
 
   beforeEach(() => {
     const user = Cypress.env("user");
-    console.log("user of cypress eehre", user);
 
     cy.session(String(user.id), () => {
       cy.loginViaUI(user);
+      cy.getCookies().then((cookies) => {
+        const cookieHeader = cookies
+          .map((c) => `${c.name}=${c.value}`)
+          .join("; ");
+
+        cy.request({
+          method: "GET",
+          url: "http://localhost:8090/admin/removeUnwantedData",
+          headers: {
+            Cookie: cookieHeader,
+          },
+        }).then((res) => {
+          expect(res.status).to.eq(200);
+        });
+      });
     });
+
     cy.visit("http://localhost:3000/app/admin");
   });
 
@@ -565,7 +580,7 @@ describe("admin components testing", () => {
     cy.contains("button", "Set Limit").click();
     cy.expectAndCloseToast("negative limit not allowed");
 
-    cy.get("#std").clear().type("5");
+    cy.get("#std").clear().type("6");
     cy.get("#limit").clear().type("10");
 
     cy.contains("button", "Set Limit").click();
@@ -574,7 +589,7 @@ describe("admin components testing", () => {
       .should("eq", 200);
     cy.expectAndCloseToast("limit set successfully");
 
-    cy.get("#std").clear().type("5");
+    cy.get("#std").clear().type("6");
     cy.get("#limit").clear().type("10");
     cy.contains("button", "Set Limit").click();
     cy.wait("@setSubjectLimitRequest")
@@ -591,6 +606,13 @@ describe("pending applications seperate test", () => {
 
   beforeEach(() => {
     const user = Cypress.env("user");
+    // cy.request({
+    //   method: "GET",
+    //   url: "http://localhost:8090/admin/removeDummyData",
+    //   withCredentials: true,
+    // }).then((res) => {
+    //   expect(res.status).to.eq(200);
+    // });
     cy.registerTemporaryUser("student");
     cy.registerTemporaryUser("teacher");
     cy.registerTemporaryUser("admin");
@@ -599,6 +621,21 @@ describe("pending applications seperate test", () => {
       cy.loginViaUI(user);
     });
     cy.visit("http://localhost:3000/app/admin");
+    // cy.getCookies().then((cookies) => {
+    //   const cookieHeader = cookies
+    //     .map((c) => `${c.name}=${c.value}`)
+    //     .join("; ");
+
+    //   cy.request({
+    //     method: "GET",
+    //     url: "http://localhost:8090/admin/removeDummyData",
+    //     headers: {
+    //       Cookie: cookieHeader,
+    //     },
+    //   }).then((res) => {
+    //     expect(res.status).to.eq(200);
+    //   });
+    // });
   });
 
   it("accept pending request", () => {
