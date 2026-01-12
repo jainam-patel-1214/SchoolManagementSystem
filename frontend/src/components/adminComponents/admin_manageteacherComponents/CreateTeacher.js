@@ -201,7 +201,7 @@ export const CreateTeacherComponent = () => {
             style={{ color: "#008cffff" }}
           >
             {" "}
-            Go back to veiw teacher's list
+            Go back to view teacher's list
           </a>
         </p>
       </HeadingComponent>
@@ -288,7 +288,7 @@ export const CreateTeacherComponent = () => {
             type="submit"
             onClick={(e) => submitHandler(e, `/${userrole}/addTeacher`)}
           >
-            Create Student
+            Create Teacher
           </ButtonElement>
           <GridLayers style={{ width: "48%", margin: "0" }}>
             <ButtonElement

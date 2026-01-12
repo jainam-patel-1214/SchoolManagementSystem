@@ -63,7 +63,6 @@ export const SubEditTabComp = () => {
       }
     } catch (error) {
       ErrorToast("Subject doesnot exists you wish to edit, try again!!");
-      console.log("no sub found");
     }
   };
 
@@ -138,7 +137,7 @@ export const SubEditTabComp = () => {
             style={{ color: "#008cffff" }}
           >
             {" "}
-            Go back to veiw subject list
+            Go back to view subject list
           </a>
         </p>
       </HeadingComponent>

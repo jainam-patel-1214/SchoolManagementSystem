@@ -66,7 +66,6 @@ export const StudentEditComponent = () => {
       }
     } catch (error) {
       ErrorToast("Student doesnot exists you wish to edit, try again!!");
-      console.log("no student found");
     }
   };
 
@@ -165,7 +164,7 @@ export const StudentEditComponent = () => {
             style={{ color: "#008cffff" }}
           >
             {" "}
-            Go back to veiw student list
+            Go back to view student list
           </a>
         </p>
       </HeadingComponent>

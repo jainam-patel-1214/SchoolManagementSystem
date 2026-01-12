@@ -1,9 +1,11 @@
+/* eslint-disable no-undef */
 // describe("template spec", () => {
 //   it("passes", () => {
 //     cy.visit("http://localhost:3000/");
 //   });
 // });
 describe("Login Form - Scholar App", () => {
+  // Password is not valid
   it("fills form and logs in failure as input fields are invalid", () => {
     cy.intercept("POST", "http://localhost:8090/login").as("loginRequest");
 
@@ -23,6 +25,8 @@ describe("Login Form - Scholar App", () => {
       .should("be.visible")
       .and("contain", "please enter an 8-16 digit password");
   });
+
+  // Invalid credentials for student
   it("fills form and logs in failure for student", () => {
     cy.intercept("POST", "http://localhost:8090/login").as("loginRequest");
 
@@ -42,6 +46,8 @@ describe("Login Form - Scholar App", () => {
       expect(interception.response.statusCode).to.eq(401);
     });
   });
+
+  // Invalid credentials for teacher
   it("fills form and logs in failure for teacher", () => {
     cy.intercept("POST", "http://localhost:8090/login").as("loginRequest");
 
@@ -61,6 +67,8 @@ describe("Login Form - Scholar App", () => {
       expect(interception.response.statusCode).to.eq(401);
     });
   });
+
+  // Invalid credentials for Admin
   it("fills form and logs in failure for admin", () => {
     cy.intercept("POST", "http://localhost:8090/login").as("loginRequest");
 
@@ -81,6 +89,8 @@ describe("Login Form - Scholar App", () => {
       expect(interception.response.statusCode).to.eq(401);
     });
   });
+
+  // Successful login of student
   it("fills form and logs in success for student", () => {
     cy.intercept("POST", "/login*").as("loginRequest");
 
@@ -105,6 +115,7 @@ describe("Login Form - Scholar App", () => {
     cy.get("#signOutButton").click();
     cy.url().should("include", "/login");
   });
+  // Successful login of teacher
   it("fills form and logs in success for teacher", () => {
     cy.visit("http://localhost:3000/");
     cy.intercept("POST", "/login*").as("loginRequest");
@@ -128,6 +139,8 @@ describe("Login Form - Scholar App", () => {
 
     cy.url().should("include", "/login");
   });
+
+  // Successful login of admin
   it("fills form and logs in success for admin", () => {
     cy.intercept("POST", "http://localhost:8090/login").as("loginRequest");
 

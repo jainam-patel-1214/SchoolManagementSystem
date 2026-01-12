@@ -45,8 +45,6 @@ describe("Student components test", () => {
     cy.get(".Toastify__toast").should("be.visible").and("contain", "Success!!");
   });
   it("checks student result - error", () => {
-    cy.visit("http://localhost:3000/");
-
     cy.get("#schoolResultBtn").click();
 
     cy.url().should("match", /\/app\/student\/schoolResult/);
@@ -61,6 +59,24 @@ describe("Student components test", () => {
         "contain",
         "Grade/Std not allowed shall be between 1 and 12 inclusive"
       );
+
+    cy.get("#std").clear().type("1").should("have.value", "1");
+    cy.get("#minPercent").clear().type("31").should("have.value", "31");
+    cy.get("#maxPercent").clear().type("20").should("have.value", "20");
+
+    cy.get("#fetchResultButton").click();
+
+    cy.get(".Toastify__toast")
+      .should("be.visible")
+      .and("contain", "Min mark shall be less than max mark");
+
+    cy.get("#section").clear().type("C1").should("have.value", "C1");
+    cy.get("#maxPercent").clear().type("80").should("have.value", "80");
+    cy.get("#fetchResultButton").click();
+
+    cy.get(".Toastify__toast")
+      .should("be.visible")
+      .and("contain", "Invalid section");
   });
   it("checks student result - success but no result", () => {
     cy.intercept("GET", "**/student/display*").as("fetchResult");

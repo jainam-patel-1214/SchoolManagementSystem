@@ -103,6 +103,7 @@ export const Navbar = () => {
         },
         {
           name: "Teachers",
+          id: "teacherTabBtn",
           location: "displayTeacher",
           action: handleNavigation,
         },
@@ -122,11 +123,13 @@ export const Navbar = () => {
       dropDownTabs: [
         {
           name: "Account",
+          id: "navigateToAccountBtn",
           location: "/app/admin",
           action: handleNavigation,
         },
         {
           name: "Pending Req",
+          id: "pendingRequestTabBtn",
           location: "pendingApplications",
           action: handleNavigation,
         },

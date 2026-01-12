@@ -540,8 +540,8 @@ func EnterMarks(ctx *gin.Context) {
 		var marks struct {
 			GrNo           int `json:"grNo" binding:"required"`
 			SubId          int `json:"subId" binding:"required"`
-			TheoryMarks    int `json:"theoryMarks" binding:"required"`
-			PracticalMarks int `json:"practicalMarks" binding:"required"`
+			TheoryMarks    int `json:"theoryMarks"`
+			PracticalMarks int `json:"practicalMarks"`
 		}
 		if err = ctx.ShouldBindJSON(&marks); err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

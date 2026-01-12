@@ -49,11 +49,6 @@ export const LoginForm = () => {
       data.userId.toString() === "" ||
       !GrNoSubIdTeacherIdAdminIdValidation(Number(data.userId))
     ) {
-      console.log(
-        data.userId.toString() !== "",
-        GrNoSubIdTeacherIdAdminIdValidation(Number(data.userId))
-      );
-
       ErrorToast("please enter your id");
       return;
     }
@@ -68,8 +63,6 @@ export const LoginForm = () => {
         userRole: data.userRole,
       };
       const res = await fetchApi("/login", "POST", body);
-      console.log("login body", res);
-
       Toaster(res);
       CookieSetter(data.userId, res.username, res.output, res.role);
       if (res.role === "student") {

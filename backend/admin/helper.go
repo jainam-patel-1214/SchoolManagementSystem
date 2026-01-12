@@ -1127,6 +1127,52 @@ func DisplayAllSubjects(ctx *gin.Context) {
 	}
 }
 
+func DisplayAllSubjectLimit(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "teacher" && role != "admin") {
+
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
+		return
+	} else {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "CANNOT CONNECT TO DB"})
+			return
+		}
+		defer db.Close()
+		type SubjectLimitList struct {
+			LevelStd int `json:"Standard"`
+			Limit    int `json:"Subject-Limit"`
+		}
+		var LimitData []SubjectLimitList
+		res, err := db.Query("SELECT std,subject_limit FROM subjectAllocation")
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		defer res.Close()
+
+		for res.Next() {
+			var limitObject SubjectLimitList
+
+			err := res.Scan(
+				&limitObject.LevelStd,
+				&limitObject.Limit,
+			)
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			LimitData = append(LimitData, limitObject)
+		}
+		if len(LimitData) > 0 {
+			ctx.JSON(http.StatusOK, gin.H{"output": LimitData})
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": "subject limit has not been set for any standard"})
+		}
+	}
+}
+
 func DisplayParticularTeacher(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || (role != "admin") {

@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 describe("Register Form - Scholar App", () => {
   it("fills form and signup failure for student", () => {
     cy.visit("http://localhost:3000/");
