@@ -22,6 +22,8 @@ export const InputContainerComponent = ({
           type="text"
           value={rest.value || ""}
           placeholder=" "
+          autoComplete="off"
+          id={rest.name}
           onChange={(e) => {
             const val = e.target.value;
             handler(objKey, val);

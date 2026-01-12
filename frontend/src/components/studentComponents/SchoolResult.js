@@ -182,13 +182,7 @@ export const SchoolResult = () => {
       }
     } catch (err) {
       ErrorToast(err);
-    } finally {
-      setInitialData();
     }
-  };
-
-  const setInitialData = () => {
-    setData(initState);
   };
 
   return (
@@ -273,7 +267,7 @@ export const SchoolResult = () => {
             textcol={"red"}
             hovercol={"#ffd3d3af"}
             type="reset"
-            onClick={() => setInitialData()}
+            onClick={() => setData(initState)}
           >
             Reset Filters
           </ButtonElement>

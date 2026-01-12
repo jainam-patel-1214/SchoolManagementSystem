@@ -99,7 +99,10 @@ export const PopoupComponent = ({
   }, [data.id]);
 
   return (
-    <DetailsSection styleDisplay={styleDisplay}>
+    <DetailsSection
+      styleDisplay={styleDisplay}
+      id="furtherDetailsPopoupContainer"
+    >
       <SearchForm
         onSubmit={(e) => {
           submitHandler(e);

@@ -219,7 +219,7 @@ export const AddMarkTab = () => {
                 "student"
               )
             }
-            labelText={"Provide sudent's ID/Name:"}
+            labelText={"Provide student's ID/Name:"}
           ></InputContainerComponent>
           <InputContainerComponent
             value={data.subId}

@@ -85,7 +85,7 @@ export const StudentEditComponent = () => {
       grno: { condition: false, message: "invalid gr no" },
       password: {
         condition: false,
-        message: "passwords are needed to be 8 digits",
+        message: "passwords are needed to be atleast 8 digits",
       },
       std: { condition: false, message: "standard shall have range of 1 - 12" },
       name: { condition: false, message: "invalid name" },
@@ -164,7 +164,7 @@ export const StudentEditComponent = () => {
             style={{ color: "#008cffff" }}
           >
             {" "}
-            Go back to veiw student list
+            Go back to view student list
           </a>
         </p>
       </HeadingComponent>

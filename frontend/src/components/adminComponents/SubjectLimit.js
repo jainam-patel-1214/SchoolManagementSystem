@@ -19,7 +19,7 @@ import {
 import { GridLayers } from "../helperComponents/GridItem";
 
 export const SubjectLimit = () => {
-  const [data, setData] = useState({ grade: 0, limit: 0 });
+  const [data, setData] = useState({ grade: "", limit: "" });
   const userrole = roleExtractor(window.location.pathname);
   const dataChangeHandler = (key, value) => {
     setData((prevdata) => ({
@@ -30,11 +30,11 @@ export const SubjectLimit = () => {
 
   const setSubjectLimit = async (e) => {
     e.preventDefault();
-    if (!GradeValidation(Number(data.grade))) {
+    if (!GradeValidation(Number(data.grade)) || data.grade === "") {
       ErrorToast("invalid grade given. It shall be between 1-12");
       return;
     }
-    if (Number(data.limit) < 0) {
+    if (Number(data.limit) < 0 || data.limit === "") {
       ErrorToast("negative limit not allowed");
       return;
     }
@@ -46,7 +46,7 @@ export const SubjectLimit = () => {
     } catch (error) {
       ErrorToast(error);
     } finally {
-      setData({ grade: 0, limit: 0 });
+      setData({ grade: "", limit: "" });
     }
   };
   return (
@@ -68,6 +68,14 @@ export const SubjectLimit = () => {
           >
             {" "}
             Go back to veiw subject list
+          </a>
+          |{" "}
+          <a
+            href={`/app/${userrole}/showSubjectLimit`}
+            style={{ color: "#007d25ff" }}
+          >
+            {" "}
+            View Limits
           </a>
         </p>
       </HeadingComponent>

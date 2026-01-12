@@ -4,7 +4,7 @@ import { TeacherEditComponent } from "./components/adminComponents/admin_managet
 import { TeacherPerformanceTab } from "./components/adminComponents/admin_manageteacherComponents/TeacherPerformanceTab";
 import { AdminHome } from "./components/adminComponents/Home";
 import { AdminPendingReqTab } from "./components/adminComponents/PendingRequestPage";
-import { SubjectLimit } from "./components/adminComponents/SubjectLimit";
+
 import { Navbar } from "./components/Navbar";
 import { SignIn } from "./components/Signin";
 import { StudentHomePage } from "./components/studentComponents/Home";
@@ -20,8 +20,10 @@ import { SubAddTabComp } from "./components/teacherComponents/subjectComponents/
 import { DisplaySubTabComp } from "./components/teacherComponents/subjectComponents/DisplaySubject";
 import { SubEditTabComp } from "./components/teacherComponents/subjectComponents/EditSubject";
 import { StudentPerformancePage } from "./components/teacherComponents/subjectComponents/StudentPerformanceTab";
+import { DisplaySubjectLimit } from "./components/teacherComponents/subjectComponents/DisplaySubjectLimit";
 import "./index.css";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { SubjectLimit } from "./components/adminComponents/SubjectLimit";
 
 function ProjectRouter() {
   return (
@@ -50,6 +52,10 @@ function ProjectRouter() {
         </Route>
 
         <Route path="displaySubject" element={<DisplaySubTabComp />}></Route>
+        <Route
+          path="showSubjectLimit"
+          element={<DisplaySubjectLimit />}
+        ></Route>
         <Route path="addSubject" element={<SubAddTabComp />}></Route>
         <Route path="editSubject" element={<SubEditTabComp />}>
           <Route index element={<SubEditTabComp />} />
@@ -79,6 +85,10 @@ function ProjectRouter() {
           <Route path=":id" element={<SubEditTabComp />}></Route>
         </Route>
         <Route path="setSubjectLimit" element={<SubjectLimit />}></Route>
+        <Route
+          path="showSubjectLimit"
+          element={<DisplaySubjectLimit />}
+        ></Route>
 
         <Route path="enterMarks" element={<AddMarkTab />}></Route>
         <Route path="editMarks" element={<EditMarkTab />}></Route>

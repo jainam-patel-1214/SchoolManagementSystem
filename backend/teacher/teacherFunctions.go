@@ -52,7 +52,7 @@ func IsValidStudent(ctx *gin.Context) {
 	defer db.Close()
 	role, exist := ctx.Get("userrole")
 	if !exist || (role != "teacher" && role != "admin") {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
 		return
 	} else {
 		studId, _ := strconv.Atoi(ctx.Param("grNo"))
@@ -80,7 +80,7 @@ func IsValidSubject(ctx *gin.Context) {
 	defer db.Close()
 	role, exist := ctx.Get("userrole")
 	if !exist || (role != "teacher" && role != "admin") {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
 		return
 	} else {
 		studId, _ := strconv.Atoi(ctx.Param("subId"))
@@ -108,7 +108,7 @@ func DoMarkRecordExists(ctx *gin.Context) {
 	defer db.Close()
 	role, exist := ctx.Get("userrole")
 	if !exist || (role != "teacher" && role != "admin") {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
 		return
 	} else {
 		studId, _ := strconv.Atoi(ctx.Query("grNo"))
@@ -141,7 +141,7 @@ func AddStudent(ctx *gin.Context) {
 	defer db.Close()
 	role, exist := ctx.Get("userrole")
 	if !exist || role != "teacher" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
 		return
 	} else {
 		var studentData struct {
@@ -224,7 +224,7 @@ func EditStud(ctx *gin.Context) {
 	defer db.Close()
 	role, exist := ctx.Get("userrole")
 	if !exist || role != "teacher" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
 		return
 	} else {
 		type EditBody struct {
@@ -328,7 +328,7 @@ func EditStud(ctx *gin.Context) {
 func CreateSub(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || role != "teacher" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
 		return
 	}
 	if role == "teacher" {
@@ -409,7 +409,7 @@ func CreateSub(ctx *gin.Context) {
 func EditSub(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || role != "teacher" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
 		return
 	}
 	if role == "teacher" {
@@ -527,7 +527,7 @@ func EnterMarks(ctx *gin.Context) {
 
 	role, exist := ctx.Get("userrole")
 	if !exist || role != "teacher" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
 		return
 	}
 	if role == "teacher" {
@@ -540,8 +540,8 @@ func EnterMarks(ctx *gin.Context) {
 		var marks struct {
 			GrNo           int `json:"grNo" binding:"required"`
 			SubId          int `json:"subId" binding:"required"`
-			TheoryMarks    int `json:"theoryMarks" binding:"required"`
-			PracticalMarks int `json:"practicalMarks" binding:"required"`
+			TheoryMarks    int `json:"theoryMarks"`
+			PracticalMarks int `json:"practicalMarks"`
 		}
 		if err = ctx.ShouldBindJSON(&marks); err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -625,7 +625,7 @@ func EditMarks(ctx *gin.Context) {
 
 	role, exist := ctx.Get("userrole")
 	if !exist || role != "teacher" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
 		return
 	}
 	if role == "teacher" {
@@ -758,7 +758,7 @@ func AddReviews(ctx *gin.Context) {
 	defer db.Close()
 	role, exist := ctx.Get("userrole")
 	if !exist || role != "teacher" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
 		return
 	}
 	tid, exist := ctx.Get("UiD")
@@ -819,7 +819,7 @@ func Performance(ctx *gin.Context) {
 	defer db.Close()
 	role, exist := ctx.Get("userrole")
 	if !exist || role != "teacher" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
 		return
 	}
 	tid, exist := ctx.Get("UiD")
@@ -1107,10 +1107,10 @@ func SelfData(ctx *gin.Context) {
 			Id       int
 			Password string
 			Name     string
-			SubId    int
-			SubName  string
-			Std      int
-			Section  string
+			SubId    sql.NullInt64
+			SubName  sql.NullString
+			Std      sql.NullInt64
+			Section  sql.NullString
 		}
 		err = db.QueryRow("SELECT t.tId,t.tPwd,t.tName,t.subId,t.stdAllocated,t.sectionAllocated FROM teachers t WHERE t.tId=?", tid).Scan(&otpt.Id, &otpt.Password, &otpt.Name, &otpt.SubId, &otpt.Std, &otpt.Section)
 		if err != nil && err != sql.ErrNoRows {
