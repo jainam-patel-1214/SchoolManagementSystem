@@ -20,6 +20,7 @@ export const InputContainerComponent = ({
       <InputWrapper>
         <FloatingInput
           type="text"
+          value={rest.value || ""}
           placeholder=" "
           autoComplete="off"
           id={rest.name}
