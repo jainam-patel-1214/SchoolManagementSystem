@@ -52,7 +52,7 @@ func IsValidStudent(ctx *gin.Context) {
 	defer db.Close()
 	role, exist := ctx.Get("userrole")
 	if !exist || (role != "teacher" && role != "admin") {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
 		return
 	} else {
 		studId, _ := strconv.Atoi(ctx.Param("grNo"))
@@ -80,7 +80,7 @@ func IsValidSubject(ctx *gin.Context) {
 	defer db.Close()
 	role, exist := ctx.Get("userrole")
 	if !exist || (role != "teacher" && role != "admin") {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
 		return
 	} else {
 		studId, _ := strconv.Atoi(ctx.Param("subId"))
@@ -108,7 +108,7 @@ func DoMarkRecordExists(ctx *gin.Context) {
 	defer db.Close()
 	role, exist := ctx.Get("userrole")
 	if !exist || (role != "teacher" && role != "admin") {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
 		return
 	} else {
 		studId, _ := strconv.Atoi(ctx.Query("grNo"))
@@ -141,7 +141,7 @@ func AddStudent(ctx *gin.Context) {
 	defer db.Close()
 	role, exist := ctx.Get("userrole")
 	if !exist || role != "teacher" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
 		return
 	} else {
 		var studentData struct {
@@ -224,7 +224,7 @@ func EditStud(ctx *gin.Context) {
 	defer db.Close()
 	role, exist := ctx.Get("userrole")
 	if !exist || role != "teacher" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
 		return
 	} else {
 		type EditBody struct {
@@ -328,7 +328,7 @@ func EditStud(ctx *gin.Context) {
 func CreateSub(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || role != "teacher" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
 		return
 	}
 	if role == "teacher" {
@@ -409,7 +409,7 @@ func CreateSub(ctx *gin.Context) {
 func EditSub(ctx *gin.Context) {
 	role, exist := ctx.Get("userrole")
 	if !exist || role != "teacher" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
 		return
 	}
 	if role == "teacher" {
@@ -527,7 +527,7 @@ func EnterMarks(ctx *gin.Context) {
 
 	role, exist := ctx.Get("userrole")
 	if !exist || role != "teacher" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
 		return
 	}
 	if role == "teacher" {
@@ -625,7 +625,7 @@ func EditMarks(ctx *gin.Context) {
 
 	role, exist := ctx.Get("userrole")
 	if !exist || role != "teacher" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
 		return
 	}
 	if role == "teacher" {
@@ -758,7 +758,7 @@ func AddReviews(ctx *gin.Context) {
 	defer db.Close()
 	role, exist := ctx.Get("userrole")
 	if !exist || role != "teacher" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
 		return
 	}
 	tid, exist := ctx.Get("UiD")
@@ -819,7 +819,7 @@ func Performance(ctx *gin.Context) {
 	defer db.Close()
 	role, exist := ctx.Get("userrole")
 	if !exist || role != "teacher" {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorizes access"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
 		return
 	}
 	tid, exist := ctx.Get("UiD")

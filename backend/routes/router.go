@@ -3,6 +3,7 @@ package routes
 import (
 	"example.com/main/admin"
 	"example.com/main/middleware"
+	"example.com/main/migration"
 	"example.com/main/student"
 	"example.com/main/teacher"
 	"github.com/gin-gonic/gin"
@@ -57,6 +58,8 @@ func InitializeRouter() *gin.Engine {
 			teach.GET("/allLimits", admin.DisplayAllSubjectLimit)
 			teach.GET("/allSubjects", admin.DisplayAllSubjects)
 			teach.GET("/selfStudents", teacher.DisplayStudentsUnderTeacher)
+			teach.GET("/removeUnwantedData", migration.RemoveUnwantedData)
+			teach.GET("/removeDummyData", migration.RemoveDummyData)
 		}
 	}
 	{
@@ -101,6 +104,9 @@ func InitializeRouter() *gin.Engine {
 			admn.GET("/allTeachers", admin.DisplayAllTeachers)
 			admn.GET("/allAdmins", admin.DisplayAllAdmin)
 			admn.GET("/isValidTeacher/:tid", admin.IsValidTeacher)
+
+			admn.GET("/removeUnwantedData", migration.RemoveUnwantedData)
+			admn.GET("/removeDummyData", migration.RemoveDummyData)
 		}
 	}
 	return r
