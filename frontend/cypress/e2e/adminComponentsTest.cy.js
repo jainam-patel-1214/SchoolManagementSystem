@@ -606,13 +606,6 @@ describe("pending applications seperate test", () => {
 
   beforeEach(() => {
     const user = Cypress.env("user");
-    // cy.request({
-    //   method: "GET",
-    //   url: "http://localhost:8090/admin/removeDummyData",
-    //   withCredentials: true,
-    // }).then((res) => {
-    //   expect(res.status).to.eq(200);
-    // });
     cy.registerTemporaryUser("student");
     cy.registerTemporaryUser("teacher");
     cy.registerTemporaryUser("admin");
@@ -621,21 +614,10 @@ describe("pending applications seperate test", () => {
       cy.loginViaUI(user);
     });
     cy.visit("http://localhost:3000/app/admin");
-    // cy.getCookies().then((cookies) => {
-    //   const cookieHeader = cookies
-    //     .map((c) => `${c.name}=${c.value}`)
-    //     .join("; ");
+  });
 
-    //   cy.request({
-    //     method: "GET",
-    //     url: "http://localhost:8090/admin/removeDummyData",
-    //     headers: {
-    //       Cookie: cookieHeader,
-    //     },
-    //   }).then((res) => {
-    //     expect(res.status).to.eq(200);
-    //   });
-    // });
+  it("initial data for teacher and student tests", () => {
+    cy.initialDataForStudentAndTeacher();
   });
 
   it("accept pending request", () => {
