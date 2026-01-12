@@ -250,3 +250,16 @@ Cypress.Commands.add(
     cy.expectAndCloseToast("inserted successfully");
   }
 );
+
+Cypress.Commands.add("initialDataForStudentAndTeacher", (role) => {
+  cy.createSubject(role, "99090", "Physics", "1", "10");
+  cy.createStudent(role, "99091", "password", "StudentA", "1", "A");
+  cy.createStudent(role, "99092", "password", "StudentB", "1", "B");
+  cy.createStudent(role, "99093", "password", "StudentC", "1", "C");
+
+  cy.get("#marksTabBtn").click();
+  cy.location("pathname").should("eq", "/app/teacher/enterMarks");
+  cy.insertMarks("99091", "99090", "80", "20", role);
+  cy.insertMarks("99092", "99090", "70", "10", role);
+  cy.insertMarks("99093", "99090", "20", "2", role);
+});

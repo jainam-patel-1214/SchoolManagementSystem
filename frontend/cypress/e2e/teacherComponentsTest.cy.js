@@ -12,6 +12,21 @@ describe("teacher components testing", () => {
 
     cy.session(String(user.id), () => {
       cy.loginViaUI(user);
+      cy.getCookies().then((cookies) => {
+        const cookieHeader = cookies
+          .map((c) => `${c.name}=${c.value}`)
+          .join("; ");
+
+        cy.request({
+          method: "GET",
+          url: "http://localhost:8090/teacher/removeUnwantedData",
+          headers: {
+            Cookie: cookieHeader,
+          },
+        }).then((res) => {
+          expect(res.status).to.eq(200);
+        });
+      });
     });
     cy.intercept("GET", "**/teacher/displayPerformance").as(
       "displayPerformance"
@@ -517,5 +532,23 @@ describe("teacher components testing", () => {
     cy.expectAndCloseToast("you can only enter comment once");
 
     cy.deleteDemoStudentUser("teacher");
+  });
+  it("cleanup", () => {
+    cy.getCookies().then((cookies) => {
+      const cookieHeader = cookies
+        .map((c) => `${c.name}=${c.value}`)
+        .join("; ");
+
+      cy.request({
+        method: "GET",
+        url: "http://localhost:8090/teacher/removeUnwantedData",
+        headers: {
+          Cookie: cookieHeader,
+        },
+      }).then((res) => {
+        expect(res.status).to.eq(200);
+      });
+    });
+    cy.initialDataForStudentAndTeacher("teacher");
   });
 });
