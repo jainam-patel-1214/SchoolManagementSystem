@@ -20,7 +20,7 @@ export const InputContainerComponent = ({
       <InputWrapper>
         <FloatingInput
           type="text"
-          value={value || ""}
+          value={rest.value || ""}
           placeholder=" "
           onChange={(e) => {
             const val = e.target.value;

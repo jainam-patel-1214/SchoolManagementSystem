@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import "cypress-real-events/support";
 
 describe("Student components test", () => {
