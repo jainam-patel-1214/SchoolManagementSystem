@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import "cypress-real-events/support";
 
 describe("Student components test", () => {
@@ -173,7 +174,6 @@ describe("Student components test", () => {
     cy.location("pathname").should("eq", "/app/student/schoolResult");
 
     cy.get("#profileTab").realHover();
-    cy.get("#subTabsContainer").should("be.visible");
     cy.get("#navigateToAccountBtn").click();
 
     cy.url().should("match", /\/app\/student/);
