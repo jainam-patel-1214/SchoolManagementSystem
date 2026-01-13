@@ -158,7 +158,7 @@ export const DisplaySubTabComp = () => {
     setData(rr);
   };
   return (
-    <AllComponentsContainer>
+    <AllComponentsContainer className="parent-container">
       <ToastContainer />
       <HeadingComponent position={"top"}>
         <PageHeading>

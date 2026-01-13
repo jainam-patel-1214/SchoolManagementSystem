@@ -26,53 +26,122 @@ import "cypress-real-events/support";
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 Cypress.Commands.add("registerWithApiCredentials", (role) => {
-  cy.task("clearUser");
-  cy.task("readUser").then((storedUser) => {
-    if (!storedUser || !storedUser.id) {
-      cy.request({
-        method: "POST",
-        url: "http://localhost:8090/register",
-        body: {
-          yourName: "testUser",
-          password: "password",
-          roleReq: role,
-          secretK: "wwww8AxndfnaA82JWAxr2.apFmJkU.1ROK10HmFBf69KxSCtW7S",
-        },
-      }).then((res) => {
-        expect(res.status).to.eq(200);
+  //   if (role === "admin") {
+  // } else cy.task("clearUserTeacher");
+  if (role === "admin") {
+    cy.registerFunctionHelper(
+      "admin",
+      "readUserAdmin",
+      "clearUserAdmin",
+      "saveUserAdmin"
+    );
+    // cy.task("clearUserAdmin");
+    // cy.task("readUser").then((storedUser) => {
+    //   if (!storedUser || !storedUser.id) {
+    //     cy.request({
+    //       method: "POST",
+    //       url: "http://localhost:8090/register",
+    //       body: {
+    //         yourName: "testUser",
+    //         password: "password",
+    //         roleReq: "admin",
+    //         secretK: "wwww8AxndfnaA82JWAxr2.apFmJkU.1ROK10HmFBf69KxSCtW7S",
+    //       },
+    //     }).then((res) => {
+    //       expect(res.status).to.eq(200);
 
-        const user = {
-          id: res.body.uid,
-          password: res.body.upwd,
-          role,
-        };
+    //       const user = {
+    //         id: res.body.uid,
+    //         password: res.body.upwd,
+    //         role,
+    //       };
+    //       cy.task("saveUserAdmin", user);
+    //       Cypress.env("user", user);
+    //       cy.loginViaUI(user);
+    //       cy.visit("http://localhost:3000/app/admin");
+    //       cy.getCookies().then((cookies) => {
+    //         const cookieHeader = cookies
+    //           .map((c) => `${c.name}=${c.value}`)
+    //           .join("; ");
 
-        cy.task("saveUser", user);
-        Cypress.env("user", user);
-        cy.loginViaUI(user);
-        cy.visit("http://localhost:3000/app/admin");
-        cy.getCookies().then((cookies) => {
-          const cookieHeader = cookies
-            .map((c) => `${c.name}=${c.value}`)
-            .join("; ");
-
-          cy.request({
-            method: "GET",
-            url: "http://localhost:8090/admin/removeDummyData",
-            headers: {
-              Cookie: cookieHeader,
-            },
-          }).then((res) => {
-            expect(res.status).to.eq(200);
-          });
-        });
-      });
-    } else {
-      Cypress.env("user", storedUser);
-      cy.loginViaUI(storedUser);
-    }
-  });
+    //         cy.request({
+    //           method: "GET",
+    //           url: "http://localhost:8090/admin/removeDummyData",
+    //           headers: {
+    //             Cookie: cookieHeader,
+    //           },
+    //         }).then((res) => {
+    //           expect(res.status).to.eq(200);
+    //         });
+    //       });
+    //     });
+    //   } else {
+    //     Cypress.env("user", storedUser);
+    //     cy.loginViaUI(storedUser);
+    //   }
+    // });
+  } else {
+    cy.registerFunctionHelper(
+      "teacher",
+      "readUserTeacher",
+      "clearUserTeacher",
+      "saveUserTeacher"
+    );
+  }
 });
+
+Cypress.Commands.add(
+  "registerFunctionHelper",
+  (role, reader, cleaner, fileSaver) => {
+    cy.task(cleaner);
+    cy.task(reader).then((storedUser) => {
+      if (!storedUser || !storedUser.id) {
+        cy.request({
+          method: "POST",
+          url: "http://localhost:8090/register",
+          body: {
+            yourName: "testUser",
+            password: "password",
+            roleReq: role,
+            secretK: "wwww8AxndfnaA82JWAxr2.apFmJkU.1ROK10HmFBf69KxSCtW7S",
+          },
+        }).then((res) => {
+          expect(res.status).to.eq(200);
+
+          const user = {
+            id: res.body.uid,
+            password: res.body.upwd,
+            role,
+          };
+          cy.task(fileSaver, user);
+          Cypress.env("user", user);
+          cy.loginViaUI(user);
+          cy.visit("http://localhost:3000/app/admin");
+          if (role === "admin") {
+            cy.getCookies().then((cookies) => {
+              const cookieHeader = cookies
+                .map((c) => `${c.name}=${c.value}`)
+                .join("; ");
+
+              cy.request({
+                method: "GET",
+                url: "http://localhost:8090/admin/removeDummyData",
+                headers: {
+                  Cookie: cookieHeader,
+                },
+              }).then((res) => {
+                expect(res.status).to.eq(200);
+              });
+            });
+          }
+        });
+      } else {
+        Cypress.env("user", storedUser);
+        cy.loginViaUI(storedUser);
+      }
+    });
+  }
+);
 
 Cypress.Commands.add("loginViaUI", ({ id, password, role }) => {
   cy.intercept("POST", "/login*").as("loginRequest");
@@ -339,43 +408,6 @@ Cypress.Commands.add("deleteParticularStudent", (role, name) => {
   cy.expectAndCloseToast("DELETED SUCCESSFULLY");
 });
 
-Cypress.Commands.add("initialDataForStudentAndTeacher", () => {
-  cy.intercept("POST", "**/admin/setSubLimit*").as("setSubjectLimitRequest");
-
-  cy.get("#subjectsTabBtn").click();
-  cy.location("pathname").should("eq", `/app/admin/displaySubject`);
-
-  cy.contains("a", "Set subject limit here").click();
-  cy.location("pathname").should("eq", `/app/admin/setSubjectLimit`);
-
-  cy.get("#std").clear().type("1");
-  cy.get("#limit").clear().type("10");
-
-  cy.contains("button", "Set Limit").click();
-  cy.wait("@setSubjectLimitRequest").then((interception) => {
-    const status = interception.response.statusCode;
-
-    expect([200, 400]).to.include(status);
-
-    if (status === 200) {
-      cy.expectAndCloseToast("limit set successfully");
-    } else {
-      cy.expectAndCloseToast("limit already set, cannot reset it");
-    }
-  });
-
-  cy.createSubject("admin", "99090", "Physics", "1", "10");
-  cy.createStudent("admin", "99091", "password", "StudentA", "1", "A");
-  cy.createStudent("admin", "99092", "password", "StudentB", "1", "B");
-  cy.createStudent("admin", "99093", "password", "StudentC", "1", "C");
-
-  cy.get("#marksTabBtn").click();
-  cy.location("pathname").should("eq", "/app/admin/enterMarks");
-  cy.insertMarks("99091", "99090", "80", "20");
-  cy.insertMarks("99092", "99090", "70", "10");
-  cy.insertMarks("99093", "99090", "20", "2");
-});
-
 Cypress.Commands.add("createSubject", (role, id, name, grade, credits) => {
   cy.intercept("POST", `**/${role}/createSub*`).as("createSubjectRequest");
 
@@ -429,8 +461,10 @@ Cypress.Commands.add(
 
 Cypress.Commands.add(
   "insertMarks",
-  (grNo, subId, theoryMark, practicalMark) => {
-    cy.intercept("POST", "**/admin/enterMarks*").as("createMarkRecordRequest");
+  (grNo, subId, theoryMark, practicalMark, role) => {
+    cy.intercept("POST", `**/${role}/enterMarks*`).as(
+      "createMarkRecordRequest"
+    );
     cy.get("#subId").clear().type(subId);
     cy.get("#grNo").clear().type(grNo);
     cy.get("#theory").clear().type(theoryMark);
@@ -451,3 +485,52 @@ Cypress.Commands.add(
     });
   }
 );
+Cypress.Commands.add("initialDataForStudentAndTeacher", (role) => {
+  if (role === "admin") {
+    cy.intercept("POST", "**/admin/setSubLimit*").as("setSubjectLimitRequest");
+
+    cy.get("#subjectsTabBtn").click();
+    cy.location("pathname").should("eq", `/app/admin/displaySubject`);
+
+    cy.contains("a", "Set subject limit here").click();
+    cy.location("pathname").should("eq", `/app/admin/setSubjectLimit`);
+
+    cy.get("#std").clear().type("1");
+    cy.get("#limit").clear().type("10");
+
+    cy.contains("button", "Set Limit").click();
+    cy.wait("@setSubjectLimitRequest").then((interception) => {
+      const status = interception.response.statusCode;
+
+      expect([200, 400]).to.include(status);
+
+      if (status === 200) {
+        cy.expectAndCloseToast("limit set successfully");
+      } else {
+        cy.expectAndCloseToast("limit already set, cannot reset it");
+      }
+    });
+
+    // cy.createSubject("admin", "99090", "Physics", "1", "10");
+    // cy.createStudent("admin", "99091", "password", "StudentA", "1", "A");
+    // cy.createStudent("admin", "99092", "password", "StudentB", "1", "B");
+    // cy.createStudent("admin", "99093", "password", "StudentC", "1", "C");
+
+    // cy.get("#marksTabBtn").click();
+    // cy.location("pathname").should("eq", "/app/admin/enterMarks");
+    // cy.insertMarks("99091", "99090", "80", "20", "admin");
+    // cy.insertMarks("99092", "99090", "70", "10","admin");
+    // cy.insertMarks("99093", "99090", "20", "2","admin");
+  } else {
+    cy.createSubject("teacher", "99090", "Physics", "1", "10");
+    cy.createStudent("teacher", "99091", "password", "StudentA", "1", "A");
+    cy.createStudent("teacher", "99092", "password", "StudentB", "1", "B");
+    cy.createStudent("teacher", "99093", "password", "StudentC", "1", "C");
+
+    cy.get("#marksTabBtn").click();
+    cy.location("pathname").should("eq", "/app/teacher/enterMarks");
+    cy.insertMarks("99091", "99090", "80", "20", "teacher");
+    cy.insertMarks("99092", "99090", "70", "10", "teacher");
+    cy.insertMarks("99093", "99090", "20", "2", "teacher");
+  }
+});

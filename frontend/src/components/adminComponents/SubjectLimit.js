@@ -50,7 +50,7 @@ export const SubjectLimit = () => {
     }
   };
   return (
-    <AllComponentsContainer>
+    <AllComponentsContainer className="parent-container">
       <ToastContainer />
       <HeadingComponent position={"top"}>
         <PageHeading>

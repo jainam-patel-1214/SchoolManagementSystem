@@ -173,7 +173,7 @@ export const StudentDataComponent = () => {
     setFilterData(rr);
   };
   return (
-    <AllComponentsContainer>
+    <AllComponentsContainer className="parent-container">
       <ToastContainer />
       <HeadingComponent position={"top"}>
         <PageHeading>
@@ -199,6 +199,7 @@ export const StudentDataComponent = () => {
               type="text"
               value={searchKey || ""}
               name="searchQuery"
+              id="searchInputComponent"
               required
               placeholder=" "
               onChange={(e) => handleFilterStudent(e)}

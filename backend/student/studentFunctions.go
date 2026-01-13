@@ -196,12 +196,12 @@ func DisplaySubject(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "only standards ranging from 1 to 12 are available"})
 			return
 		}
-		var count int
-		if err := db.QueryRow("SELECT COUNT(std) FROM subjectAllocation WHERE std=?", constraints.Std).Scan(&count); err != nil && err != sql.ErrNoRows {
+		var isLimitSet int
+		if err := db.QueryRow("SELECT COUNT(std) FROM subjectAllocation WHERE std=?", constraints.Std).Scan(&isLimitSet); err != nil && err != sql.ErrNoRows {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		if count <= 0 {
+		if isLimitSet <= 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "no limit have been set for this std thus there are no subjects"})
 			return
 		}

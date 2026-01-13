@@ -185,7 +185,7 @@ export const CreateTeacherComponent = () => {
   }, [data.teacherId]);
 
   return (
-    <AllComponentsContainer>
+    <AllComponentsContainer className="parent-container">
       <ToastContainer />
       <HeadingComponent position={"top"}>
         <PageHeading>

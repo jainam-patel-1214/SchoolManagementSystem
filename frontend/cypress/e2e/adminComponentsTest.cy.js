@@ -32,7 +32,7 @@ describe("admin components testing", () => {
   });
 
   it("initial data for teacher and student tests", () => {
-    cy.initialDataForStudentAndTeacher();
+    cy.initialDataForStudentAndTeacher("admin");
   });
 
   it("navigation of admin's components", () => {
@@ -599,6 +599,23 @@ describe("admin components testing", () => {
   });
 });
 
+describe("Initial data setup", () => {
+  before(() => {
+    cy.registerWithApiCredentials("admin");
+  });
+
+  beforeEach(() => {
+    const user = Cypress.env("user");
+    cy.session(String(user.id), () => {
+      cy.loginViaUI(user);
+    });
+    cy.visit("http://localhost:3000/app/admin");
+  });
+  it("initial data for teacher and student tests", () => {
+    cy.initialDataForStudentAndTeacher("admin");
+  });
+});
+
 describe("pending applications seperate test", () => {
   before(() => {
     cy.registerWithApiCredentials("admin");
@@ -614,10 +631,6 @@ describe("pending applications seperate test", () => {
       cy.loginViaUI(user);
     });
     cy.visit("http://localhost:3000/app/admin");
-  });
-
-  it("initial data for teacher and student tests", () => {
-    cy.initialDataForStudentAndTeacher();
   });
 
   it("accept pending request", () => {

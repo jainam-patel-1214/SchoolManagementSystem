@@ -134,7 +134,7 @@ export const StudentHomePage = () => {
       {isLoading ? (
         <>Fetching the data</>
       ) : (
-        <AllComponentsContainer>
+        <AllComponentsContainer className="parent-container">
           <ToastContainer />
           <InfoBoxContainer>
             <InfoBox>

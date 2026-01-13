@@ -43,6 +43,7 @@ export const Navbar = () => {
       staticTabs: [
         {
           name: "School result",
+          id: "schoolResultBtn",
           location: "schoolResult",
           action: handleNavigation,
         },
@@ -50,6 +51,7 @@ export const Navbar = () => {
       dropDownTabs: [
         {
           name: "Account",
+          id: "navigateToAccountBtn",
           location: "/app/student",
           action: handleNavigation,
         },
