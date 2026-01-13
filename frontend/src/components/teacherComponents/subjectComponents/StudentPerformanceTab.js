@@ -71,7 +71,7 @@ export const StudentPerformancePage = () => {
     },
   ];
   useEffect(() => {
-    const url = `http://localhost:8090/${userrole}/studentreport/${id}`;
+    const url = `/${userrole}/studentreport/${id}`;
     const fetchReport = async () => {
       try {
         setIsLoading(true);

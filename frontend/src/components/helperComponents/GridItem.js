@@ -209,19 +209,10 @@ export const GridItemComponent = ({
             type="button"
             onClick={() => {
               isTeacher
-                ? deleteHandler(
-                    `http://localhost:8090/${userrole}/delTeacher`,
-                    Number(objectId)
-                  )
+                ? deleteHandler(`/${userrole}/delTeacher`, Number(objectId))
                 : isStudent
-                ? deleteHandler(
-                    `http://localhost:8090/${userrole}/delStudent`,
-                    Number(objectId)
-                  )
-                : deleteHandler(
-                    `http://localhost:8090/${userrole}/delSubject`,
-                    Number(objectId)
-                  );
+                ? deleteHandler(`/${userrole}/delStudent`, Number(objectId))
+                : deleteHandler(`/${userrole}/delSubject`, Number(objectId));
             }}
           >
             Delete

@@ -135,7 +135,6 @@ export const CreateTeacherComponent = () => {
         }
       }
       bodyObj["role"] = "teacher";
-      console.log(payload, "payload", bodyObj, "body");
 
       res = await fetchApi(apiUrl, "POST", bodyObj);
       Toaster(res);
@@ -151,13 +150,8 @@ export const CreateTeacherComponent = () => {
 
   const fetchTeachers = async () => {
     try {
-      const res = await fetchApi(
-        `http://localhost:8090/admin/allTeachers`,
-        "GET",
-        {}
-      );
-      if (res.output) {
-        console.log(res);
+      const res = await fetchApi(`/admin/allTeachers`, "GET", {});
+      if (res.output && typeof res.output !== "string") {
         userList.current = res.output;
         return;
       } else {
@@ -292,9 +286,7 @@ export const CreateTeacherComponent = () => {
             textcol={"default"}
             hovercol={"default"}
             type="submit"
-            onClick={(e) =>
-              submitHandler(e, `http://localhost:8090/${userrole}/addTeacher`)
-            }
+            onClick={(e) => submitHandler(e, `/${userrole}/addTeacher`)}
           >
             Create Student
           </ButtonElement>

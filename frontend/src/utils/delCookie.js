@@ -9,11 +9,7 @@ async function delCookie(...cname) {
       const tokenVal = getCookie(c);
       const obj = { token: tokenVal };
       try {
-        const response = await fetchApi(
-          "http://localhost:8090/deleteCookieFromDB",
-          "DELETE",
-          obj
-        );
+        const response = await fetchApi("/deleteCookieFromDB", "DELETE", obj);
         document.cookie = `${c}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;`;
         if (!response.output) {
           const errText = await response.text();

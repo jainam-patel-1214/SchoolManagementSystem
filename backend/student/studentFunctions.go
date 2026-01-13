@@ -103,7 +103,7 @@ func DisplayStudents(ctx *gin.Context) {
 			} else if count > 0 {
 				dbstr += " AND "
 			}
-			dbstr += "s.section = " + "'" + constraints.ViewBySection + "'"
+			dbstr += "s.section = '" + constraints.ViewBySection + "'"
 		}
 		if constraints.MinPercent != 0 {
 			if count == 0 {
@@ -112,7 +112,7 @@ func DisplayStudents(ctx *gin.Context) {
 			} else if count > 0 {
 				dbstr += " AND "
 			}
-			dbstr += "(m.theoryM+m.practicalM) > " + strconv.Itoa(constraints.MinPercent)
+			dbstr += "(m.theoryM+m.practicalM) >= " + strconv.Itoa(constraints.MinPercent)
 		}
 		if constraints.MaxPercent != 0 {
 			if count == 0 {
@@ -121,7 +121,7 @@ func DisplayStudents(ctx *gin.Context) {
 			} else if count > 0 {
 				dbstr += " AND "
 			}
-			dbstr += "(m.theoryM + m.practicalM) < " + strconv.Itoa(constraints.MaxPercent)
+			dbstr += "(m.theoryM + m.practicalM) <= " + strconv.Itoa(constraints.MaxPercent)
 		}
 
 		db, err := sql.Open("mysql", dsn)

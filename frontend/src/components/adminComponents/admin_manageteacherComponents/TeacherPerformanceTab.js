@@ -28,12 +28,14 @@ export const TeacherPerformanceTab = () => {
   const section = fetchUrlParams("section");
   const subject = fetchUrlParams("subject");
   useEffect(() => {
-    const url = `http://localhost:8090/${userrole}/displayTeacherPerformance/${id}`;
+    const url = `/${userrole}/displayTeacherPerformance/${id}`;
     const load = async () => {
       try {
         setIsLoading(true);
         const result = await fetchApi(url, "GET", {});
-        setDisplayData(result.output);
+        if (typeof result.output !== "string") {
+          setDisplayData(result.output);
+        }
       } catch (err) {
         ErrorToast(err);
       } finally {
@@ -47,26 +49,32 @@ export const TeacherPerformanceTab = () => {
     {
       header: "Teacher Id",
       accessorKey: "Tid",
+      id: "teacherId",
     },
     {
       header: "Teacher Name",
       accessorKey: "TName",
+      id: "teacherName",
     },
     {
       header: "Standard Allocated",
       accessorKey: "StdAllocated",
+      id: "teacherStd",
     },
     {
       header: "Subject Allocated",
       accessorKey: "SubName",
+      id: "teacherSubjetc",
     },
     {
       header: "Total Practical Marks",
       accessorKey: "TotalPracticalMarks",
+      id: "teacherTotalPracticalMM",
     },
     {
       header: "Total Theory Marks",
       accessorKey: "TotalTheoryMarks",
+      id: "teacherTotalTheoryMM",
     },
   ];
 

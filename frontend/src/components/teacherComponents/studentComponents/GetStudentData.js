@@ -44,7 +44,7 @@ export const DataContainer = styled.div`
 `;
 
 export const StudentDataComponent = () => {
-  const [filterData, setFilterData] = useState(null);
+  const [filterData, setFilterData] = useState([]);
   const [searchKey, setSearchKey] = useState("");
   const originalData = useRef([]);
   const userrole = roleExtractor(window.location.pathname);
@@ -54,12 +54,8 @@ export const StudentDataComponent = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const res = await fetchApi(
-        `http://localhost:8090/${userrole}/allStudents`,
-        "GET",
-        {}
-      );
-      if (res.output) {
+      const res = await fetchApi(`/${userrole}/allStudents`, "GET", {});
+      if (res.output && typeof res.output !== "string") {
         originalData.current = res.output;
         setFilterData(res.output);
         return;
@@ -92,32 +88,37 @@ export const StudentDataComponent = () => {
   const navigate = useNavigate();
   const columnHelper = createColumnHelper();
   const columns = [
-    columnHelper.accessor("grNo", {
+    {
       header: "Student ID",
-      cell: (info) => info.getValue(),
+      accessorKey: "grNo",
+      id: "grNo",
       enableSorting: false,
-    }),
-    columnHelper.accessor("studentName", {
+    },
+    {
       header: "Name",
-      cell: (info) => info.getValue(),
-      enableSorting: true,
-    }),
-    columnHelper.accessor("password", {
+      accessorKey: "studentName",
+      id: "studentName",
+      enableSorting: false,
+    },
+    {
       header: "Password",
-      cell: (info) => info.getValue(),
+      accessorKey: "password",
+      id: "password",
       enableSorting: false,
-    }),
-    columnHelper.accessor("grade", {
+    },
+    {
       header: "Grade",
-      cell: (info) => info.getValue(),
+      accessorKey: "grade",
+      id: "grade",
       enableSorting: false,
-    }),
-    columnHelper.accessor("section", {
+    },
+    {
       header: "Section",
-      cell: (info) => info.getValue(),
+      accessorKey: "section",
+      id: "section",
       enableSorting: false,
-    }),
-    columnHelper.display({
+    },
+    {
       id: "accept",
       header: "",
       cell: ({ row }) => {
@@ -135,9 +136,8 @@ export const StudentDataComponent = () => {
           </ButtonElement>
         );
       },
-    }),
-
-    columnHelper.display({
+    },
+    {
       id: "reject",
       header: "",
       cell: ({ row }) => {
@@ -150,17 +150,14 @@ export const StudentDataComponent = () => {
             textcol={"red"}
             hovercol={"#ffd3d3af"}
             onClick={() =>
-              deleteStudentHandler(
-                `http://localhost:8090/${userrole}/delStudent`,
-                Number(v.grNo)
-              )
+              deleteStudentHandler(`/${userrole}/delStudent`, Number(v.grNo))
             }
           >
             Delete
           </ButtonElement>
         );
       },
-    }),
+    },
   ];
 
   const handleFilterStudent = (e) => {
@@ -239,7 +236,7 @@ export const StudentDataComponent = () => {
             ></GeneralTableComponent>
           ) : (
             <GridContainer>
-              {filterData?.map(
+              {filterData.map(
                 ({ grNo, password, studentName, grade, section }, i) => (
                   <GridItemComponent
                     key={i}

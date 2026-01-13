@@ -48,30 +48,37 @@ export const SchoolResult = () => {
     {
       header: "Student Name",
       accessorKey: "studentName",
+      id: "studentName",
     },
     {
       header: "Standard",
       accessorKey: "standard",
+      id: "studentStd",
     },
     {
       header: "Section",
       accessorKey: "section",
+      id: "studentSection",
     },
     {
       header: "Subject Name",
       accessorKey: "subject",
+      id: "subjectName",
     },
     {
       header: "Practical Marks",
       accessorKey: "practicalMarks",
+      id: "studentPracticalMarks",
     },
     {
       header: "Theory Marks",
       accessorKey: "theoryMarks",
+      id: "studentTheoryMarks",
     },
     {
       header: "Grade",
       accessorKey: "grade",
+      id: "marksGrade",
     },
   ];
   const initState = {
@@ -136,7 +143,9 @@ export const SchoolResult = () => {
     }
 
     try {
-      const apiUrl = `http://localhost:8090/${userrole}/display`;
+      console.log(data, "filter data ehre");
+
+      const apiUrl = `/${userrole}/display`;
       const params = {
         viewByStd: Number(data.grade),
         viewBySection: data.section,
@@ -146,21 +155,27 @@ export const SchoolResult = () => {
       const queryParams = {};
       let elem;
       for (elem of Object.keys(params)) {
+        console.log(elem, params[elem], typeof params[elem]);
+
         if (
           params[elem] !== null &&
           params[elem] !== undefined &&
+          typeof params[elem] !== "string" &&
           !isNaN(params[elem])
         ) {
           queryParams[elem] = params[elem];
+        } else {
+          if (StringValidator(params[elem])) queryParams[elem] = params[elem];
         }
       }
+
       const res = await fetchApi(
         apiUrl + "?" + new URLSearchParams(queryParams),
         "GET",
         {}
       );
       Toaster(res);
-      if (res.output) {
+      if (res.output && typeof res.output !== "string") {
         setDisplayData(res.output);
       } else {
         setDisplayData(res.error);
@@ -204,7 +219,6 @@ export const SchoolResult = () => {
           <InputContainerComponent
             width={"auto"}
             icon={RiBookShelfLine}
-            isRequired={true}
             handler={dataChangeHandler}
             objKey={"grade"}
             labelText={"Provide grade of class you wish result of:"}
@@ -213,7 +227,6 @@ export const SchoolResult = () => {
           ></InputContainerComponent>
           <InputContainerComponent
             width={"auto"}
-            isRequired={false}
             icon={TiSortAlphabetically}
             handler={dataChangeHandler}
             objKey={"section"}
@@ -226,20 +239,18 @@ export const SchoolResult = () => {
             icon={HiArrowTrendingDown}
             handler={dataChangeHandler}
             objKey={"minMark"}
-            isRequired={false}
             labelText={"Min marks:"}
             name={"minPercent"}
-            value={data.minMark}
+            value={data.minMark || ""}
           ></InputContainerComponent>
           <InputContainerComponent
             width={"auto"}
             handler={dataChangeHandler}
             icon={HiArrowTrendingUp}
             objKey={"maxMark"}
-            isRequired={false}
             labelText={"Max marks:"}
             name={"maxPercent"}
-            value={data.maxMark}
+            value={data.maxMark || ""}
           ></InputContainerComponent>
         </GridContainer>
         <GridLayers style={{ width: "100%" }}>

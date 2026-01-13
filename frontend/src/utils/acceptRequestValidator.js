@@ -33,11 +33,11 @@ export const adminRequestFieldValidator = (data) => {
         ErrorToast("invalid subject id assigned for teacher");
         return false;
       }
-      if (!GradeValidation(data.std)) {
+      if (data.std !== 0 && !GradeValidation(data.std)) {
         ErrorToast("invalid grade/std assigned for teacher");
         return false;
       }
-      if (!StringValidator(data.section)) {
+      if (data.section !== "" && !StringValidator(data.section)) {
         ErrorToast("invalid section assigned for teacher");
         return false;
       }

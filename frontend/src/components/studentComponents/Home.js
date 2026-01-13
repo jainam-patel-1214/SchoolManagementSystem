@@ -52,40 +52,48 @@ export const StudentHomePage = () => {
     {
       header: "Subject Id",
       accessorKey: "subId",
+      id: "subjectId",
     },
     {
       header: "Subject Name",
       accessorKey: "subjectName",
+      id: "subjectName",
     },
     {
       header: "Practical Marks",
       accessorKey: "practicalMM",
+      id: "practicalMarks",
     },
     {
       header: "Theory Marks",
       accessorKey: "theoryMM",
+      id: "theoryMarks",
     },
     {
       header: "Grade",
       accessorKey: "grade",
+      id: "marksGrade",
     },
   ];
   const subjectColumnDef = [
     {
       header: "Subject Id",
       accessorKey: "Subid",
+      id: "subjectId",
     },
     {
       header: "Name",
       accessorKey: "Subname",
+      id: "subjectName",
     },
     {
       header: "Credits",
       accessorKey: "Credit",
+      id: "subjectCredit",
     },
   ];
   useEffect(() => {
-    const baseUrl = "http://localhost:8090/student";
+    const baseUrl = "/student";
     const fetchReport = async () => {
       try {
         const name = getCookie("username");
@@ -98,8 +106,10 @@ export const StudentHomePage = () => {
           fetchApi(`${baseUrl}/report`, "GET", {}),
           fetchApi(`${baseUrl}/data`, "GET", {}),
         ]);
-        setDisplayReport(report.output);
-        setDisplayData(data.output);
+        setDisplayReport(
+          typeof report.output !== "string" ? report.output : {}
+        );
+        setDisplayData(typeof data.output !== "string" ? data.output : {});
 
         let sum = 0;
         report.output?.MarkInfo?.forEach((e) => {

@@ -16,6 +16,7 @@ import {
 } from "../../styled-components/HelperStyledComponents";
 import { ToastContainer } from "react-toastify";
 import { GeneralTableComponent } from "../helperComponents/GeneralTable";
+import { isNotEmptyPair } from "../../utils/validations";
 
 const Overlay = styled.div`
   position: fixed;
@@ -37,9 +38,9 @@ export const AdminPendingReqTab = () => {
     password: "",
     role: "",
     pendingId: null,
-    subjectId: "",
-    std: "",
-    section: "",
+    subjectId: null,
+    std: null,
+    section: null,
   };
   const [data, setData] = useState(initState);
   const [isStudent, setIsStudent] = useState(false);
@@ -61,14 +62,8 @@ export const AdminPendingReqTab = () => {
 
   const fetchPendingApps = async () => {
     try {
-      const res = await fetchApi(
-        `http://localhost:8090/${userrole}/pendingRequest`,
-        "GET",
-        {}
-      );
-      if (typeof res.output === "string") {
-        SuccessToast(res.output);
-      } else {
+      const res = await fetchApi(`/${userrole}/pendingRequest`, "GET", {});
+      if (typeof res.output !== "string") {
         setDisplayData(res.output);
       }
     } catch (err) {
@@ -100,7 +95,7 @@ export const AdminPendingReqTab = () => {
         uRole: v.roleReq,
       };
       const res = await fetchApi(
-        `http://localhost:8090/${userrole}/rejectRequest`,
+        `/${userrole}/rejectRequest`,
         "DELETE",
         payload
       );
@@ -141,12 +136,6 @@ export const AdminPendingReqTab = () => {
     };
     if (isStudent) {
       payload = { ...payload, std: Number(data.std), section: data.section };
-      const isValid = adminRequestFieldValidator(payload);
-      console.log("is valid", isValid);
-
-      if (!isValid) {
-        return;
-      }
     } else if (isTeacher) {
       payload = {
         ...payload,
@@ -154,23 +143,38 @@ export const AdminPendingReqTab = () => {
         section: data.section,
         subId: Number(data.subjectId),
       };
-      const isValid = adminRequestFieldValidator(payload);
-      if (!isValid) {
+      // const isValid = adminRequestFieldValidator(payload);
+      // if (!isValid) {
+      //   return;
+      // }
+    }
+    // else if (!isStudent && !isTeacher) {
+    // const isValid = adminRequestFieldValidator(payload);
+    // if (!isValid) {
+    //   return;
+    // }
+    // }
+    let bodyObj = {};
+    const numberKeys = ["std", "subId", "Uid"];
+    for (const [key, value] of Object.entries(payload)) {
+      if (isNaN(value) && numberKeys.includes(key)) {
+        ErrorToast(`${key}'s value must be a number`);
         return;
       }
-    } else if (!isStudent && !isTeacher) {
-      const isValid = adminRequestFieldValidator(payload);
-      if (!isValid) {
-        return;
+      if (isNotEmptyPair(value)) {
+        bodyObj[key] = value;
       }
     }
+    const isValid = adminRequestFieldValidator(bodyObj);
+    console.log("is valid", isValid);
+
+    if (!isValid) {
+      return;
+    }
+    console.log(bodyObj);
 
     try {
-      const res = await fetchApi(
-        `http://localhost:8090/${userrole}/acceptRequest`,
-        "POST",
-        payload
-      );
+      const res = await fetchApi(`/${userrole}/acceptRequest`, "POST", payload);
       Toaster(res);
     } catch (error) {
       ErrorToast(error);
@@ -189,27 +193,27 @@ export const AdminPendingReqTab = () => {
 
   const columnHelper = createColumnHelper();
   const columns = [
-    columnHelper.accessor("roleReq", {
-      header: "Role requested",
-      cell: (info) => info.getValue(),
+    {
+      header: "Role Requested",
+      accessorKey: "roleReq",
+      id: "roleReq",
       enableSorting: false,
-    }),
-
-    columnHelper.accessor("userName", {
-      header: "Name",
-      cell: (info) => info.getValue(),
-      enableSorting: true,
-    }),
-
-    columnHelper.accessor("pwd", {
-      header: "Password",
-      cell: (info) => info.getValue(),
+    },
+    {
+      header: "User Name",
+      accessorKey: "userName",
+      id: "userName",
       enableSorting: false,
-    }),
-
-    columnHelper.display({
+    },
+    {
+      header: "User Password",
+      accessorKey: "pwd",
+      id: "pwd",
+      enableSorting: false,
+    },
+    {
       id: "accept",
-      header: "Accept",
+      header: "",
       cell: ({ row }) => {
         const v = row.original;
         return (
@@ -222,11 +226,10 @@ export const AdminPendingReqTab = () => {
           </PendingBtnComp>
         );
       },
-    }),
-
-    columnHelper.display({
+    },
+    {
       id: "reject",
-      header: "Reject",
+      header: "",
       cell: ({ row }) => {
         const v = row.original;
         return (
@@ -239,7 +242,46 @@ export const AdminPendingReqTab = () => {
           </PendingBtnComp>
         );
       },
-    }),
+    },
+    // columnHelper.accessor("roleReq", {
+    //   header: "Role requested",
+    //   cell: (info) => info.getValue(),
+    //   enableSorting: false,
+    // }),
+
+    // columnHelper.accessor("userName", {
+    //   header: "Name",
+    //   cell: (info) => info.getValue(),
+    //   enableSorting: true,
+    // }),
+
+    // columnHelper.accessor("pwd", {
+    //   header: "Password",
+    //   cell: (info) => info.getValue(),
+    //   enableSorting: false,
+    // }),
+
+    // columnHelper.display({
+    //   id: "accept",
+    //   header: "Accept",
+    //   cell: ({ row }) => {
+    //     const v = row.original;
+    //     return (
+
+    //     );
+    //   },
+    // }),
+
+    // columnHelper.display({
+    //   id: "reject",
+    //   header: "Reject",
+    //   cell: ({ row }) => {
+    //     const v = row.original;
+    //     return (
+
+    //     );
+    //   },
+    // }),
   ];
 
   return (
@@ -265,7 +307,7 @@ export const AdminPendingReqTab = () => {
           data={data}
           newHandler={dataChangeHandler}
         ></PopoupComponent>
-        {displayData?.length > 0 ? (
+        {displayData.length > 0 ? (
           <ContentContainers
             elements={"single"}
             usage={"nongrid"}

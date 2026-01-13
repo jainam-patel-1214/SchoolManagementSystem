@@ -43,11 +43,11 @@ export const SubEditTabComp = () => {
   const searchSubject = async (id) => {
     try {
       const subjectData = await fetchApi(
-        `http://localhost:8090/${userrole}/subjectData/${id}`,
+        `/${userrole}/subjectData/${id}`,
         "GET",
         {}
       );
-      if (subjectData.output) {
+      if (subjectData.output && typeof subjectData.output !== "string") {
         const initState = {
           subjectId: "",
           subjectName: "",
@@ -63,7 +63,6 @@ export const SubEditTabComp = () => {
       }
     } catch (error) {
       ErrorToast("Subject doesnot exists you wish to edit, try again!!");
-      console.log("no sub found");
     }
   };
 
@@ -152,7 +151,7 @@ export const SubEditTabComp = () => {
         <ContentContainers elements={"multiple"} style={{ marginTop: "1rem" }}>
           <GridContainer>
             <InputContainerComponent
-              value={data.subjectName}
+              value={data.subjectName || ""}
               objKey={"subjectName"}
               width={"auto"}
               handler={dataChangeHandler}
@@ -161,7 +160,7 @@ export const SubEditTabComp = () => {
               labelText={"Provide subject name:"}
             ></InputContainerComponent>
             <InputContainerComponent
-              value={data.subjectCredit}
+              value={data.subjectCredit || ""}
               objKey={"subjectCredit"}
               width={"auto"}
               handler={dataChangeHandler}
@@ -170,7 +169,7 @@ export const SubEditTabComp = () => {
               labelText={"Provide new credit:"}
             ></InputContainerComponent>
             <InputContainerComponent
-              value={data.subjectStd}
+              value={data.subjectStd || ""}
               objKey={"subjectStd"}
               width={"auto"}
               handler={dataChangeHandler}
@@ -189,9 +188,7 @@ export const SubEditTabComp = () => {
               textcol={"default"}
               hovercol={"default"}
               type="submit"
-              onClick={(e) =>
-                submitHandler(e, `http://localhost:8090/${userrole}/updateSub`)
-              }
+              onClick={(e) => submitHandler(e, `/${userrole}/updateSub`)}
             >
               Update Subject
             </ButtonElement>

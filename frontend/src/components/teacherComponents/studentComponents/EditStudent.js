@@ -44,11 +44,11 @@ export const StudentEditComponent = () => {
   const searchStudent = async (id) => {
     try {
       const studentData = await fetchApi(
-        `http://localhost:8090/${userrole}/studentData/${id}`,
+        `/${userrole}/studentData/${id}`,
         "GET",
         {}
       );
-      if (studentData.output) {
+      if (studentData.output && typeof studentData.output !== "string") {
         const initState = {
           grNo: "",
           standard: "",
@@ -66,7 +66,6 @@ export const StudentEditComponent = () => {
       }
     } catch (error) {
       ErrorToast("Student doesnot exists you wish to edit, try again!!");
-      console.log("no student found");
     }
   };
 
@@ -132,7 +131,6 @@ export const StudentEditComponent = () => {
           bodyObj[key] = value;
         }
       }
-      console.log(bodyObj);
       res = await fetchApi(apiUrl, "PUT", bodyObj);
       if (res.output) {
         originalData.current = { ...data };
@@ -182,7 +180,7 @@ export const StudentEditComponent = () => {
       <ContentContainers elements={"multiple"} style={{ marginTop: "1rem" }}>
         <GridContainer>
           <InputContainerComponent
-            value={data.password}
+            value={data.password || ""}
             objKey={"password"}
             width={"auto"}
             handler={dataChangeHandler}
@@ -191,7 +189,7 @@ export const StudentEditComponent = () => {
             labelText={"Provide new password:"}
           ></InputContainerComponent>
           <InputContainerComponent
-            value={data.name}
+            value={data.name || ""}
             objKey={"name"}
             width={"auto"}
             handler={dataChangeHandler}
@@ -200,7 +198,7 @@ export const StudentEditComponent = () => {
             labelText={"Provide new name:"}
           ></InputContainerComponent>
           <InputContainerComponent
-            value={data.section}
+            value={data.section || ""}
             objKey={"section"}
             width={"auto"}
             handler={dataChangeHandler}
@@ -209,7 +207,7 @@ export const StudentEditComponent = () => {
             labelText={"Provide new section:"}
           ></InputContainerComponent>
           <InputContainerComponent
-            value={data.standard}
+            value={data.standard || ""}
             objKey={"standard"}
             width={"auto"}
             handler={dataChangeHandler}
@@ -228,9 +226,7 @@ export const StudentEditComponent = () => {
             textcol={"default"}
             hovercol={"default"}
             type="submit"
-            onClick={(e) =>
-              submitHandler(e, `http://localhost:8090/${userrole}/updateStud`)
-            }
+            onClick={(e) => submitHandler(e, `/${userrole}/updateStud`)}
           >
             Update Student
           </ButtonElement>

@@ -1,11 +1,12 @@
 import bgImg from "../assets/bg.jpg";
-import { LoginRegisterForm } from "./LoginRegisterform";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import getCookie from "../utils/getCookie";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { SuccessToast } from "../utils/toasterCode";
 import styled from "styled-components";
+import { LoginForm } from "./LoginForm";
+import { RegisterForm } from "./RegisterForm";
 const SignInSections = styled.div`
   width: 50%;
   height: 100%;
@@ -32,13 +33,17 @@ const SignInPage = styled.div`
 `;
 export const SignIn = () => {
   const navigate = useNavigate();
+  let isLogin = true;
+
+  const currentUrl = window.location.href.split("/");
+  if (currentUrl[currentUrl.length - 1] === "signup") {
+    isLogin = false;
+  } else isLogin = true;
+
   useEffect(() => {
     const tempRole = getCookie("role");
     if (tempRole !== undefined && tempRole !== null && tempRole !== "") {
-      SuccessToast(
-        `You would be soon redirected to ${tempRole}'s home page`,
-        toast
-      );
+      SuccessToast(`You would be soon redirected to ${tempRole}'s home page`);
     }
 
     if (tempRole === "student") {
@@ -65,7 +70,7 @@ export const SignIn = () => {
         <img src={bgImg} alt="background" />
       </SignInSections>
       <SignInSections variant={"loginform"}>
-        <LoginRegisterForm />
+        {isLogin ? <LoginForm /> : <RegisterForm></RegisterForm>}
       </SignInSections>
     </SignInPage>
   );
