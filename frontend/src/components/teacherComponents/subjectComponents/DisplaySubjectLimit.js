@@ -42,7 +42,7 @@ export const DisplaySubjectLimit = () => {
     fetchData();
   }, []);
   return (
-    <AllComponentsContainer>
+    <AllComponentsContainer className="parent-container">
       {isLoading ? (
         <></>
       ) : (

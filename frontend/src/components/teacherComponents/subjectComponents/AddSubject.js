@@ -134,7 +134,7 @@ export const SubAddTabComp = () => {
   }, [data.subjectId]);
 
   return (
-    <AllComponentsContainer>
+    <AllComponentsContainer className="parent-container">
       <ToastContainer />
       <HeadingComponent position={"top"}>
         <PageHeading>

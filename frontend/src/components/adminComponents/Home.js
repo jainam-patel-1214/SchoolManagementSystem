@@ -51,7 +51,7 @@ export const AdminHome = () => {
   }, []);
 
   return (
-    <AllComponentsContainer>
+    <AllComponentsContainer className="parent-container">
       {isLoading ? (
         <>Fetching the data</>
       ) : (

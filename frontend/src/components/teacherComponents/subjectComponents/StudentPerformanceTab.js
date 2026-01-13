@@ -95,7 +95,7 @@ export const StudentPerformancePage = () => {
       {isLoading ? (
         <>Fetching the data</>
       ) : (
-        <AllComponentsContainer>
+        <AllComponentsContainer className="parent-container">
           <ToastContainer />
           <InfoBoxContainer>
             <InfoBox>
