@@ -112,8 +112,12 @@ func CreateSession(ctx *gin.Context) {
 	case "admin":
 		var aId int
 		err := db.QueryRow("SELECT admin_id,admin_name FROM admins WHERE admin_id=? AND admin_pwd=? ", credentials.UserId, credentials.Password).Scan(&aId, &name)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "invalid credentials"})
+		if err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 			return
 		}
 		role = "admin"
@@ -123,7 +127,7 @@ func CreateSession(ctx *gin.Context) {
 		claim.RegisteredClaims.IssuedAt = jwt.NewNumericDate(time.Now())
 		claim.RegisteredClaims.ExpiresAt = jwt.NewNumericDate(temptime)
 	default:
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "invalid role"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid role"})
 		return
 	}
 

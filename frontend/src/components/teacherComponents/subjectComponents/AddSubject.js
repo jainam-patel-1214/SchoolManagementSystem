@@ -134,7 +134,7 @@ export const SubAddTabComp = () => {
   }, [data.subjectId]);
 
   return (
-    <AllComponentsContainer>
+    <AllComponentsContainer className="parent-container">
       <ToastContainer />
       <HeadingComponent position={"top"}>
         <PageHeading>
@@ -150,7 +150,7 @@ export const SubAddTabComp = () => {
             style={{ color: "#008cffff" }}
           >
             {" "}
-            Go back to veiw subject list
+            Go back to view subject list
           </a>
         </p>
       </HeadingComponent>

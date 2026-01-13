@@ -84,7 +84,7 @@ export const TeacherPerformanceTab = () => {
         <>Fetching the data</>
       ) : (
         <div>
-          <AllComponentsContainer>
+          <AllComponentsContainer className="parent-container">
             <ToastContainer />
             <InfoBoxContainer>
               <InfoBox>

@@ -43,6 +43,7 @@ export const Navbar = () => {
       staticTabs: [
         {
           name: "School result",
+          id: "schoolResultBtn",
           location: "schoolResult",
           action: handleNavigation,
         },
@@ -50,6 +51,7 @@ export const Navbar = () => {
       dropDownTabs: [
         {
           name: "Account",
+          id: "navigateToAccountBtn",
           location: "/app/student",
           action: handleNavigation,
         },
@@ -59,16 +61,19 @@ export const Navbar = () => {
       staticTabs: [
         {
           name: "Students",
+          id: "studentsTabBtn",
           location: "displayStudent",
           action: handleNavigation,
         },
         {
           name: "Subjects",
+          id: "subjectsTabBtn",
           location: "displaySubject",
           action: handleNavigation,
         },
         {
           name: "Marks",
+          id: "marksTabBtn",
           location: "enterMarks",
           action: handleNavigation,
         },
@@ -76,11 +81,13 @@ export const Navbar = () => {
       dropDownTabs: [
         {
           name: "Account",
+          id: "navigateToAccountBtn",
           location: "/app/teacher",
           action: handleNavigation,
         },
         {
           name: "Add review",
+          id: "reviewTabBtn",
           location: "reviews",
           action: handleNavigation,
         },
@@ -90,21 +97,25 @@ export const Navbar = () => {
       staticTabs: [
         {
           name: "Students",
+          id: "studentsTabBtn",
           location: "displayStudent",
           action: handleNavigation,
         },
         {
           name: "Teachers",
+          id: "teacherTabBtn",
           location: "displayTeacher",
           action: handleNavigation,
         },
         {
           name: "Subjects",
+          id: "subjectsTabBtn",
           location: "displaySubject",
           action: handleNavigation,
         },
         {
           name: "Marks",
+          id: "marksTabBtn",
           location: "enterMarks",
           action: handleNavigation,
         },
@@ -112,11 +123,13 @@ export const Navbar = () => {
       dropDownTabs: [
         {
           name: "Account",
+          id: "navigateToAccountBtn",
           location: "/app/admin",
           action: handleNavigation,
         },
         {
           name: "Pending Req",
+          id: "pendingRequestTabBtn",
           location: "pendingApplications",
           action: handleNavigation,
         },
@@ -153,22 +166,30 @@ export const Navbar = () => {
               )
             )}
           {navigationMenuContent[role]?.staticTabs?.map(
-            ({ name, location, action }, i) => {
+            ({ name, id, location, action }, i) => {
               return (
-                <StyledNavbarTabs key={i} onClick={() => action(location)}>
+                <StyledNavbarTabs
+                  key={i}
+                  id={id}
+                  onClick={() => action(location)}
+                >
                   {name}
                   <FaAngleUp style={{ verticalAlign: "middle" }} />
                 </StyledNavbarTabs>
               );
             }
           )}
-          <StyledNavbarTabs>
+          <StyledNavbarTabs id="profileTab">
             Profile <FaAngleUp style={{ verticalAlign: "middle" }} />
             <StyledNavbarSubTabs>
               {navigationMenuContent[role]?.dropDownTabs?.map(
-                ({ name, location, action }, i) => {
+                ({ name, location, action, id }, i) => {
                   return (
-                    <NavbarTabs key={i} onClick={() => action(location)}>
+                    <NavbarTabs
+                      key={i}
+                      id={id}
+                      onClick={() => action(location)}
+                    >
                       {name}
                     </NavbarTabs>
                   );

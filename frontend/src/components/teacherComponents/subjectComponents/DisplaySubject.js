@@ -158,7 +158,7 @@ export const DisplaySubTabComp = () => {
     setData(rr);
   };
   return (
-    <AllComponentsContainer>
+    <AllComponentsContainer className="parent-container">
       <ToastContainer />
       <HeadingComponent position={"top"}>
         <PageHeading>
@@ -181,6 +181,18 @@ export const DisplaySubTabComp = () => {
                 style={{ color: "#8513ffff" }}
               >
                 Set subject limit here
+              </a>
+            </>
+          )}
+          {userrole === "teacher" && (
+            <>
+              |{" "}
+              <a
+                href={`/app/${userrole}/showSubjectLimit`}
+                style={{ color: "#007d25ff" }}
+              >
+                {" "}
+                View Limits
               </a>
             </>
           )}
@@ -232,7 +244,7 @@ export const DisplaySubTabComp = () => {
             <GridContainer>
               {data.map(({ subjectId, subjectName, level, credits }, i) => (
                 <GridItemComponent
-                  key={subjectId} // ✅ better key
+                  key={subjectId}
                   index={i}
                   objectId={subjectId}
                   password=""

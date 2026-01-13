@@ -250,18 +250,18 @@ export const TeacherEditComponent = () => {
 
   const selectChangeHandler = (e) => {
     const subId = Number(e.target.value);
-    let subjectName = "";
+    // let subjectName = "";
     subjectList.current.forEach((item) => {
       if (item.value === subId)
         setSearchKey(`${item.label} (Subject id: ${item.value})`);
     });
     dataChangeHandler("subjectId", e.target.value);
     setShowSubjectList(false);
-    return subjectName;
+    // return subjectName;
   };
 
   return (
-    <AllComponentsContainer>
+    <AllComponentsContainer className="parent-container">
       <ToastContainer />
       <HeadingComponent position={"top"}>
         <PageHeading>
@@ -277,7 +277,7 @@ export const TeacherEditComponent = () => {
             style={{ color: "#008cffff" }}
           >
             {" "}
-            Go back to veiw teacher list
+            Go back to view teacher list
           </a>
         </p>
       </HeadingComponent>
@@ -308,34 +308,20 @@ export const TeacherEditComponent = () => {
             icon={FaKey}
             labelText={"Provide new password here:"}
           ></InputContainerComponent>
-          {!showSubjectList ? (
-            <InputContainerComponent
-              width={"auto"}
-              name={"subname"}
-              value={searchKey}
-              handler={dataChangeHandler}
-              objKey={"subjectId"}
-              icon={RiContactsBook2Fill}
-              labelText={"Select new subject:"}
-              onFocus={() => setShowSubjectList(true)}
-              onInput={handleFilterSubject}
-              searchKeyHandler={setSearchKey}
-            ></InputContainerComponent>
-          ) : (
-            <SelectComponent
-              icon={RiContactsBook2Fill}
-              label="Select a subject from dropdown to update"
-              value={data.subjectId || ""}
-              onChange={selectChangeHandler}
-            >
-              <option value="">Select subject to update</option>
-              {filteredSubjects.map((v) => (
-                <option key={v.value} value={v.value}>
-                  {`${v.label} (subject's id: ${v.value})`}
-                </option>
-              ))}
-            </SelectComponent>
-          )}
+          <SelectComponent
+            icon={RiContactsBook2Fill}
+            label="Select a subject from dropdown to update"
+            value={data.subjectId || ""}
+            onChange={selectChangeHandler}
+            name="selectSubject"
+          >
+            <option value="">Select subject to update</option>
+            {filteredSubjects.map((v) => (
+              <option key={v.value} value={v.value}>
+                {`${v.label} (subject's id: ${v.value})`}
+              </option>
+            ))}
+          </SelectComponent>
           <InputContainerComponent
             width={"auto"}
             name={"std"}

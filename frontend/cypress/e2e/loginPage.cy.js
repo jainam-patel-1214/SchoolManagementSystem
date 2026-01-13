@@ -1,0 +1,169 @@
+/* eslint-disable no-undef */
+// describe("template spec", () => {
+//   it("passes", () => {
+//     cy.visit("http://localhost:3000/");
+//   });
+// });
+describe("Login Form - Scholar App", () => {
+  // Password is not valid
+  it("fills form and logs in failure as input fields are invalid", () => {
+    cy.intercept("POST", "http://localhost:8090/login").as("loginRequest");
+
+    cy.visit("http://localhost:3000/");
+
+    cy.get("#userid").type("12345").should("have.value", "12345");
+
+    cy.get("#password").type("Tt@123").should("have.value", "Tt@123");
+
+    cy.get('select[name="userRole"]')
+      .select("student")
+      .should("have.value", "student");
+
+    cy.get('button[type="submit"]').click();
+
+    cy.get(".Toastify__toast")
+      .should("be.visible")
+      .and("contain", "please enter an 8-16 digit password");
+  });
+
+  // Invalid credentials for student
+  it("fills form and logs in failure for student", () => {
+    cy.intercept("POST", "http://localhost:8090/login").as("loginRequest");
+
+    cy.visit("http://localhost:3000/");
+
+    cy.get("#userid").type("12345").should("have.value", "12345");
+
+    cy.get("#password").type("Test@123").should("have.value", "Test@123");
+
+    cy.get('select[name="userRole"]')
+      .select("student")
+      .should("have.value", "student");
+
+    cy.get('button[type="submit"]').click();
+
+    cy.wait("@loginRequest").then((interception) => {
+      expect(interception.response.statusCode).to.eq(401);
+    });
+  });
+
+  // Invalid credentials for teacher
+  it("fills form and logs in failure for teacher", () => {
+    cy.intercept("POST", "http://localhost:8090/login").as("loginRequest");
+
+    cy.visit("http://localhost:3000/");
+
+    cy.get("#userid").type("12345").should("have.value", "12345");
+
+    cy.get("#password").type("Test@123").should("have.value", "Test@123");
+
+    cy.get('select[name="userRole"]')
+      .select("teacher")
+      .should("have.value", "teacher");
+
+    cy.get('button[type="submit"]').click();
+
+    cy.wait("@loginRequest").then((interception) => {
+      expect(interception.response.statusCode).to.eq(401);
+    });
+  });
+
+  // Invalid credentials for Admin
+  it("fills form and logs in failure for admin", () => {
+    cy.intercept("POST", "http://localhost:8090/login").as("loginRequest");
+
+    cy.visit("http://localhost:3000/");
+
+    cy.get("#userid").type("12345").should("have.value", "12345");
+
+    cy.get("#password").type("Test@123").should("have.value", "Test@123");
+
+    cy.get('select[name="userRole"]')
+      .select("admin")
+      .should("have.value", "admin");
+
+    cy.get('button[type="submit"]').click();
+
+    cy.wait("@loginRequest").then((interception) => {
+      console.log(interception.response);
+      expect(interception.response.statusCode).to.eq(401);
+    });
+  });
+
+  // Successful login of student
+  it("fills form and logs in success for student", () => {
+    cy.intercept("POST", "/login*").as("loginRequest");
+
+    cy.visit("http://localhost:3000/");
+
+    cy.get("#userid").type("99092").should("have.value", "99092");
+
+    cy.get("#password").type("password").should("have.value", "password");
+
+    cy.get('select[name="userRole"]')
+      .select("student")
+      .should("have.value", "student");
+
+    cy.get('button[type="submit"]').click();
+
+    cy.wait("@loginRequest").then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
+    });
+
+    cy.url().should("match", /\/app\/(student|teacher|admin)/);
+
+    cy.get("#signOutButton").click();
+    cy.url().should("include", "/login");
+  });
+  // Successful login of teacher
+  it("fills form and logs in success for teacher", () => {
+    cy.visit("http://localhost:3000/");
+    cy.intercept("POST", "/login*").as("loginRequest");
+    cy.get("#userid").type("9090").should("have.value", "9090");
+
+    cy.get("#password").type("password").should("have.value", "password");
+
+    cy.get('select[name="userRole"]')
+      .select("teacher")
+      .should("have.value", "teacher");
+
+    cy.get('button[type="submit"]').click();
+
+    cy.wait("@loginRequest").then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
+    });
+
+    cy.url().should("match", /\/app\/(student|teacher|admin)/);
+
+    cy.get("#signOutButton").click();
+
+    cy.url().should("include", "/login");
+  });
+
+  // Successful login of admin
+  it("fills form and logs in success for admin", () => {
+    cy.intercept("POST", "http://localhost:8090/login").as("loginRequest");
+
+    cy.visit("http://localhost:3000/");
+
+    cy.get("#userid").type("999").should("have.value", "999");
+
+    cy.get("#password").type("password").should("have.value", "password");
+
+    cy.get('select[name="userRole"]')
+      .select("admin")
+      .should("have.value", "admin");
+
+    cy.get('button[type="submit"]').click();
+
+    cy.wait("@loginRequest").then((interception) => {
+      expect(interception.response.statusCode).to.eq(200);
+    });
+
+    cy.url().should("match", /\/app\/(student|teacher|admin)/);
+
+    cy.get("#signOutButton").click();
+
+    cy.url().should("include", "/login");
+  });
+});

@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { roleExtractor } from "../../utils/roleExtractor";
 import { fetchApi } from "../../utils/fetchApiCode";
 import { ErrorToast, SuccessToast, Toaster } from "../../utils/toasterCode";
-import { createColumnHelper } from "@tanstack/react-table";
 import { PopoupComponent } from "./AcceptPopup";
 import { adminRequestFieldValidator } from "../../utils/acceptRequestValidator";
 import styled from "styled-components";
@@ -166,12 +165,10 @@ export const AdminPendingReqTab = () => {
       }
     }
     const isValid = adminRequestFieldValidator(bodyObj);
-    console.log("is valid", isValid);
 
     if (!isValid) {
       return;
     }
-    console.log(bodyObj);
 
     try {
       const res = await fetchApi(`/${userrole}/acceptRequest`, "POST", payload);
@@ -191,19 +188,24 @@ export const AdminPendingReqTab = () => {
     fetchPendingApps();
   }, []);
 
-  const columnHelper = createColumnHelper();
   const columns = [
     {
       header: "Role Requested",
       accessorKey: "roleReq",
       id: "roleReq",
       enableSorting: false,
+      cell: ({ getValue }) => {
+        return <span className="user-role">{getValue()}</span>;
+      },
     },
     {
       header: "User Name",
       accessorKey: "userName",
       id: "userName",
       enableSorting: false,
+      cell: ({ getValue }) => {
+        return <span className="user-name">{getValue()}</span>;
+      },
     },
     {
       header: "User Password",
@@ -219,6 +221,7 @@ export const AdminPendingReqTab = () => {
         return (
           <PendingBtnComp
             type="button"
+            className="pendingAcceptButton"
             variant={"accept"}
             onClick={(e) => handleAccept(e, v)}
           >
@@ -235,6 +238,7 @@ export const AdminPendingReqTab = () => {
         return (
           <PendingBtnComp
             type="button"
+            className="pendingRejectButton"
             variant={"reject"}
             onClick={(e) => handleReject(e, v)}
           >
@@ -285,7 +289,7 @@ export const AdminPendingReqTab = () => {
   ];
 
   return (
-    <AllComponentsContainer>
+    <AllComponentsContainer className="parent-container">
       <ToastContainer />
       <HeadingComponent position={"top"}>
         <PageHeading>

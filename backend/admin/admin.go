@@ -780,6 +780,15 @@ func SetSubLimit(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "provide positive limit"})
 			return
 		}
+		var limitAlreadySet int
+		if err = db.QueryRow("SELECT COUNT(std) FROM subjectAllocation WHERE std=?", limitData.Standard).Scan(&limitAlreadySet); err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if limitAlreadySet > 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "limit already set, cannot reset it"})
+			return
+		}
 		if _, err = db.Exec("INSERT INTO subjectAllocation (std,subject_limit) VALUES (?,?)", limitData.Standard, limitData.SubLimit); err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return

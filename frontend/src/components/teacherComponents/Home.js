@@ -32,9 +32,9 @@ export const TeacherHome = () => {
       "GET",
       {}
     );
-    if (res.output && typeof res !== "string") {
-      setStudentsAmount(res.output);
-    }
+    // if (res.output && typeof res !== "string") {
+    setStudentsAmount(res.output);
+    // }
   };
   useEffect(() => {
     const baseApi = `/${userrole}`;
@@ -52,10 +52,11 @@ export const TeacherHome = () => {
         );
         fetchStudents(Std, Section, SubId);
         setDisplayReport(
-          typeof reportRes.output !== "string" ? reportRes.output : {}
+          typeof reportRes.output !== "string" ? reportRes.output : []
         );
       } catch (err) {
-        ErrorToast(err);
+        // ErrorToast(err);
+        console.log(err);
       } finally {
         setIsLoading(false);
       }
@@ -102,7 +103,7 @@ export const TeacherHome = () => {
         <>Fetching the data</>
       ) : (
         <div>
-          <AllComponentsContainer>
+          <AllComponentsContainer className="parent-container">
             <ToastContainer />
             <InfoBoxContainer>
               <InfoBox>
@@ -142,19 +143,24 @@ export const TeacherHome = () => {
                   width={"23%"}
                   infobox={true}
                   label={"Subject allocated Id:"}
-                  value={displayData.SubId}
+                  value={displayData.SubId?.Int64 || "N/A"}
                 ></LabelValuePair>
                 <LabelValuePair
                   width={"23%"}
                   infobox={true}
                   label={"Class Allocated:"}
-                  value={displayData.Std + displayData.Section}
+                  value={
+                    displayData.Std?.Int64 === 0
+                      ? "N/A"
+                      : displayData.Std?.Int64.toString() +
+                        displayData.Section?.String
+                  }
                 ></LabelValuePair>
                 <LabelValuePair
                   width={"40%"}
                   infobox={true}
                   label={"Subject Name:"}
-                  value={displayData.SubName || "N/A"}
+                  value={displayData.SubName?.String || "N/A"}
                 ></LabelValuePair>
               </GridLayers>
             </ContentContainers>

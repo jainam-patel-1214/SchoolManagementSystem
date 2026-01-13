@@ -84,8 +84,8 @@ export const SchoolResult = () => {
   const initState = {
     section: "",
     grade: "",
-    minMark: null,
-    maxMark: null,
+    minMark: 0,
+    maxMark: 100,
   };
   const [data, setData] = useState(initState);
   const dataChangeHandler = (key, value) => {
@@ -182,17 +182,11 @@ export const SchoolResult = () => {
       }
     } catch (err) {
       ErrorToast(err);
-    } finally {
-      setInitialData();
     }
   };
 
-  const setInitialData = () => {
-    setData(initState);
-  };
-
   return (
-    <AllComponentsContainer>
+    <AllComponentsContainer className="parent-container">
       <ToastContainer />
       <HeadingComponent position={"top"}>
         <PageHeading>
@@ -261,6 +255,7 @@ export const SchoolResult = () => {
             textcol={"default"}
             hovercol={"default"}
             type="submit"
+            id="fetchResultButton"
             onClick={(e) => submitHandler(e)}
           >
             Search result
@@ -272,7 +267,7 @@ export const SchoolResult = () => {
             textcol={"red"}
             hovercol={"#ffd3d3af"}
             type="reset"
-            onClick={() => setInitialData()}
+            onClick={() => setData(initState)}
           >
             Reset Filters
           </ButtonElement>

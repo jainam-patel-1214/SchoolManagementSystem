@@ -222,7 +222,7 @@ export const EditMarkTab = () => {
   }, []);
 
   return (
-    <AllComponentsContainer>
+    <AllComponentsContainer className="parent-container">
       <ToastContainer />
       <HeadingComponent position={"top"}>
         <PageHeading>
@@ -260,7 +260,7 @@ export const EditMarkTab = () => {
             handler={dataChangeHandler}
             name={"grNo"}
             icon={FaCircleUser}
-            labelText={"Provide sudent's ID/Name:"}
+            labelText={"Provide student's ID/Name:"}
             onFocus={() => setShowStudentList(true)}
             onBlur={() => setShowStudentList(false)}
             onInput={(e) =>

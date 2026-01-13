@@ -24,7 +24,6 @@ import { LineBreak } from "../../../styled-components/LineBreak";
 import { GridItemComponent } from "../../helperComponents/GridItem";
 import { MdTableRows, MdWindow } from "react-icons/md";
 import styled from "styled-components";
-import { createColumnHelper } from "@tanstack/react-table";
 import { GeneralTableComponent } from "../../helperComponents/GeneralTable";
 import { useNavigate } from "react-router-dom";
 import { roleExtractor } from "../../../utils/roleExtractor";
@@ -86,7 +85,6 @@ export const StudentDataComponent = () => {
     fetchData();
   }, []);
   const navigate = useNavigate();
-  const columnHelper = createColumnHelper();
   const columns = [
     {
       header: "Student ID",
@@ -175,7 +173,7 @@ export const StudentDataComponent = () => {
     setFilterData(rr);
   };
   return (
-    <AllComponentsContainer>
+    <AllComponentsContainer className="parent-container">
       <ToastContainer />
       <HeadingComponent position={"top"}>
         <PageHeading>
@@ -201,6 +199,7 @@ export const StudentDataComponent = () => {
               type="text"
               value={searchKey || ""}
               name="searchQuery"
+              id="searchInputComponent"
               required
               placeholder=" "
               onChange={(e) => handleFilterStudent(e)}

@@ -49,13 +49,14 @@ export const SelectComponent = ({
   label,
   value,
   onChange,
+  name,
   children,
 }) => {
   return (
     <SelectContainer>
       {Icon && <Icon style={{ fontSize: "xx-large", margin: "10px" }} />}
       <FloatingSelectWrapper>
-        <FloatingSelect value={value} onChange={onChange}>
+        <FloatingSelect value={value} onChange={onChange} name={name}>
           {children}
         </FloatingSelect>
         <FloatingSelectLabel>{label}</FloatingSelectLabel>
