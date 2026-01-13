@@ -59,6 +59,7 @@ describe("teacher components testing", () => {
     cy.intercept("DELETE", "**/teacher/delStudent*").as("deleteStudentRequest");
 
     cy.createDemoStudentUser("teacher");
+    cy.get(".parent-container").scrollTo("top");
 
     cy.contains("a", "Go back to veiw student list").click();
     cy.location("pathname").should("eq", "/app/teacher/displayStudent");
@@ -77,6 +78,8 @@ describe("teacher components testing", () => {
     cy.wait("@updateStudentRequest")
       .its("response.statusCode")
       .should("eq", 200);
+
+    cy.get(".parent-container").scrollTo("top");
 
     cy.contains("a", "Go back to veiw student list").click();
     cy.location("pathname").should("eq", "/app/teacher/displayStudent");
@@ -100,6 +103,7 @@ describe("teacher components testing", () => {
     cy.intercept("DELETE", "**/teacher/delSubject*").as("deleteSubjectRequest");
 
     cy.createDemoSubject("teacher");
+    cy.get(".parent-container").scrollTo("top");
 
     cy.contains("a", "Go back to veiw subject list").click();
     cy.location("pathname").should("eq", "/app/teacher/displaySubject");
@@ -119,6 +123,7 @@ describe("teacher components testing", () => {
       .its("response.statusCode")
       .should("eq", 200);
     cy.expectAndCloseToast("subject updated successfully");
+    cy.get(".parent-container").scrollTo("top");
 
     cy.contains("a", "Go back to veiw subject list").click();
     cy.location("pathname").should("eq", "/app/teacher/displaySubject");
@@ -140,6 +145,7 @@ describe("teacher components testing", () => {
     cy.intercept("DELETE", "**/teacher/delStudent*").as("deleteStudentRequest");
 
     cy.createDemoStudentUser("teacher");
+    cy.get(".parent-container").scrollTo("top");
 
     cy.contains("a", "Go back to veiw student list").click();
     cy.location("pathname").should("eq", "/app/teacher/displayStudent");
@@ -177,6 +183,7 @@ describe("teacher components testing", () => {
     cy.intercept("DELETE", "**/teacher/delSubject*").as("deleteSubjectRequest");
 
     cy.createDemoSubject("teacher");
+    cy.get(".parent-container").scrollTo("top");
 
     cy.contains("a", "Go back to veiw subject list").click();
     cy.location("pathname").should("eq", "/app/teacher/displaySubject");
@@ -201,6 +208,7 @@ describe("teacher components testing", () => {
 
     cy.get("#studentsTabBtn").click();
     cy.location("pathname").should("eq", "/app/teacher/displayStudent");
+    cy.get(".parent-container").scrollTo("top");
 
     cy.contains("a", "Create a new student here").click();
     cy.location("pathname").should("eq", "/app/teacher/addStudent");
@@ -268,6 +276,7 @@ describe("teacher components testing", () => {
 
     cy.get("#subjectsTabBtn").click();
     cy.location("pathname").should("eq", "/app/teacher/displaySubject");
+    cy.get(".parent-container").scrollTo("top");
 
     cy.contains("a", "Create a new subject here").click();
     cy.location("pathname").should("eq", "/app/teacher/addSubject");
@@ -362,6 +371,7 @@ describe("teacher components testing", () => {
     cy.location("pathname").should("eq", "/app/teacher/enterMarks");
 
     cy.insertMarks("999", "99", "50", "10", "teacher");
+    cy.get(".parent-container").scrollTo("top");
 
     cy.contains("a", "Update student marks record here").click();
     cy.location("pathname").should("eq", "/app/teacher/editMarks");
@@ -431,6 +441,7 @@ describe("teacher components testing", () => {
     cy.location("pathname").should("eq", "/app/teacher/enterMarks");
 
     cy.insertMarks("999", "99", "50", "10", "teacher");
+    cy.get(".parent-container").scrollTo("top");
 
     cy.contains("a", "Update student marks record here").click();
     cy.location("pathname").should("eq", "/app/teacher/editMarks");
@@ -457,6 +468,8 @@ describe("teacher components testing", () => {
 
     cy.get("#marksTabBtn").click();
     cy.location("pathname").should("eq", "/app/teacher/enterMarks");
+    cy.get(".parent-container").scrollTo("top");
+
     cy.contains("a", "Update student marks record here").click();
     cy.location("pathname").should("eq", "/app/teacher/editMarks");
 
@@ -533,7 +546,7 @@ describe("teacher components testing", () => {
 
     cy.deleteDemoStudentUser("teacher");
   });
-  it.only("cleanup", () => {
+  it("cleanup", () => {
     cy.getCookies().then((cookies) => {
       const cookieHeader = cookies
         .map((c) => `${c.name}=${c.value}`)

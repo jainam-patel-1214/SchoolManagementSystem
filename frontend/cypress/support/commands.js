@@ -117,21 +117,23 @@ Cypress.Commands.add(
           Cypress.env("user", user);
           cy.loginViaUI(user);
           cy.visit("http://localhost:3000/app/admin");
-          cy.getCookies().then((cookies) => {
-            const cookieHeader = cookies
-              .map((c) => `${c.name}=${c.value}`)
-              .join("; ");
+          if (role === "admin") {
+            cy.getCookies().then((cookies) => {
+              const cookieHeader = cookies
+                .map((c) => `${c.name}=${c.value}`)
+                .join("; ");
 
-            cy.request({
-              method: "GET",
-              url: "http://localhost:8090/admin/removeDummyData",
-              headers: {
-                Cookie: cookieHeader,
-              },
-            }).then((res) => {
-              expect(res.status).to.eq(200);
+              cy.request({
+                method: "GET",
+                url: "http://localhost:8090/admin/removeDummyData",
+                headers: {
+                  Cookie: cookieHeader,
+                },
+              }).then((res) => {
+                expect(res.status).to.eq(200);
+              });
             });
-          });
+          }
         });
       } else {
         Cypress.env("user", storedUser);
@@ -509,26 +511,26 @@ Cypress.Commands.add("initialDataForStudentAndTeacher", (role) => {
       }
     });
 
-    cy.createSubject("admin", "99090", "Physics", "1", "10");
-    cy.createStudent("admin", "99091", "password", "StudentA", "1", "A");
-    cy.createStudent("admin", "99092", "password", "StudentB", "1", "B");
-    cy.createStudent("admin", "99093", "password", "StudentC", "1", "C");
+    // cy.createSubject("admin", "99090", "Physics", "1", "10");
+    // cy.createStudent("admin", "99091", "password", "StudentA", "1", "A");
+    // cy.createStudent("admin", "99092", "password", "StudentB", "1", "B");
+    // cy.createStudent("admin", "99093", "password", "StudentC", "1", "C");
 
-    cy.get("#marksTabBtn").click();
-    cy.location("pathname").should("eq", "/app/admin/enterMarks");
-    cy.insertMarks("99091", "99090", "80", "20");
-    cy.insertMarks("99092", "99090", "70", "10");
-    cy.insertMarks("99093", "99090", "20", "2");
+    // cy.get("#marksTabBtn").click();
+    // cy.location("pathname").should("eq", "/app/admin/enterMarks");
+    // cy.insertMarks("99091", "99090", "80", "20", "admin");
+    // cy.insertMarks("99092", "99090", "70", "10","admin");
+    // cy.insertMarks("99093", "99090", "20", "2","admin");
   } else {
-    cy.createSubject(role, "99090", "Physics", "1", "10");
-    cy.createStudent(role, "99091", "password", "StudentA", "1", "A");
-    cy.createStudent(role, "99092", "password", "StudentB", "1", "B");
-    cy.createStudent(role, "99093", "password", "StudentC", "1", "C");
+    cy.createSubject("teacher", "99090", "Physics", "1", "10");
+    cy.createStudent("teacher", "99091", "password", "StudentA", "1", "A");
+    cy.createStudent("teacher", "99092", "password", "StudentB", "1", "B");
+    cy.createStudent("teacher", "99093", "password", "StudentC", "1", "C");
 
     cy.get("#marksTabBtn").click();
     cy.location("pathname").should("eq", "/app/teacher/enterMarks");
-    cy.insertMarks("99091", "99090", "80", "20", role);
-    cy.insertMarks("99092", "99090", "70", "10", role);
-    cy.insertMarks("99093", "99090", "20", "2", role);
+    cy.insertMarks("99091", "99090", "80", "20", "teacher");
+    cy.insertMarks("99092", "99090", "70", "10", "teacher");
+    cy.insertMarks("99093", "99090", "20", "2", "teacher");
   }
 });
