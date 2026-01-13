@@ -141,8 +141,8 @@ func AcceptPendingReq(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "please provide password"})
 			return
 		}
-		temp := body.UserId
-		if temp <= 0 || temp > 99999999 {
+		userId := body.UserId
+		if userId <= 0 || userId > 99999999 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid user id"})
 			return
 		}
@@ -154,24 +154,24 @@ func AcceptPendingReq(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "role your requested doesnot exist"})
 			return
 		}
-		var count int
-		if err = db.QueryRow("SELECT COUNT(id) FROM pendingApplications WHERE username=? AND role_requested=? AND user_pwd=? AND id=?", body.UserName, body.UserRole, body.UserPwd, body.PendingId).Scan(&count); err != nil && err != sql.ErrNoRows {
+		var doesPendingRequestExist int
+		if err = db.QueryRow("SELECT COUNT(id) FROM pendingApplications WHERE username=? AND role_requested=? AND user_pwd=? AND id=?", body.UserName, body.UserRole, body.UserPwd, body.PendingId).Scan(&doesPendingRequestExist); err != nil && err != sql.ErrNoRows {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		if count <= 0 {
+		if doesPendingRequestExist <= 0 {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "no such pending request exist"})
 			return
 		}
 
 		if body.UserRole == "student" {
 
-			var count int
-			if err = db.QueryRow("SELECT COUNT(grNo) FROM students WHERE grNo=?", temp).Scan(&count); err != nil && err != sql.ErrNoRows {
+			var doesStudentExist int
+			if err = db.QueryRow("SELECT COUNT(grNo) FROM students WHERE grNo=?", userId).Scan(&doesStudentExist); err != nil && err != sql.ErrNoRows {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return
 			}
-			if count > 0 {
+			if doesStudentExist > 0 {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": "student already exist with gr number provided, try updating student details"})
 				return
 			}
@@ -189,12 +189,12 @@ func AcceptPendingReq(ctx *gin.Context) {
 			}
 		}
 		if body.UserRole == "teacher" {
-			var count int
-			if err = db.QueryRow("SELECT COUNT(tId) FROM teachers WHERE tId=?", temp).Scan(&count); err != nil {
+			var doesTeacherExist int
+			if err = db.QueryRow("SELECT COUNT(tId) FROM teachers WHERE tId=?", userId).Scan(&doesTeacherExist); err != nil {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			if count > 0 {
+			if doesTeacherExist > 0 {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": "teacher id you wish to add already exist"})
 				return
 			}
@@ -207,12 +207,12 @@ func AcceptPendingReq(ctx *gin.Context) {
 				return
 			}
 			if body.SubId != 0 && (body.SubId > 0 || body.SubId < 99999999) {
-				var count int
-				if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", body.SubId).Scan(&count); err != nil && err != sql.ErrNoRows {
+				var doesSubjectExist int
+				if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", body.SubId).Scan(&doesSubjectExist); err != nil && err != sql.ErrNoRows {
 					ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 					return
 				}
-				if count <= 0 {
+				if doesSubjectExist <= 0 {
 					ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject donot exist you want to assign"})
 					return
 				}
@@ -239,12 +239,12 @@ func AcceptPendingReq(ctx *gin.Context) {
 		}
 		if body.UserRole == "admin" {
 
-			var count int
-			if err = db.QueryRow("SELECT COUNT(admin_id) FROM admins WHERE admin_id=?", temp).Scan(&count); err != nil {
+			var doesAdminExist int
+			if err = db.QueryRow("SELECT COUNT(admin_id) FROM admins WHERE admin_id=?", userId).Scan(&doesAdminExist); err != nil {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			if count > 0 {
+			if doesAdminExist > 0 {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": "admin id you wish to add already exist"})
 				return
 			}
@@ -353,13 +353,13 @@ func ShowPendingReq(ctx *gin.Context) {
 		}
 		defer res.Close()
 		for res.Next() {
-			var temp PendingDb
-			err = res.Scan(&temp.PendingId, &temp.Username, &temp.RoleRequested, &temp.Pwd)
+			var pendingRequestInstance PendingDb
+			err = res.Scan(&pendingRequestInstance.PendingId, &pendingRequestInstance.Username, &pendingRequestInstance.RoleRequested, &pendingRequestInstance.Pwd)
 			if err != nil {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error scanning result of db"})
 				return
 			}
-			result = append(result, temp)
+			result = append(result, pendingRequestInstance)
 		}
 		if len(result) == 0 {
 			ctx.JSON(http.StatusOK, gin.H{"output": "no pending request found"})
@@ -387,18 +387,18 @@ func DeleteTeacher(ctx *gin.Context) {
 			return
 		}
 
-		var count int
+		var doesTeacherExist int
 
 		db, err := sql.Open("mysql", dsn)
 		if err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "CANNOT CONNECT TO DB"})
 			return
 		}
-		if err = db.QueryRow("SELECT COUNT(tId) FROM teachers WHERE tId=?", tid.TId).Scan(&count); err != nil {
+		if err = db.QueryRow("SELECT COUNT(tId) FROM teachers WHERE tId=?", tid.TId).Scan(&doesTeacherExist); err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		if count <= 0 {
+		if doesTeacherExist <= 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "teacher you wish to reomve donot exist"})
 			return
 		}
@@ -534,7 +534,7 @@ func AddTeacher(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "pls assign std and section if you are assigning subject else you wont be able to calculate teacher's performance"})
 			return
 		}
-		var count int
+		var doesTeacherExist int
 
 		db, err := sql.Open("mysql", dsn)
 		if err != nil {
@@ -542,21 +542,21 @@ func AddTeacher(ctx *gin.Context) {
 			return
 		}
 		defer db.Close()
-		if err = db.QueryRow("SELECT COUNT(tId) FROM teachers WHERE tId=?", tdata.TId).Scan(&count); err != nil {
+		if err = db.QueryRow("SELECT COUNT(tId) FROM teachers WHERE tId=?", tdata.TId).Scan(&doesTeacherExist); err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		if count > 0 {
+		if doesTeacherExist > 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "teacher id you wish to add already exist"})
 			return
 		}
 		if tdata.SubAllocated != 0 {
-			var count int
-			if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", tdata.SubAllocated).Scan(&count); err != nil {
+			var doesSubjectExist int
+			if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", tdata.SubAllocated).Scan(&doesSubjectExist); err != nil {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			if count <= 0 {
+			if doesSubjectExist <= 0 {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject doesnot exist you want to assign to teacher"})
 				return
 			}
@@ -608,12 +608,12 @@ func EditTeacher(ctx *gin.Context) {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "provide a teacher id"})
 			return
 		}
-		var count int
-		if err := db.QueryRow("SELECT COUNT(tId) FROM teachers WHERE tId=?", tdata.TId).Scan(&count); err != nil {
+		var doesTeacherExist int
+		if err := db.QueryRow("SELECT COUNT(tId) FROM teachers WHERE tId=?", tdata.TId).Scan(&doesTeacherExist); err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		if count <= 0 {
+		if doesTeacherExist <= 0 {
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "teacher doesnot exist you want to edit"})
 			return
 		}
@@ -648,18 +648,18 @@ func EditTeacher(ctx *gin.Context) {
 			return
 		}
 		if tdata.SubAllocated != 0 {
-			var count int
-			if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", tdata.SubAllocated).Scan(&count); err != nil {
+			var doesSubjectExist int
+			if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", tdata.SubAllocated).Scan(&doesSubjectExist); err != nil {
 				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			if count <= 0 {
+			if doesSubjectExist <= 0 {
 				ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject doesnot exist you want to assign to teacher"})
 				return
 			}
 		}
 		if err = db.QueryRow("SELECT * FROM teachers WHERE tId=?", tdata.TId).Scan(&defaultData.TId, &defaultData.Tpwd, &defaultData.Role, &defaultData.Name, &defaultData.SubAllocated, &defaultData.StdAllocated, &defaultData.SectionAllocated); err != nil && err != sql.ErrNoRows {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error() + "----------------from here"})
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		} else if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "teacher not found to edit"})

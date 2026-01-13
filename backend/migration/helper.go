@@ -43,9 +43,11 @@ func RemoveUnwantedData(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		if _, err = db.Exec("DELETE FROM subjectAllocation WHERE std != 1"); err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
+		if role == "admin" {
+			if _, err = db.Exec("DELETE FROM subjectAllocation WHERE std != 1"); err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
 		}
 		if _, err = db.Exec("TRUNCATE reviews"); err != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
