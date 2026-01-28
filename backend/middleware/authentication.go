@@ -57,8 +57,8 @@ func CreateSession(ctx *gin.Context) {
 		return
 	}
 
-	if credentials.Password != "" && len(credentials.Password) != 8 {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid pwd"})
+	if credentials.Password != "" && (len(credentials.Password) < 8 || len(credentials.Password) > 16) {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid pwd, provide password between 8-16 digits"})
 		return
 	}
 	if credentials.UserRole != "student" && credentials.UserRole != "teacher" && credentials.UserRole != "admin" {
@@ -75,6 +75,7 @@ func CreateSession(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err})
 			return
 		}
+		defer res.Close()
 		if res.Next() {
 			var grNo int
 			err = res.Scan(&grNo, &role, &name)
@@ -94,6 +95,7 @@ func CreateSession(ctx *gin.Context) {
 			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err})
 			return
 		}
+		defer res.Close()
 		if res.Next() {
 			var tId int
 			err = res.Scan(&tId, &role, &name)
@@ -110,8 +112,12 @@ func CreateSession(ctx *gin.Context) {
 	case "admin":
 		var aId int
 		err := db.QueryRow("SELECT admin_id,admin_name FROM admins WHERE admin_id=? AND admin_pwd=? ", credentials.UserId, credentials.Password).Scan(&aId, &name)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "invalid credentials"})
+		if err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 			return
 		}
 		role = "admin"
@@ -121,7 +127,7 @@ func CreateSession(ctx *gin.Context) {
 		claim.RegisteredClaims.IssuedAt = jwt.NewNumericDate(time.Now())
 		claim.RegisteredClaims.ExpiresAt = jwt.NewNumericDate(temptime)
 	default:
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "invalid role"})
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "invalid role"})
 		return
 	}
 
@@ -180,12 +186,12 @@ func ValidateSession() gin.HandlerFunc {
 			return
 		}
 		if token.Valid {
-			var amt int
-			if err = db.QueryRow(`SELECT COUNT(sessionId) FROM activeSessions WHERE sessiontoken=?`, userCookie).Scan(&amt); err != nil {
+			var count int
+			if err = db.QueryRow(`SELECT COUNT(sessionId) FROM activeSessions WHERE sessiontoken=?`, userCookie).Scan(&count); err != nil {
 				ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			if amt < 1 {
+			if count < 1 {
 				ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invaliddd or expired token provided"})
 				return
 			}

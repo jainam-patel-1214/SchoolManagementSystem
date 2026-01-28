@@ -2,7 +2,6 @@ package migration
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -23,6 +22,7 @@ func RunMigrations(db *sql.DB, dirName string) {
 		log.Fatal(err)
 	}
 	for _, file := range fileName {
+
 		path := filepath.Join(dirName, file)
 		content, err := os.ReadFile(path)
 		if err != nil {
@@ -33,7 +33,7 @@ func RunMigrations(db *sql.DB, dirName string) {
 			if file == "001.sql" {
 				log.Fatal("Error in 001.sql:", err)
 			} else {
-				fmt.Println("Ignoring error in", file, ":", err)
+				log.Println("Ignoring error in", file, ":", err)
 			}
 		}
 	}

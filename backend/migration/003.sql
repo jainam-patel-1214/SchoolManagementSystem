@@ -1,0 +1,16 @@
+ALTER TABLE pendingApplications
+MODIFY COLUMN user_pwd VARCHAR(16),
+ADD CONSTRAINT check_ppassword_length
+CHECK (CHAR_LENGTH(user_pwd) BETWEEN 8 AND 16);
+ALTER TABLE teachers
+MODIFY COLUMN tPwd VARCHAR(16),
+ADD CONSTRAINT check_tpassword_length
+CHECK (CHAR_LENGTH(tPwd) BETWEEN 8 AND 16);
+ALTER TABLE students
+MODIFY COLUMN sPwd VARCHAR(16),
+ADD CONSTRAINT check_spassword_length
+CHECK (CHAR_LENGTH(sPwd) BETWEEN 8 AND 16);
+ALTER TABLE admins
+MODIFY COLUMN admin_pwd VARCHAR(16),
+ADD CONSTRAINT check_apassword_length
+CHECK (CHAR_LENGTH(admin_pwd) BETWEEN 8 AND 16);

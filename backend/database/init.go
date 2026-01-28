@@ -1,7 +1,6 @@
 package database
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -32,6 +31,5 @@ func InitDb() string {
 	if dbHostdsn == "" {
 		log.Fatal("DSN not found in environment variables")
 	}
-	fmt.Println("DB Host:", dbHostdsn)
 	return dbHostdsn
 }
