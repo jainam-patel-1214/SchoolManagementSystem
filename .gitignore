@@ -1,6 +1,12 @@
 # backend env
 backend/.env
 
+<<<<<<< HEAD
+=======
+#frontend
+frontend/build/
+
+>>>>>>> a4a3a4b1f5e2e6db5a898b89cadfa4442b734c19
 # macOS
 .DS_Store
 

@@ -1,0 +1,1368 @@
+package admin
+
+import (
+	"database/sql"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"unicode"
+
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+)
+
+type DisplayConditions struct {
+	ViewByStd     int    `json:"viewByStd"`
+	ViewBySection string `json:"viewBySection"`
+	MinPercent    int    `json:"minPercent"`
+	MaxPercent    int    `json:"maxPercent"`
+}
+
+func HasOnlyAlphabets(s string) bool {
+	for _, r := range s {
+		if unicode.IsSpace(r) {
+			continue
+		}
+		if !unicode.IsLetter(r) {
+			return false
+		}
+	}
+	return true
+}
+
+func AddStudent(ctx *gin.Context) {
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "database crashed"})
+		return
+	}
+	defer db.Close()
+	role, exist := ctx.Get("userrole")
+	if !exist || role != "admin" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
+		return
+	} else {
+		var studentData struct {
+			GR_NO       int    `json:"grNo" binding:"required"`
+			StudentPwd  string `json:"studPwd" binding:"required"`
+			UserRole    string `json:"userRole" binding:"required"`
+			StudentName string `json:"studName" binding:"required"`
+			Std         int    `json:"std" binding:"required"`
+			Section     string `json:"section" binding:"required"`
+		}
+		err = ctx.ShouldBindJSON(&studentData)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if studentData.GR_NO == 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid gr no provided"})
+			return
+		}
+		if studentData.GR_NO > 99999999 || studentData.GR_NO < 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid gr no provided"})
+			return
+		}
+		var doesStudentExist int
+		if err = db.QueryRow("SELECT COUNT(grNo) FROM students WHERE grNo=?", studentData.GR_NO).Scan(&doesStudentExist); err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if doesStudentExist > 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "student already exist with gr number provided, try updating student details"})
+			return
+		}
+		if studentData.StudentPwd == "" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "please provide password"})
+			return
+		}
+		if len(studentData.StudentPwd) < 8 || len(studentData.StudentPwd) > 16 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "password length required of 8 to 16 characters"})
+			return
+		}
+		if studentData.UserRole != "student" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "student user role required"})
+			return
+		}
+		if studentData.StudentName == "" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "please provide name of student"})
+			return
+		}
+		if !HasOnlyAlphabets(studentData.StudentName) && studentData.StudentName != "" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "symbols/digits not allowed in student name"})
+			return
+		}
+		if studentData.Std == 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "standard not provided, it shall be from 1 to 12"})
+			return
+		}
+		if studentData.Section == "" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "section not provided"})
+			return
+		}
+		if studentData.Std < 0 || studentData.Std > 12 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "standard shall be from 1 to 12"})
+			return
+		}
+		if len(studentData.Section) < 1 || len(studentData.Section) > 2 || !HasOnlyAlphabets(studentData.Section) {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid section"})
+			return
+		}
+		_, err = db.Exec("INSERT INTO students (grNo, sPwd, userRole, studName, std, section) VALUES (?,?,?,?,?,?)", studentData.GR_NO, studentData.StudentPwd, studentData.UserRole, studentData.StudentName, studentData.Std, studentData.Section)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error while inserting into db"})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"output": "student created"})
+	}
+}
+
+func EditStud(ctx *gin.Context) {
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+
+		return
+	}
+	defer db.Close()
+	role, exist := ctx.Get("userrole")
+	if !exist || role != "admin" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
+		return
+	} else {
+		type EditBody struct {
+			GR_No       int    `json:"grNo" binding:"required"`
+			StudentPwd  string `json:"studPwd"`
+			UserRole    string `json:"userRole"`
+			StudentName string `json:"studName"`
+			Std         int    `json:"std"`
+			Section     string `json:"section"`
+		}
+		var editBody EditBody
+		err = ctx.ShouldBindJSON(&editBody)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		if editBody.GR_No == 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid gr no provided"})
+			return
+		}
+		if editBody.GR_No > 99999999 || editBody.GR_No < 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid gr no provided"})
+			return
+		}
+		var doesStudentExist int
+		if err = db.QueryRow("SELECT COUNT(grNo) FROM students WHERE grNo=?", editBody.GR_No).Scan(&doesStudentExist); err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if doesStudentExist <= 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "student doesnt exist with gr number provided, try creating student"})
+			return
+		}
+		if (len(editBody.StudentPwd) < 8 || len(editBody.StudentPwd) > 16) && editBody.StudentPwd != "" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "password length required of 8 to 16 characters"})
+			return
+		}
+		if editBody.UserRole != "" && editBody.UserRole != "student" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "student user role required"})
+			return
+		}
+		if editBody.StudentName != "" && !HasOnlyAlphabets(editBody.StudentName) {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "please accurate name of student"})
+			return
+		}
+		if editBody.Std != 0 && (editBody.Std < 1 || editBody.Std > 12) {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "standard shall be from 1 to 12"})
+			return
+		}
+		if editBody.Section != "" && (len(editBody.Section) < 1 || len(editBody.Section) > 2) {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "accurate section not provided"})
+			return
+		}
+
+		var defaultData EditBody
+		err = db.QueryRow("SELECT * FROM students WHERE grNo=?", editBody.GR_No).Scan(&defaultData.GR_No, &defaultData.StudentPwd, &defaultData.UserRole, &defaultData.StudentName, &defaultData.Std, &defaultData.Section)
+		if err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "no student found to be edited"})
+			return
+		}
+		var dbstr strings.Builder
+		dbstr.WriteString("UPDATE students SET ")
+		var conditions []string
+		if editBody.StudentPwd != defaultData.StudentPwd && editBody.StudentPwd != "" {
+			conditions = append(conditions, ("sPwd = '" + editBody.StudentPwd + "'"))
+		}
+		if editBody.StudentName != defaultData.StudentName && editBody.StudentName != "" && HasOnlyAlphabets(editBody.StudentName) {
+			conditions = append(conditions, ("studName = '" + editBody.StudentName + "'"))
+		}
+		if editBody.Std != 0 && editBody.Std != defaultData.Std && editBody.Std <= 12 && editBody.Std > 0 {
+			conditions = append(conditions, ("std = " + strconv.Itoa(editBody.Std)))
+		}
+		if editBody.Section != defaultData.Section && editBody.Section != "" && HasOnlyAlphabets(editBody.Section) {
+			conditions = append(conditions, ("section = '" + editBody.Section + "'"))
+		}
+		for i, v := range conditions {
+			dbstr.WriteString(v)
+			if i != len(conditions)-1 {
+				dbstr.WriteString(",")
+			}
+		}
+		dbstr.WriteString((" WHERE grNo = " + strconv.Itoa(editBody.GR_No)))
+
+		if len(conditions) > 0 {
+			_, err = db.Exec(dbstr.String())
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error while updating db"})
+				return
+			}
+		} else {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "old values = new values not allowed"})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"output": "student updated successfully"})
+		return
+	}
+}
+
+func CreateSub(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || role != "admin" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
+		return
+	}
+	if role == "admin" {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cannot connect to db"})
+			return
+		}
+		defer db.Close()
+		var subInfo struct {
+			SubId    int    `json:"subId" binding:"required"`
+			SubName  string `json:"subName" binding:"required"`
+			LevelStd int    `json:"levelStd" binding:"required"`
+			Credits  int    `json:"credits" binding:"required"`
+		}
+		if err = ctx.ShouldBindJSON(&subInfo); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "error processing body"})
+			return
+		}
+
+		if subInfo.SubId <= 0 || subInfo.SubId > 99999999 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject id, pls enter max 8 digit id"})
+			return
+		}
+		var doesSubjectExist int
+		if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", subInfo.SubId).Scan(&doesSubjectExist); err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if doesSubjectExist > 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject already exist with id provided, try updating subject details"})
+			return
+		}
+		if subInfo.SubName == "" || len(subInfo.SubName) > 50 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject name, pls provide name upto 50 chars"})
+			return
+		}
+		if subInfo.LevelStd <= 0 || subInfo.LevelStd > 12 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "only standard from 1 to 12 are valid"})
+			return
+		}
+		if subInfo.Credits < 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "negative credits are not possible"})
+			return
+		}
+
+		var limit int
+		err = db.QueryRow("SELECT subject_limit FROM subjectAllocation WHERE std = ?", subInfo.LevelStd).Scan(&limit)
+		if err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error processing data"})
+			return
+		}
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("first set limit of subjects allocated in standard %d", subInfo.LevelStd)})
+			return
+		}
+		var subjectCount int
+		err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE levelStd = ?", subInfo.LevelStd).Scan(&subjectCount)
+		if err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error processing data"})
+			return
+		}
+		if subjectCount >= limit {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("limit of subject for standard %d reached", subInfo.LevelStd)})
+			return
+		}
+		if _, err = db.Exec("INSERT INTO subjects (subId,subName,levelStd,credits) VALUES (?,?,?,?)", subInfo.SubId, subInfo.SubName, subInfo.LevelStd, subInfo.Credits); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error inserting data"})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"output": "inserted successfully"})
+		return
+	} else {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized user"})
+		return
+	}
+}
+
+func EditSub(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || role != "admin" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
+		return
+	}
+	if role == "admin" {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cant connect db"})
+			return
+		}
+		defer db.Close()
+		type EditBody struct {
+			SubId    int    `json:"subId" binding:"required"`
+			SubName  string `json:"subName"`
+			LevelStd int    `json:"levelStd"`
+			Credits  int    `json:"credits"`
+		}
+		var editBody EditBody
+		err = ctx.ShouldBindJSON(&editBody)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "error while readingbody"})
+			return
+		}
+
+		if editBody.SubId <= 0 || editBody.SubId > 99999999 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject id, pls enter max 8 digit id"})
+			return
+		}
+		var doesSubjectExist int
+		if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", editBody.SubId).Scan(&doesSubjectExist); err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if doesSubjectExist <= 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject doesnot exist with id provided, try creating subject details"})
+			return
+		}
+		if err = db.QueryRow("SELECT COUNT(subId) FROM marks WHERE subId=?", editBody.SubId).Scan(&doesSubjectExist); err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if doesSubjectExist > 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Marks are alloted to students associated to subject you want to edit. Cant edit, only delete is possible"})
+			return
+		}
+		if editBody.SubName != "" && len(editBody.SubName) > 50 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject name, pls provide name upto 50 chars"})
+			return
+		}
+		if editBody.LevelStd != 0 {
+			if editBody.LevelStd < 0 || editBody.LevelStd > 12 {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "only standard from 1 to 12 are valid"})
+				return
+			}
+		}
+		if editBody.Credits < 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "negative credits are not possible"})
+			return
+		}
+
+		var defaultData EditBody
+		err = db.QueryRow("SELECT * FROM subjects WHERE subId=?", editBody.SubId).Scan(&defaultData.SubId, &defaultData.SubName, &defaultData.LevelStd, &defaultData.Credits)
+		if err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error while processing data"})
+			return
+		}
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "subject not found to edit"})
+			return
+		}
+		dbstr := "UPDATE subjects SET "
+		var conditions []string
+		if editBody.SubId != defaultData.SubId && editBody.SubId != 0 {
+			conditions = append(conditions, ("subId = " + strconv.Itoa(editBody.SubId)))
+		}
+		if editBody.SubName != defaultData.SubName && editBody.SubName != "" {
+			conditions = append(conditions, ("subName = '" + editBody.SubName + "'"))
+		}
+		if editBody.LevelStd != 0 && editBody.LevelStd != defaultData.LevelStd && editBody.LevelStd <= 12 && editBody.LevelStd > 0 {
+			conditions = append(conditions, ("levelStd = " + strconv.Itoa(editBody.LevelStd)))
+		}
+		if editBody.Credits != defaultData.Credits {
+			conditions = append(conditions, ("credits = " + strconv.Itoa(editBody.Credits)))
+		}
+		for i, v := range conditions {
+			dbstr += v
+			if i != len(conditions)-1 {
+				dbstr += ","
+			}
+		}
+		dbstr += (" WHERE subId = " + strconv.Itoa(editBody.SubId))
+
+		if len(conditions) > 0 {
+			_, err = db.Exec(dbstr)
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error while updating db"})
+				return
+			}
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": "no changes"})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"output": "subject updated successfully"})
+		return
+	} else {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized user"})
+		return
+	}
+}
+
+func EnterMarks(ctx *gin.Context) {
+
+	role, exist := ctx.Get("userrole")
+	if !exist || role != "admin" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
+		return
+	}
+	if role == "admin" {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cannot connect to db"})
+			return
+		}
+		defer db.Close()
+		var marks struct {
+			GrNo           int `json:"grNo" binding:"required"`
+			SubId          int `json:"subId" binding:"required"`
+			TheoryMarks    int `json:"theoryMarks" binding:"required"`
+			PracticalMarks int `json:"practicalMarks" binding:"required"`
+		}
+		if err = ctx.ShouldBindJSON(&marks); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		if marks.GrNo <= 0 || marks.GrNo > 99999999 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid gr no., pls enter max 8 digit id"})
+			return
+		}
+		if marks.SubId <= 0 || marks.SubId > 99999999 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject id"})
+			return
+		}
+		if marks.TheoryMarks < 0 || marks.TheoryMarks > 80 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "provide theory marks between 0 & 80"})
+			return
+		}
+		if marks.PracticalMarks < 0 || marks.PracticalMarks > 20 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "provide practical marks between 0 & 20"})
+			return
+		}
+		var studentCount int
+		err = db.QueryRow("SELECT COUNT(grNo) FROM students WHERE grNo = ?", marks.GrNo).Scan(&studentCount)
+		if err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if studentCount <= 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "student not exist whom you want to add marks"})
+			return
+		}
+		var subjectCount int
+		err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId = ?", marks.SubId).Scan(&subjectCount)
+		if err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if subjectCount <= 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject not exist whom you want to add marks"})
+			return
+		}
+		var doesMarkRecordExists int
+		err = db.QueryRow("SELECT COUNT(grNo) FROM marks WHERE grNo = ? AND subId = ?", marks.GrNo, marks.SubId).Scan(&doesMarkRecordExists)
+		if err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if doesMarkRecordExists > 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "record already present please try updating it"})
+			return
+		}
+
+		var stdSt int
+		var stdSub int
+		err = db.QueryRow("SELECT std FROM students WHERE grNo = ?", marks.GrNo).Scan(&stdSt)
+		if err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		err = db.QueryRow("SELECT levelStd FROM subjects WHERE subId = ?", marks.SubId).Scan(&stdSub)
+		if err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if stdSt != stdSub {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "either check student or check subject you are trying to enter marks because both field's standard doesnot match"})
+			return
+		}
+		if _, err = db.Exec("INSERT INTO marks (grNo,subId,theoryM,practicalM,grade) VALUES (?,?,?,?,?)", marks.GrNo, marks.SubId, marks.TheoryMarks, marks.PracticalMarks, gradeCalculator(marks.TheoryMarks+marks.PracticalMarks)); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error inserting data"})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"output": "inserted successfully"})
+		return
+	} else {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized user"})
+		return
+	}
+
+}
+func EditMarks(ctx *gin.Context) {
+
+	role, exist := ctx.Get("userrole")
+	if !exist || role != "admin" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
+		return
+	}
+	if role == "admin" {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cant connect db"})
+			return
+		}
+		defer db.Close()
+		type marks struct {
+			GrNo           int `json:"grNo" binding:"required"`
+			SubId          int `json:"subId" binding:"required"`
+			TheoryMarks    int `json:"theoryMarks"`
+			PracticalMarks int `json:"practicalMarks"`
+		}
+		var editBody marks
+		var tempgrade string
+		err = ctx.ShouldBindJSON(&editBody)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		if editBody.GrNo <= 0 || editBody.GrNo > 99999999 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid gr no., pls enter max 8 digit id"})
+			return
+		}
+		if editBody.SubId <= 0 || editBody.SubId > 99999999 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject id"})
+			return
+		}
+		if editBody.TheoryMarks != 0 {
+			if editBody.TheoryMarks < 0 || editBody.TheoryMarks > 80 {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "provide theory marks between 0 & 80"})
+				return
+			}
+		}
+		if editBody.PracticalMarks != 0 {
+			if editBody.PracticalMarks < 0 || editBody.PracticalMarks > 20 {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "provide practical marks between 0 & 20"})
+				return
+			}
+		}
+		var studentCount int
+		err = db.QueryRow("SELECT COUNT(grNo) FROM students WHERE grNo = ?", editBody.GrNo).Scan(&studentCount)
+		if err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if studentCount <= 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "student not exist whom you want to edit marks"})
+			return
+		}
+		var subjectCount int
+		err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId = ?", editBody.SubId).Scan(&subjectCount)
+		if err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if subjectCount <= 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject not exist whom you want to rdit marks"})
+			return
+		}
+		var doesMarkRecordExists int
+		err = db.QueryRow("SELECT COUNT(grNo) FROM marks WHERE grNo = ? AND subId = ?", editBody.GrNo, editBody.SubId).Scan(&doesMarkRecordExists)
+		if err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if doesMarkRecordExists <= 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "record not present please try creating it"})
+			return
+		}
+		var defaultData marks
+		err = db.QueryRow("SELECT * FROM marks WHERE grNo=? AND subId=?", editBody.GrNo, editBody.SubId).Scan(&defaultData.GrNo, &defaultData.SubId, &defaultData.TheoryMarks, &defaultData.PracticalMarks, &tempgrade)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "such grno and subject id entry not found"})
+			return
+		}
+		var dbstr strings.Builder
+		dbstr.WriteString("UPDATE marks SET ")
+		changeOccur := false
+		var conditions []string
+		if editBody.TheoryMarks != defaultData.TheoryMarks && editBody.TheoryMarks <= 80 && editBody.TheoryMarks >= 0 {
+			conditions = append(conditions, ("theoryM = " + strconv.Itoa(editBody.TheoryMarks)))
+			changeOccur = true
+		}
+		if editBody.PracticalMarks != defaultData.PracticalMarks && editBody.PracticalMarks <= 20 && editBody.PracticalMarks >= 0 {
+			conditions = append(conditions, ("practicalM = " + strconv.Itoa(editBody.PracticalMarks)))
+			changeOccur = true
+		}
+		needComma := false
+		for i, v := range conditions {
+			dbstr.WriteString(v)
+			needComma = true
+			if i != len(conditions)-1 {
+				dbstr.WriteString(",")
+			}
+		}
+		if needComma {
+			dbstr.WriteString(",")
+		}
+		if changeOccur {
+			dbstr.WriteString(fmt.Sprintf(" grade = '%s' ", gradeCalculator(editBody.TheoryMarks+editBody.PracticalMarks)))
+		}
+		dbstr.WriteString(fmt.Sprintf("WHERE grNo = %s AND subId = %s", strconv.Itoa(editBody.GrNo), strconv.Itoa(editBody.SubId)))
+		if changeOccur {
+			_, err = db.Exec(dbstr.String())
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error while updating db"})
+				return
+			}
+			ctx.JSON(http.StatusOK, gin.H{"output": "student updated successfully"})
+			return
+		} else {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "no changes specified"})
+			return
+		}
+	} else {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized user"})
+		return
+	}
+
+}
+
+func Performance(ctx *gin.Context) {
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+
+		return
+	}
+	defer db.Close()
+	role, exist := ctx.Get("userrole")
+	if !exist || role != "admin" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
+		return
+	}
+	var TeacherId struct {
+		Tid int
+	}
+	TeacherId.Tid, _ = strconv.Atoi(ctx.Param("tid"))
+
+	if TeacherId.Tid <= 0 || TeacherId.Tid > 99999999 {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "no id found"})
+		return
+	}
+	if TeacherId.Tid != 0 {
+		var doesTeacherExist int
+		if err = db.QueryRow("SELECT COUNT(tId) FROM teachers WHERE tId = ?", TeacherId.Tid).Scan(&doesTeacherExist); err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if doesTeacherExist <= 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "no such teacher found with entered teacher id"})
+			return
+		}
+		var teachFlag int
+		if err = db.QueryRow("SELECT subId FROM teachers WHERE tId=?", TeacherId.Tid).Scan(&teachFlag); teachFlag == 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "teacher id you provided doesnt take any subject, so no performance can be evaluated"})
+			return
+		} else if err == sql.ErrNoRows || teachFlag <= 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "teacher id you provided doesnt take any subject, so no performance can be evaluated"})
+			return
+		}
+		if err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	} else {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "please provide teacher's id"})
+		return
+	}
+	res := db.QueryRow("SELECT subId,stdAllocated FROM teachers WHERE tId = ?", TeacherId.Tid)
+	var sub int
+	var stdallocated int
+	if err = res.Scan(&sub, &stdallocated); err != nil && err != sql.ErrNoRows {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong"})
+		return
+	} else if sub == 0 || stdallocated == 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject/standard is not allocated to teacher whose performance you requested. thus no performance can be fetched"})
+		return
+	} else if err == sql.ErrNoRows {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "subject/standard is not allocated to teacher whose performance you requested. thus no performance can be fetched"})
+		return
+	}
+	type Teachers struct {
+		Tid                 int
+		TName               string
+		StdAllocated        int
+		SubName             string
+		TotalTheoryMarks    int
+		TotalPracticalMarks int
+	}
+	var result []Teachers
+	res2, err := db.Query("SELECT tId FROM teachers WHERE stdAllocated=? AND subId IS NOT NULL", stdallocated)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "something went wrong hwile fetching db"})
+		return
+	}
+	defer res2.Close()
+	for res2.Next() {
+		var tempres Teachers
+		var temp int
+		err = res2.Scan(&temp)
+		if err != nil {
+			log.Fatal("cannot scan", err)
+		} else {
+			res3, err := db.Query("SELECT t.tId, t.tName, t.stdAllocated, s.subName, SUM(m.theoryM) AS totalTheory, SUM(m.practicalM) AS totalPractical FROM marks m LEFT JOIN teachers t ON m.subId = t.subId INNER JOIN subjects s ON t.subId = s.subId WHERE t.tId = ? GROUP BY t.tId, t.tName, t.stdAllocated, s.subName", temp)
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			defer res3.Close()
+			if res3.Next() {
+				err = res3.Scan(&tempres.Tid, &tempres.TName, &tempres.StdAllocated, &tempres.SubName, &tempres.TotalTheoryMarks, &tempres.TotalPracticalMarks)
+				if err != nil {
+					log.Fatal("error finding data", err)
+					return
+				}
+				result = append(result, tempres)
+			}
+		}
+	}
+	if len(result) == 0 {
+		ctx.JSON(http.StatusOK, gin.H{"output": "no results found"})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"output": result})
+}
+
+func DelStud(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || role != "admin" {
+
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
+		return
+	}
+	if role == "admin" {
+		var stdGrno struct {
+			GRno int `json:"grNo" binding:"required"`
+		}
+		if err := ctx.ShouldBindJSON(&stdGrno); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "unable to read body"})
+			return
+		}
+		if stdGrno.GRno <= 0 || stdGrno.GRno > 99999999 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid student id entered for deletion"})
+			return
+		}
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "CANNOT CONNECT TO DB"})
+			return
+		}
+		if stdGrno.GRno != 0 {
+			var doesStudentExist int
+			if err = db.QueryRow("SELECT COUNT(grNo) FROM students WHERE grNo=?", stdGrno.GRno).Scan(&doesStudentExist); err != nil && err != sql.ErrNoRows {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			if doesStudentExist <= 0 {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "student to be deleted doesnot exist, please enter existing gr no"})
+				return
+			}
+		}
+		defer db.Close()
+		if _, err = db.Exec("DELETE FROM students WHERE grNo = ?", stdGrno.GRno); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "error in DB, cant delete"})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"output": "DELETED SUCCESSFULLY"})
+	} else {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
+		return
+	}
+}
+
+func DelSub(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || role != "admin" {
+
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
+		return
+	}
+	if role == "admin" {
+		var subid struct {
+			SubId int `json:"subId" binding:"required"`
+		}
+		if err := ctx.ShouldBindJSON(&subid); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "unable to read body"})
+			return
+		}
+		if subid.SubId <= 0 || subid.SubId > 99999999 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid subject id, pls enter max 8 digit id"})
+			return
+		}
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "CANNOT CONNECT TO DB"})
+			return
+		}
+		if subid.SubId != 0 {
+			var doesSubjectExist int
+			if err = db.QueryRow("SELECT COUNT(subId) FROM subjects WHERE subId=?", subid.SubId).Scan(&doesSubjectExist); err != nil && err != sql.ErrNoRows {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			if doesSubjectExist <= 0 {
+				ctx.JSON(http.StatusBadRequest, gin.H{"error": "subject to be deleted doesnot exist, please enter existing subject id"})
+				return
+			}
+		}
+		defer db.Close()
+		if _, err = db.Exec("DELETE FROM subjects WHERE subId = ?", subid.SubId); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"output": "DELETED SUCCESSFULLY"})
+
+	} else {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
+		return
+	}
+}
+
+func SelfData(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || role != "admin" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
+		return
+	} else {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "cant connect to db"})
+			return
+		}
+		defer db.Close()
+
+		tid, exist := ctx.Get("UiD")
+		if !exist || tid == 0 {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "id not found"})
+			return
+		}
+		temp := fmt.Sprintf("%v", tid)
+
+		var otpt struct {
+			Id       string
+			Password string
+			Name     string
+		}
+		err = db.QueryRow("SELECT admin_id,admin_name,admin_pwd FROM admins WHERE admin_id=?", temp).Scan(&otpt.Id, &otpt.Name, &otpt.Password)
+		if err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"output": otpt})
+	}
+}
+
+func DisplayAllAdmin(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "admin") {
+
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
+		return
+	} else {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "CANNOT CONNECT TO DB"})
+			return
+		}
+		defer db.Close()
+		type StudentList struct {
+			AdminId  int    `json:"adminId"`
+			Password string `json:"password"`
+			Name     string `json:"adminName"`
+		}
+		var AdminsData []StudentList
+		res, err := db.Query("SELECT admin_id,admin_name,admin_pwd FROM admins")
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		defer res.Close()
+
+		for res.Next() {
+			var admin StudentList
+
+			err := res.Scan(
+				&admin.AdminId,
+				&admin.Name,
+				&admin.Password,
+			)
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			AdminsData = append(AdminsData, admin)
+		}
+		if len(AdminsData) > 0 {
+			ctx.JSON(http.StatusOK, gin.H{"output": AdminsData})
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": "no admins found"})
+		}
+	}
+}
+
+func DisplayAllStudents(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "teacher" && role != "admin") {
+
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
+		return
+	} else {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "CANNOT CONNECT TO DB"})
+			return
+		}
+		defer db.Close()
+		type StudentList struct {
+			GrNo     int    `json:"grNo"`
+			Password string `json:"password"`
+			Name     string `json:"studentName"`
+			Grade    int    `json:"grade"`
+			Section  string `json:"section"`
+		}
+		var StudentsData []StudentList
+		res, err := db.Query("SELECT grNo,sPwd,studName,std,section FROM students")
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		defer res.Close()
+
+		for res.Next() {
+			var student StudentList
+
+			err := res.Scan(
+				&student.GrNo,
+				&student.Password,
+				&student.Name,
+				&student.Grade,
+				&student.Section,
+			)
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			StudentsData = append(StudentsData, student)
+		}
+		if len(StudentsData) > 0 {
+			ctx.JSON(http.StatusOK, gin.H{"output": StudentsData})
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": "no students found"})
+		}
+	}
+}
+
+func IsValidTeacher(ctx *gin.Context) {
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "database crashed"})
+		return
+	}
+	defer db.Close()
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "admin") {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized access"})
+		return
+	} else {
+		tID, _ := strconv.Atoi(ctx.Param("tid"))
+		var amount int
+		err = db.QueryRow("SELECT COUNT(tId) FROM teachers WHERE tId = ?", tID).Scan(&amount)
+		if err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if amount <= 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "teacher not exist"})
+			return
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": "valid teacher"})
+			return
+		}
+	}
+}
+
+func DisplayAllTeachers(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "admin") {
+
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
+		return
+	} else {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "CANNOT CONNECT TO DB"})
+			return
+		}
+		defer db.Close()
+		type TeacherList struct {
+			Tid      int            `json:"teacherId"`
+			Password string         `json:"teacherPwd"`
+			Name     string         `json:"teacherName"`
+			Grade    sql.NullInt64  `json:"gradeAllocated"`
+			Section  sql.NullString `json:"sectionAllocated"`
+			Subject  sql.NullString `json:"subjectAllocated"`
+			SubId    sql.NullInt64  `json:"subjectId"`
+		}
+		var TeachersData []TeacherList
+		res, err := db.Query("SELECT t.tId,t.tPwd,t.tName,t.stdAllocated,t.sectionAllocated,s.subName,s.subId FROM teachers t LEFT JOIN subjects s ON t.subId = s.subId")
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		defer res.Close()
+
+		for res.Next() {
+			var teacher TeacherList
+
+			err := res.Scan(
+				&teacher.Tid,
+				&teacher.Password,
+				&teacher.Name,
+				&teacher.Grade,
+				&teacher.Section,
+				&teacher.Subject,
+				&teacher.SubId,
+			)
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			TeachersData = append(TeachersData, teacher)
+		}
+		if len(TeachersData) > 0 {
+			ctx.JSON(http.StatusOK, gin.H{"output": TeachersData})
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": "no teachers found"})
+		}
+	}
+}
+
+func DisplayAllSubjects(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "teacher" && role != "admin") {
+
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
+		return
+	} else {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "CANNOT CONNECT TO DB"})
+			return
+		}
+		defer db.Close()
+		type SubjectList struct {
+			SubId    int    `json:"subjectId"`
+			SubName  string `json:"subjectName"`
+			LevelStd int    `json:"level"`
+			Credits  int    `json:"credits"`
+		}
+		var SubjectsData []SubjectList
+		res, err := db.Query("SELECT subId,subName,levelStd,credits FROM subjects")
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		defer res.Close()
+
+		for res.Next() {
+			var subject SubjectList
+
+			err := res.Scan(
+				&subject.SubId,
+				&subject.SubName,
+				&subject.LevelStd,
+				&subject.Credits,
+			)
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			SubjectsData = append(SubjectsData, subject)
+		}
+		if len(SubjectsData) > 0 {
+			ctx.JSON(http.StatusOK, gin.H{"output": SubjectsData})
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": "no subjects found"})
+		}
+	}
+}
+
+func DisplayAllSubjectLimit(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "teacher" && role != "admin") {
+
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
+		return
+	} else {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "CANNOT CONNECT TO DB"})
+			return
+		}
+		defer db.Close()
+		type SubjectLimitList struct {
+			LevelStd int `json:"Standard"`
+			Limit    int `json:"Subject-Limit"`
+		}
+		var LimitData []SubjectLimitList
+		res, err := db.Query("SELECT std,subject_limit FROM subjectAllocation")
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		defer res.Close()
+
+		for res.Next() {
+			var limitObject SubjectLimitList
+
+			err := res.Scan(
+				&limitObject.LevelStd,
+				&limitObject.Limit,
+			)
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			LimitData = append(LimitData, limitObject)
+		}
+		if len(LimitData) > 0 {
+			ctx.JSON(http.StatusOK, gin.H{"output": LimitData})
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": "subject limit has not been set for any standard"})
+		}
+	}
+}
+
+func DisplayParticularTeacher(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "admin") {
+
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorused access"})
+		return
+	} else {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "CANNOT CONNECT TO DB"})
+			return
+		}
+		defer db.Close()
+		tId, _ := strconv.Atoi(ctx.Param("tid"))
+		if tId == 0 {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid teacher id"})
+		}
+		var TeachersData struct {
+			Tid      int            `json:"teacherId"`
+			Password string         `json:"teacherPwd"`
+			Name     string         `json:"teacherName"`
+			Grade    sql.NullInt64  `json:"gradeAllocated"`
+			Section  sql.NullString `json:"sectionAllocated"`
+			Subject  sql.NullString `json:"subjectAllocated"`
+			SubId    sql.NullInt64  `json:"subjectId"`
+		}
+		if err := db.QueryRow("SELECT t.tId,t.tPwd,t.tName,t.stdAllocated,t.sectionAllocated,s.subName,s.subId FROM teachers t LEFT JOIN subjects s ON t.subId = s.subId WHERE t.tId = ?", tId).Scan(
+			&TeachersData.Tid,
+			&TeachersData.Password,
+			&TeachersData.Name,
+			&TeachersData.Grade,
+			&TeachersData.Section,
+			&TeachersData.Subject,
+			&TeachersData.SubId,
+		); err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		} else if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusOK, gin.H{"output": "no teachers found"})
+			return
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": TeachersData})
+			return
+		}
+	}
+}
+func DisplayParticularStudent(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "admin" && role != "teacher") {
+
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
+		return
+	} else {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "CANNOT CONNECT TO DB"})
+			return
+		}
+		defer db.Close()
+		studId, _ := strconv.Atoi(ctx.Param("grNo"))
+		var StudentData struct {
+			GrNo     int    `json:"grNo"`
+			Password string `json:"studentPwd"`
+			Name     string `json:"studentName"`
+			Grade    int    `json:"grade"`
+			Section  string `json:"section"`
+		}
+		if err := db.QueryRow("SELECT grNo, sPwd, studName, std, section FROM students WHERE grNo=?", studId).Scan(&StudentData.GrNo, &StudentData.Password, &StudentData.Name, &StudentData.Grade, &StudentData.Section); err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		} else if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusOK, gin.H{"output": "no student found"})
+			return
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": StudentData})
+			return
+		}
+
+	}
+}
+func DisplayParticularSubject(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "admin" && role != "teacher") {
+
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
+		return
+	} else {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "CANNOT CONNECT TO DB"})
+			return
+		}
+		defer db.Close()
+		subid, _ := strconv.Atoi(ctx.Param("subId"))
+		var SubjectData struct {
+			SubjectId int    `json:"subId"`
+			Name      string `json:"sujectName"`
+			Grade     int    `json:"levelStd"`
+			Credits   int    `json:"credits"`
+		}
+		if err := db.QueryRow("SELECT subId, subName, levelStd, credits FROM subjects WHERE subId=?", subid).Scan(&SubjectData.SubjectId, &SubjectData.Name, &SubjectData.Grade, &SubjectData.Credits); err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		} else if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusOK, gin.H{"output": "no subject found"})
+			return
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{"output": SubjectData})
+			return
+		}
+
+	}
+}
+func DisplayParticularMarks(ctx *gin.Context) {
+	role, exist := ctx.Get("userrole")
+	if !exist || (role != "admin") {
+
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorised access"})
+		return
+	} else {
+		db, err := sql.Open("mysql", dsn)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "CANNOT CONNECT TO DB"})
+			return
+		}
+		defer db.Close()
+		GrNo := ctx.DefaultQuery("grNo", "")
+		Subid := ctx.DefaultQuery("subId", "")
+		var MarkInfo struct {
+			StudentId     int    `json:"grNo"`
+			SubId         int    `json:"subId"`
+			TheoryMark    int    `json:"theoryMarks"`
+			PracticalMark int    `json:"practicalM"`
+			Grade         string `json:"markGrade"`
+		}
+		if err := db.QueryRow("SELECT grNo,subId,theoryM,practicalM,grade FROM marks WHERE grNo=? AND subId=?", GrNo, Subid).Scan(&MarkInfo.StudentId, &MarkInfo.SubId, &MarkInfo.TheoryMark, &MarkInfo.PracticalMark, &MarkInfo.Grade); err != nil && err != sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		} else if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"output": "No such entry found"})
+			return
+		} else {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"output": MarkInfo})
+			return
+		}
+
+	}
+}
+
+func gradeCalculator(n int) string {
+	if n > 90 {
+		return "AA"
+	} else if n > 80 && n <= 90 {
+		return "AB"
+	} else if n > 70 && n <= 80 {
+		return "BB"
+	} else if n > 60 && n <= 70 {
+		return "BC"
+	} else if n > 50 && n <= 60 {
+		return "CC"
+	} else if n > 40 && n <= 50 {
+		return "CD"
+	} else if n > 30 && n <= 40 {
+		return "DD"
+	}
+	return "FF"
+}
+
+func FetchSecretKey() string {
+	rootPath, _ := os.Getwd()
+	possiblePaths := []string{
+		filepath.Join(rootPath, ".", ".env"),
+	}
+
+	loaded := false
+	for _, path := range possiblePaths {
+		err := godotenv.Load(path)
+		if err != nil {
+			log.Fatal("Warning: .env not found in any known path")
+		}
+		loaded = true
+	}
+
+	if !loaded {
+
+	}
+
+	secretK := os.Getenv("SECRETKEY")
+	if secretK == "" {
+		log.Fatal("SECRETKEY not found in environment variables to check params")
+	}
+	return secretK
+}
