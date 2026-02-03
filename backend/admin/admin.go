@@ -24,7 +24,7 @@ func CreatePendingReq(ctx *gin.Context) {
 		Username      string `json:"yourName" binding:"required"`
 		Pwd           string `json:"password" binding:"required"`
 		SecretKey     string `json:"secretK"`
-		TempKey       string
+		KKey          string
 	}
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
